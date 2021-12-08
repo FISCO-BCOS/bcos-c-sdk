@@ -62,10 +62,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}")
 # message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# find JNI 
-find_package(JNI REQUIRED)
-include_directories(${JNI_INCLUDE_DIRS})
-
 hunter_add_package(jsoncpp)
 find_package(jsoncpp CONFIG REQUIRED)
 
