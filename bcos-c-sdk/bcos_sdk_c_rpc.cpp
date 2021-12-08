@@ -1,517 +1,380 @@
-#include "bcos-c-sdk/bcos_sdk_c_rpc.h"
+#include "bcos_sdk_c_rpc.h"
+#include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/rpc/JsonRpcImpl.h>
 
 #include <memory>
 #include <tuple>
 
+using namespace bcos;
+using namespace bcos::boostssl;
+using namespace bcos::boostssl::utilities;
+using namespace bcos::boostssl::utilities::protocol;
+
 // ------------------------common send message interface begin----------------
 // send message to rpc server
-void bcos_rpc_send_msg(void *rpc, const char *data,
-                       bcos_sdk_struct_response_cb callback, void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_generic_method_call(
+    void* sdk, const char* data, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->genericMethod(
-      data, [callback, context](bcos::Error::Ptr error,
-                                std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->genericMethod(data, [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
 }
 
 // send message to group
-void bcos_rpc_send_msg_to_group(void *rpc, const char *group, const char *data,
-                                bcos_sdk_struct_response_cb callback,
-                                void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_generic_method_call_to_group(void* sdk, const char* group, const char* data,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->genericMethod(
-      group, data,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->genericMethod(
+        group, data, [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // send message to group of node
-void bcos_rpc_send_msg_to_group_node(void *rpc, const char *group,
-                                     const char *node, const char *data,
-                                     bcos_sdk_struct_response_cb callback,
-                                     void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_generic_method_call_to_group_node(void* sdk, const char* group, const char* node,
+    const char* data, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->genericMethod(
-      group, node, data,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->genericMethod(group, node ? node : "", data,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 // ------------------------common send message interface end----------------
 
 // ------------------------------rpc interface begin -------------------------
 // call
-void bcos_rpc_call(void *rpc, const char *group, const char *to,
-                   const char *data, bcos_sdk_struct_response_cb callback,
-                   void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_call(void* sdk, const char* group, const char* node, const char* to, const char* data,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->call(group, to, data,
-                   [callback, context](bcos::Error::Ptr error,
-                                       std::shared_ptr<bcos::bytes> resp) {
-                     bcos_sdk_c_handle_response(
-                         error ? error.get() : NULL,
-                         resp ? (void *)resp->data() : NULL,
-                         resp ? resp->size() : 0, callback, context);
-                   });
+    rpc->call(group, node ? node : "", to, data,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // sendTransaction
-void bcos_rpc_send_transaction(void *rpc, const char *group, const char *data,
-                               int proof, bcos_sdk_struct_response_cb callback,
-                               void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_send_transaction(void* sdk, const char* group, const char* node, const char* data,
+    int proof, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->sendTransaction(
-      group, data, proof,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->sendTransaction(group, node ? node : "", data, proof,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getTransaction
-void bcos_rpc_get_transaction(void *rpc, const char *group, const char *tx_hash,
-                              int proof, bcos_sdk_struct_response_cb callback,
-                              void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_transaction(void* sdk, const char* group, const char* node, const char* tx_hash,
+    int proof, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getTransaction(
-      group, tx_hash, proof,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getTransaction(group, node ? node : "", tx_hash, proof,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getTransactionReceipt
-void bcos_rpc_get_transaction_receipt(void *rpc, const char *group,
-                                      const char *tx_hash, int proof,
-                                      bcos_sdk_struct_response_cb callback,
-                                      void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_transaction_receipt(void* sdk, const char* group, const char* node,
+    const char* tx_hash, int proof, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getTransactionReceipt(
-      group, tx_hash, proof,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getTransactionReceipt(group, node ? node : "", tx_hash, proof,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getBlockByHash
-void bcos_rpc_get_block_by_hash(void *rpc, const char *group,
-                                const char *block_hash, int only_header,
-                                int only_tx_hash,
-                                bcos_sdk_struct_response_cb callback,
-                                void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_block_by_hash(void* sdk, const char* group, const char* node,
+    const char* block_hash, int only_header, int only_tx_hash,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getBlockByHash(
-      group, block_hash, only_header, only_tx_hash,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getBlockByHash(group, node ? node : "", block_hash, only_header, only_tx_hash,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getBlockByNumber
-void bcos_rpc_get_block_by_number(void *rpc, const char *group,
-                                  int64_t block_number, int only_header,
-                                  int only_tx_hash,
-                                  bcos_sdk_struct_response_cb callback,
-                                  void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_block_by_number(void* sdk, const char* group, const char* node,
+    int64_t block_number, int only_header, int only_tx_hash, bcos_sdk_c_struct_response_cb callback,
+    void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getBlockByNumber(
-      group, block_number, only_header, only_tx_hash,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getBlockByNumber(group, node ? node : "", block_number, only_header, only_tx_hash,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getBlockHashByNumber
-void bcos_rpc_get_block_hash_by_number(void *rpc, const char *group,
-                                       int64_t block_number,
-                                       bcos_sdk_struct_response_cb callback,
-                                       void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_block_hash_by_number(void* sdk, const char* group, const char* node,
+    int64_t block_number, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getBlockHashByNumber(
-      group, block_number,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getBlockHashByNumber(group, node ? node : "", block_number,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
-// getBlockNumber
-void bcos_rpc_get_block_number(void *rpc, const char *group,
-                               bcos_sdk_struct_response_cb callback,
-                               void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
 
-  rpcPointer->getBlockNumber(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+// getBlockLimit
+int64_t bcos_rpc_get_block_limit(void* sdk, const char* group)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
+    return rpc->getBlockLimit(group);
+}
+
+// getBlockNumber
+void bcos_rpc_get_block_number(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
+    rpc->getBlockNumber(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getCode
-void bcos_rpc_get_code(void *rpc, const char *group, const char *address,
-                       bcos_sdk_struct_response_cb callback, void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_code(void* sdk, const char* group, const char* node, const char* address,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getCode(group, address,
-                      [callback, context](bcos::Error::Ptr error,
-                                          std::shared_ptr<bcos::bytes> resp) {
-                        bcos_sdk_c_handle_response(
-                            error ? error.get() : NULL,
-                            resp ? (void *)resp->data() : NULL,
-                            resp ? resp->size() : 0, callback, context);
-                      });
+    rpc->getCode(group, node ? node : "", address,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getSealerList
-void bcos_rpc_get_sealer_list(void *rpc, const char *group,
-                              bcos_sdk_struct_response_cb callback,
-                              void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_sealer_list(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getSealerList(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getSealerList(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getObserverList
-void bcos_rpc_get_observer_list(void *rpc, const char *group,
-                                bcos_sdk_struct_response_cb callback,
-                                void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_observer_list(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getObserverList(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getObserverList(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getPbftView
-void bcos_rpc_get_pbft_view(void *rpc, const char *group,
-                            bcos_sdk_struct_response_cb callback,
-                            void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_pbft_view(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getPbftView(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getPbftView(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getPendingTxSize
-void bcos_rpc_get_pending_tx_size(void *rpc, const char *group,
-                                  bcos_sdk_struct_response_cb callback,
-                                  void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_pending_tx_size(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getPendingTxSize(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getPendingTxSize(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getSyncStatus
-void bcos_rpc_get_sync_status(void *rpc, const char *group,
-                              bcos_sdk_struct_response_cb callback,
-                              void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_sync_status(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getSyncStatus(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getSyncStatus(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getConsensusStatus
-void bcos_rpc_get_consensus_status(void *rpc, const char *group,
-                                   bcos_sdk_struct_response_cb callback,
-                                   void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_consensus_status(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getConsensusStatus(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getConsensusStatus(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getSystemConfigByKey
-void bcos_rpc_get_system_config_by_key(void *rpc, const char *group,
-                                       const char *key,
-                                       bcos_sdk_struct_response_cb callback,
-                                       void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_system_config_by_key(void* sdk, const char* group, const char* node,
+    const char* key, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getSystemConfigByKey(
-      group, key,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getSystemConfigByKey(group, node ? node : "", key,
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // getTotalTransactionCount
-void bcos_rpc_get_total_transaction_count(void *rpc, const char *group,
-                                          bcos_sdk_struct_response_cb callback,
-                                          void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_total_transaction_count(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getTotalTransactionCount(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getTotalTransactionCount(group, node ? node : "",
+        [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
+}
+
+// getGroupPeers
+void bcos_rpc_get_group_peers(
+    void* sdk, const char* group, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
+
+    rpc->getGroupPeers(group, [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
 }
 
 // getPeers
-void bcos_rpc_get_peers(void *rpc, bcos_sdk_struct_response_cb callback,
-                        void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_peers(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getPeers([callback, context](bcos::Error::Ptr error,
-                                           std::shared_ptr<bcos::bytes> resp) {
-    bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                               resp ? (void *)resp->data() : NULL,
-                               resp ? resp->size() : 0, callback, context);
-  });
-}
-
-// createGroup
-void bcos_rpc_create_group(void *rpc, const char *group_info,
-                           bcos_sdk_struct_response_cb callback,
-                           void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->createGroup(
-      group_info, [callback, context](bcos::Error::Ptr error,
-                                      std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// expandGroupNode
-void bcos_rpc_expand_group_node(void *rpc, const char *group,
-                                const char *node_info,
-                                bcos_sdk_struct_response_cb callback,
-                                void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->expandGroupNode(
-      group, node_info,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// removeGroup
-void bcos_rpc_remove_group(void *rpc, const char *group,
-                           bcos_sdk_struct_response_cb callback,
-                           void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->removeGroup(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// recoverGroupNode
-void bcos_rpc_recover_group_node(void *rpc, const char *group, const char *node,
-                                 bcos_sdk_struct_response_cb callback,
-                                 void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->recoverGroupNode(
-      group, node,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// startNode
-void bcos_rpc_start_node(void *rpc, const char *group, const char *node,
-                         bcos_sdk_struct_response_cb callback, void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->startNode(group, node,
-                        [callback, context](bcos::Error::Ptr error,
-                                            std::shared_ptr<bcos::bytes> resp) {
-                          bcos_sdk_c_handle_response(
-                              error ? error.get() : NULL,
-                              resp ? (void *)resp->data() : NULL,
-                              resp ? resp->size() : 0, callback, context);
-                        });
-}
-
-// stopNode
-void bcos_rpc_stop_node(void *rpc, const char *group, const char *node,
-                        bcos_sdk_struct_response_cb callback, void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->stopNode(group, node,
-                       [callback, context](bcos::Error::Ptr error,
-                                           std::shared_ptr<bcos::bytes> resp) {
-                         bcos_sdk_c_handle_response(
-                             error ? error.get() : NULL,
-                             resp ? (void *)resp->data() : NULL,
-                             resp ? resp->size() : 0, callback, context);
-                       });
+    rpc->getPeers([callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
 }
 
 // getGroupList
-void bcos_rpc_get_group_list(void *rpc, bcos_sdk_struct_response_cb callback,
-                             void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_group_list(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getGroupList(
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// getGroupInfoList
-void bcos_rpc_get_group_info_list(void *rpc,
-                                  bcos_sdk_struct_response_cb callback,
-                                  void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->getGroupInfoList(
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getGroupList([callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
 }
 
 // getGroupInfo
-void bcos_rpc_get_group_info(void *rpc, const char *group,
-                             bcos_sdk_struct_response_cb callback,
-                             void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_group_info(
+    void* sdk, const char* group, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getGroupInfo(
-      group, [callback, context](bcos::Error::Ptr error,
-                                 std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getGroupInfo(group, [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
+}
+
+// getGroupInfoList
+void bcos_rpc_get_group_info_list(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
+
+    rpc->getGroupInfoList([callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+        bcos_sdk_c_handle_response(error ? error.get() : NULL, resp ? (void*)resp->data() : NULL,
+            resp ? resp->size() : 0, callback, context);
+    });
 }
 
 // getGroupNodeInfo
-void bcos_rpc_get_group_node_info(void *rpc, const char *group,
-                                  const char *node,
-                                  bcos_sdk_struct_response_cb callback,
-                                  void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
+void bcos_rpc_get_group_node_info(void* sdk, const char* group, const char* node,
+    bcos_sdk_c_struct_response_cb callback, void* context)
+{
+    auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
+    auto rpc = sdkPointer->jsonRpc();
 
-  rpcPointer->getGroupNodeInfo(
-      group, node,
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
-}
-
-// getNodeInfo // TODO: Temporary interface, should be removed in the end
-void bcos_rpc_get_node_info(void *rpc, bcos_sdk_struct_response_cb callback,
-                            void *context) {
-  auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcInterface *)rpc;
-
-  rpcPointer->getNodeInfo(
-      [callback, context](bcos::Error::Ptr error,
-                          std::shared_ptr<bcos::bytes> resp) {
-        bcos_sdk_c_handle_response(error ? error.get() : NULL,
-                                   resp ? (void *)resp->data() : NULL,
-                                   resp ? resp->size() : 0, callback, context);
-      });
+    rpc->getGroupNodeInfo(
+        group, node, [callback, context](Error::Ptr error, std::shared_ptr<bytes> resp) {
+            bcos_sdk_c_handle_response(error ? error.get() : NULL,
+                resp ? (void*)resp->data() : NULL, resp ? resp->size() : 0, callback, context);
+        });
 }
 
 // ------------------------------rpc interface end -------------------------
-
-void *bcos_rpc_get_ws(void *rpc) {
-  if (rpc) {
-    auto rpcPointer = (bcos::cppsdk::jsonrpc::JsonRpcImpl *)rpc;
-    auto ws = rpcPointer->service();
-    return ws ? ws.get() : NULL;
-  }
-
-  return NULL;
-}
