@@ -4,7 +4,7 @@
 
 # bcos-c-sdk
 
-bcos-c-sdk是[FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS)的c语言版本的sdk实现，支持rpc、amop、合约事件订阅等基础功能。
+bcos-c-sdk是[FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS)sdk的c语言实现，提供了rpc、amop、合约事件订阅基础功能的访问接口，用户开发c语言版本的区块链应用，也可以方便开发者在此基础上快速实现其他语言版本的sdk。
 
 ## 文档
 
