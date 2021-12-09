@@ -3,7 +3,7 @@
 English / [中文](doc/README_CN.md)
 # bcos-c-sdk
 
-bcos-c-sdk is [FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS)sdk c language implementation, provides RPC, AMOP, contract event subscription basic function access interface, Users can develop blockchain applications in C  and language developer can also quickly implement SDKS in other languages on this basis.
+bcos-c-sdk is [FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS) sdk implementation in c language, provides RPC, AMOP, contract event subscription basic function access interface, Users can develop blockchain applications in C  and language developer can also quickly implement SDKS in other languages on this basis.
 
 ## Documentation
 
