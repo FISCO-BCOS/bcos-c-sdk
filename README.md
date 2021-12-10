@@ -7,7 +7,7 @@ bcos-c-sdk is [FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS) sdk imp
 
 ## Documentation
 
-- [FISCO BCOS 3.0 documentation](https://fisco-bcos-documentation-3x.readthedocs.io/zh/latest/index.html)
+- [FISCO BCOS 3.x documentation](https://fisco-bcos-doc.readthedocs.io/)
 
 ## Code contribution
 
