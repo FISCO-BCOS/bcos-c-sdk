@@ -71,8 +71,8 @@ void* bcos_sdk_create(struct bcos_sdk_c_config* config)
     {
         // construct sdk object
         auto factory = std::make_shared<bcos::cppsdk::SdkFactory>();
-        factory->setConfig(initWsConfig(config));
-        auto sdk = factory->buildSdk();
+        auto wsConfig = initWsConfig(config);
+        auto sdk = factory->buildSdk(wsConfig);
         auto sdkPointer = sdk.release();
         BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_create") << LOG_DESC("[NEWOBJ]")
                        << LOG_KV("sdk", sdkPointer);
@@ -88,9 +88,35 @@ void* bcos_sdk_create(struct bcos_sdk_c_config* config)
     return NULL;
 }
 
+// create bcos sdk object by config file
+void* bcos_sdk_create_by_config_file(const char* config_file)
+{
+    bcos_sdk_clear_last_error();
+    try
+    {
+        // construct sdk object
+        auto factory = std::make_shared<bcos::cppsdk::SdkFactory>();
+        auto sdk = factory->buildSdk(config_file);
+        auto sdkPointer = sdk.release();
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_create_by_config_file") << LOG_DESC("[NEWOBJ]")
+                       << LOG_KV("sdk", sdkPointer);
+        return sdkPointer;
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_by_config_file")
+                        << LOG_KV("configFile", config_file) << LOG_KV("errorMsg", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return NULL;
+}
+
 // start the bcos sdk
 void bcos_sdk_start(void* sdk)
 {
+    bcos_sdk_clear_last_error();
     try
     {
         if (sdk)
