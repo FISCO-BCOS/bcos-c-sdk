@@ -106,8 +106,8 @@ target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
 #    add_subdirectory(test)
 # endif()
 
-if (BUILD_EXEC_TEST)
-    add_subdirectory(test/exe)
+if (BUILD_SAMPLE)
+    add_subdirectory(sample)
 endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
