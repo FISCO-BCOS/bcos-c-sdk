@@ -33,9 +33,10 @@
 void usage()
 {
     printf("Desc: rpc methods call test\n");
-    printf("Usage: rpc <host> <port> <group>\n");
+    printf("Usage: rpc <host> <port> <ssl type> <group>\n");
     printf("Example:\n");
-    printf("   ./rpc 127.0.0.1 20200 group\n");
+    printf("   ./rpc 127.0.0.1 20200 ssl group\n");
+    printf("   ./rpc 127.0.0.1 20200 sm_ssl group\n");
     exit(0);
 }
 
@@ -62,7 +63,7 @@ void on_recv_resp_callback(struct bcos_sdk_c_struct_response* resp)
     }
 }
 
-struct bcos_sdk_c_config* create_config(char* host, int port)
+struct bcos_sdk_c_config* create_config(int sm_ssl, char* host, int port)
 {
     // create c-sdk config object
     struct bcos_sdk_c_config* config = bcos_sdk_c_config_create_empty();
@@ -85,21 +86,36 @@ struct bcos_sdk_c_config* create_config(char* host, int port)
     config->disableSsl = 0;
 
     // set ssl type
-    config->ssl_type = my_strdup("ssl");
+    config->ssl_type = my_strdup(sm_ssl ? "sm_ssl" : "ssl");
 
     // --- set ssl cert ---------
-    struct bcos_sdk_c_cert_config* cert_config =
-        (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
-
     // cert config items is the path of file ,not the content
     config->is_cert_path = 1;
 
-    cert_config->ca_cert = my_strdup("./conf/ca.crt");
-    cert_config->node_cert = my_strdup("./conf/sdk.crt");
-    cert_config->node_key = my_strdup("./conf/sdk.key");
+    if (sm_ssl)
+    {  // sm ssl connection cert config
+        struct bcos_sdk_c_sm_cert_config* sm_cert_config =
+            (struct bcos_sdk_c_sm_cert_config*)malloc(sizeof(struct bcos_sdk_c_sm_cert_config));
+        sm_cert_config->ca_cert = my_strdup("./conf/sm_ca.crt");
+        sm_cert_config->node_cert = my_strdup("./conf/sm_sdk.crt");
+        sm_cert_config->node_key = my_strdup("./conf/sm_sdk.key");
+        sm_cert_config->en_node_key = my_strdup("./conf/sm_ensdk.key");
+        sm_cert_config->en_node_cert = my_strdup("./conf/sm_ensdk.crt");
 
-    config->cert_config = cert_config;
-    config->sm_cert_config = NULL;
+        config->sm_cert_config = sm_cert_config;
+        config->cert_config = NULL;
+    }
+    else
+    {  // ssl connection cert config
+        struct bcos_sdk_c_cert_config* cert_config =
+            (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
+        cert_config->ca_cert = my_strdup("./conf/ca.crt");
+        cert_config->node_cert = my_strdup("./conf/sdk.crt");
+        cert_config->node_key = my_strdup("./conf/sdk.key");
+
+        config->sm_cert_config = NULL;
+        config->cert_config = cert_config;
+    }
     // --- set ssl cert ---------
 
     return config;
@@ -107,7 +123,7 @@ struct bcos_sdk_c_config* create_config(char* host, int port)
 
 int main(int argc, char** argv)
 {
-    if (argc < 4)
+    if (argc < 5)
     {
         usage();
     }
@@ -115,14 +131,23 @@ int main(int argc, char** argv)
     // option params
     const char* host = argv[1];
     int port = atoi(argv[2]);
-    const char* group = argv[3];
+    const char* type = argv[3];
+    const char* group = argv[4];
 
     printf(" [RPC] params ===>>>> \n");
     printf(" \t # host: %s\n", host);
     printf(" \t # port: %d\n", port);
+    printf(" \t # type: %s\n", type);
     printf(" \t # group: %s\n", group);
 
-    struct bcos_sdk_c_config* config = create_config((char*)host, port);
+    int is_sm_ssl = 1;
+    char* pos = strstr(type, "sm_ssl");
+    if (pos == NULL)
+    {
+        is_sm_ssl = 0;
+    }
+
+    struct bcos_sdk_c_config* config = create_config(is_sm_ssl, (char*)host, port);
     void* sdk = bcos_sdk_create(config);
     // check success or not
     int error = bcos_sdk_get_last_error();
