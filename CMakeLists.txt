@@ -91,13 +91,26 @@ include(InstallInclude)
 # install bcos-framework
 # include(InstallBcosFrameworkDependencies)
 
-# build dynamic target
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 
+# -fPIC
+set(ENV{CMAKE_C_FLAGS} "${CMAKE_C_FLAGS} -fPIC")
+set(ENV{CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -fPIC")
+
+# static lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
-# add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 add_library(${BCOS_C_SDK_TARGET} ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+
+# dynamic lib
+set(BCOS_C_SDK_DY_TARGET "bcos-c-sdk-dy")
+add_library(${BCOS_C_SDK_DY_TARGET} SHARED ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_DY_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+
+# build sample exec
+if (BUILD_SAMPLE)
+    add_subdirectory(sample)
+endif()
 
 # ut and binary exe
 # if (TESTS)
@@ -105,10 +118,6 @@ target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
 #    set(CTEST_OUTPUT_ON_FAILURE TRUE)
 #    add_subdirectory(test)
 # endif()
-
-if (BUILD_SAMPLE)
-    add_subdirectory(sample)
-endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
