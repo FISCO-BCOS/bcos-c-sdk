@@ -26,14 +26,9 @@ if (NOT DEFINED URL_BASE)
     set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
-# download bcos-cmake-scripts
-# set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bcos-cmake-scripts)
-# FetchContent_Declare(bcos-cmake-scripts
-#    GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
-#    GIT_TAG dev
-#    SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
-# )
-# FetchContent_MakeAvailable(bcos-cmake-scripts)
+# -fPIC
+set(ENV{CMAKE_C_FLAGS} "${CMAKE_C_FLAGS} -fPIC")
+set(ENV{CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -fPIC")
 
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
@@ -93,9 +88,7 @@ include(InstallInclude)
 
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 
-# -fPIC
-set(ENV{CMAKE_C_FLAGS} "${CMAKE_C_FLAGS} -fPIC")
-set(ENV{CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -fPIC")
+
 
 # static lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
