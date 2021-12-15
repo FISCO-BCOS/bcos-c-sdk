@@ -82,14 +82,14 @@ include(InstallInclude)
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 
 # static lib
-set(BCOS_C_SDK_TARGET "bcos-c-sdk")
-add_library(${BCOS_C_SDK_TARGET} ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
+add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
 
 # dynamic lib
-set(BCOS_C_SDK_DY_TARGET "bcos-c-sdk-dy")
-add_library(${BCOS_C_SDK_DY_TARGET} SHARED ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_DY_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+set(BCOS_C_SDK_TARGET "bcos-c-sdk")
+add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
 
 # build sample exec
 if (BUILD_SAMPLE)
@@ -105,7 +105,7 @@ endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
-    TARGETS ${BCOS_C_SDK_TARGET}
+    TARGETS ${BCOS_C_SDK_STATIC_TARGET}
     EXPORT "${TARGETS_EXPORT_NAME}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
