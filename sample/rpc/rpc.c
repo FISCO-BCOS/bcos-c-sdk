@@ -33,9 +33,9 @@
 void usage()
 {
     printf("Desc: rpc methods call test\n");
-    printf("Usage: rpc <config> <group>\n");
+    printf("Usage: rpc <host> <port> <group>\n");
     printf("Example:\n");
-    printf("   ./rpc ./config_sample.ini group\n");
+    printf("   ./rpc 127.0.0.1 20200 group\n");
     exit(0);
 }
 
@@ -53,22 +53,68 @@ void on_recv_resp_callback(struct bcos_sdk_c_struct_response* resp)
     }
 }
 
+struct bcos_sdk_c_config* create_config(char* host, int port)
+{
+    // create c-sdk config object
+    struct bcos_sdk_c_config* config = bcos_sdk_c_config_create_empty();
+    // set thread pool size
+    config->thread_pool_size = 8;
+    // set message timeout(unit: ms)
+    config->message_timeout_ms = 10000;
+
+    // --- set connected peers ---------
+    struct bcos_sdk_c_endpoint* ep =
+        (struct bcos_sdk_c_endpoint*)malloc(sizeof(struct bcos_sdk_c_endpoint));
+    ep->host = strdup(host);
+    ep->port = port;
+
+    config->peers = ep;
+    config->peers_count = 1;
+    // --- set connected peers ---------
+
+    // do not disable ssl
+    config->disableSsl = 0;
+
+    // set ssl type
+    config->ssl_type = strdup("ssl");
+
+    // --- set ssl cert ---------
+    struct bcos_sdk_c_cert_config* cert_config =
+        (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
+
+    // cert config items is the path of file ,not the content
+    config->is_cert_path = 1;
+
+    cert_config->ca_cert = strdup("./conf/ca.crt");
+    cert_config->node_cert = strdup("./conf/sdk.crt");
+    cert_config->node_key = strdup("./conf/sdk.key");
+
+    config->cert_config = cert_config;
+    config->sm_cert_config = NULL;
+    // --- set ssl cert ---------
+
+    return config;
+}
+
 int main(int argc, char** argv)
 {
-    if (argc < 3)
+    if (argc < 4)
     {
         usage();
     }
 
     // option params
-    const char* config = argv[1];
-    const char* group = argv[2];
+    const char* host = argv[1];
+    int port = atoi(argv[2]);
+    const char* group = argv[3];
 
     printf(" [RPC] params ===>>>> \n");
-    printf(" \t # config: %s\n", config);
+    printf(" \t # host: %s\n", host);
+    printf(" \t # port: %d\n", port);
     printf(" \t # group: %s\n", group);
 
-    void* sdk = bcos_sdk_create_by_config_file(config);
+    struct bcos_sdk_c_config* config = create_config((char*)host, port);
+    void* sdk = bcos_sdk_create(config);
     // check success or not
     int error = bcos_sdk_get_last_error();
     if (error != 0)
@@ -77,6 +123,7 @@ int main(int argc, char** argv)
             bcos_sdk_get_last_error_msg());
         exit(-1);
     }
+    bcos_sdk_c_config_destroy(config);  // release resource
 
     printf("[RPC] start sdk...\n");
     bcos_sdk_start(sdk);

@@ -26,10 +26,6 @@ if (NOT DEFINED URL_BASE)
     set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
-# -fPIC
-set(ENV{CMAKE_C_FLAGS} "${CMAKE_C_FLAGS} -fPIC")
-set(ENV{CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -fPIC")
-
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
@@ -83,12 +79,7 @@ include(InstallConfig)
 # install the include files for hash
 include(InstallInclude)
 
-# install bcos-framework
-# include(InstallBcosFrameworkDependencies)
-
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
-
-
 
 # static lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")

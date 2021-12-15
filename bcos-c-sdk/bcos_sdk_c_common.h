@@ -84,6 +84,8 @@ struct bcos_sdk_c_config
 
     // ssl or sm_ssl
     char* ssl_type;
+    // cert config items is the content of the cert or the path of the cert file
+    int is_cert_path;
     // ssl connection cert, effective with ssl_type is 'ssl'
     struct bcos_sdk_c_cert_config* cert_config;
     // sm ssl connection cert, effective with ssl_type is 'sm_ssl'

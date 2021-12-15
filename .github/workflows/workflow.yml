@@ -51,9 +51,9 @@ jobs:
         run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_SAMPLE=ON
       - name: compile
-        run: cd build && make -j2
+        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j2
       - name: run test
         run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
   build_with_gcc:
@@ -87,7 +87,7 @@ jobs:
       - name: install Ubuntu dependencies
         run: sudo apt install -y git curl openssl build-essential cmake ccache
       - name: configure
-        run: mkdir -p build && cd build && cmake ../
+        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_SAMPLE=ON
       - name: compile
         run: cd build && make -j2
       - name: run test
@@ -132,6 +132,8 @@ jobs:
           source /opt/rh/devtoolset-7/enable
           mkdir -p build && cd build
           # cmake3 .. -DBUILD_EXEC_TEST=on -DHUNTER_STATUS_DEBUG=ON
-          cmake3 ../
+          export CFLAGS="${CFLAGS} -fPIC"
+          export CXXFLAGS="${CXXFLAGS} -fPIC"
+          cmake3 ../ -DBUILD_SAMPLE=ON
           make -j2
           # CTEST_OUTPUT_ON_FAILURE=TRUE make test
