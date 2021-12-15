@@ -26,15 +26,6 @@ if (NOT DEFINED URL_BASE)
     set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
-# download bcos-cmake-scripts
-# set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bcos-cmake-scripts)
-# FetchContent_Declare(bcos-cmake-scripts
-#    GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
-#    GIT_TAG dev
-#    SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
-# )
-# FetchContent_MakeAvailable(bcos-cmake-scripts)
-
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
@@ -88,16 +79,22 @@ include(InstallConfig)
 # install the include files for hash
 include(InstallInclude)
 
-# install bcos-framework
-# include(InstallBcosFrameworkDependencies)
-
-# build dynamic target
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 
+# static lib
+set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
+add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+
+# dynamic lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
-# add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
-add_library(${BCOS_C_SDK_TARGET} ${SOURCES})
+add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+
+# build sample exec
+if (BUILD_SAMPLE)
+    add_subdirectory(sample)
+endif()
 
 # ut and binary exe
 # if (TESTS)
@@ -106,13 +103,9 @@ target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
 #    add_subdirectory(test)
 # endif()
 
-if (BUILD_SAMPLE)
-    add_subdirectory(sample)
-endif()
-
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
-    TARGETS ${BCOS_C_SDK_TARGET}
+    TARGETS ${BCOS_C_SDK_STATIC_TARGET}
     EXPORT "${TARGETS_EXPORT_NAME}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"

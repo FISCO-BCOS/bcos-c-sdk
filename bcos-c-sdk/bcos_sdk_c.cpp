@@ -57,7 +57,7 @@ static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sd
     {
         auto contextConfig = std::make_shared<bcos::boostssl::context::ContextConfig>();
         contextConfig->setSslType(config->ssl_type);
-        contextConfig->setIsCertPath(false);
+        contextConfig->setIsCertPath(config->is_cert_path ? true : false);
 
         if (contextConfig->sslType() != "sm_ssl")
         {
