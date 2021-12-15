@@ -64,8 +64,8 @@ int main(int argc, char** argv)
     // option params
     const char* config = argv[1];
     const char* group = argv[2];
-    int64_t from = atoi(argv[3]);
-    int64_t to = atoi(argv[4]);
+    int from = atoi(argv[3]);
+    int to = atoi(argv[4]);
 
     const char* address = "";
     if (argc > 5)
@@ -76,8 +76,8 @@ int main(int argc, char** argv)
     printf(" [EventSub] params ===>>>> \n");
     printf(" \t # config: %s\n", config);
     printf(" \t # group: %s\n", group);
-    printf(" \t # from: %lld\n", from);
-    printf(" \t # to: %lld\n", to);
+    printf(" \t # from: %d\n", from);
+    printf(" \t # to: %d\n", to);
     printf(" \t # address: %s\n", address);
 
     void* sdk = bcos_sdk_create_by_config_file(config);
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     char params[1024] = {0};
     snprintf(params, sizeof(params),
         "{\"group\":\"%s\",\"id\":\"%d\",\"params\":{\"addresses\":["
-        "\"%s\"],\"fromBlock\":%lld,\"toBlock\":%lld,"
+        "\"%s\"],\"fromBlock\":%d,\"toBlock\":%d,"
         "\"topics\":[]}}",
         group, id, address, from, to);
 

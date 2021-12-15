@@ -39,6 +39,15 @@ void usage()
     exit(0);
 }
 
+char* my_strdup(const char* s)
+{
+    size_t len = strlen(s) + 1;
+    char* result = (char*)malloc(len);
+    if (result == (char*)0)
+        return (char*)0;
+    return (char*)memcpy(result, s, len);
+}
+
 // callback for rpc interfaces
 void on_recv_resp_callback(struct bcos_sdk_c_struct_response* resp)
 {
@@ -65,7 +74,7 @@ struct bcos_sdk_c_config* create_config(char* host, int port)
     // --- set connected peers ---------
     struct bcos_sdk_c_endpoint* ep =
         (struct bcos_sdk_c_endpoint*)malloc(sizeof(struct bcos_sdk_c_endpoint));
-    ep->host = strdup(host);
+    ep->host = my_strdup(host);
     ep->port = port;
 
     config->peers = ep;
@@ -76,7 +85,7 @@ struct bcos_sdk_c_config* create_config(char* host, int port)
     config->disableSsl = 0;
 
     // set ssl type
-    config->ssl_type = strdup("ssl");
+    config->ssl_type = my_strdup("ssl");
 
     // --- set ssl cert ---------
     struct bcos_sdk_c_cert_config* cert_config =
@@ -85,9 +94,9 @@ struct bcos_sdk_c_config* create_config(char* host, int port)
     // cert config items is the path of file ,not the content
     config->is_cert_path = 1;
 
-    cert_config->ca_cert = strdup("./conf/ca.crt");
-    cert_config->node_cert = strdup("./conf/sdk.crt");
-    cert_config->node_key = strdup("./conf/sdk.key");
+    cert_config->ca_cert = my_strdup("./conf/ca.crt");
+    cert_config->node_cert = my_strdup("./conf/sdk.crt");
+    cert_config->node_key = my_strdup("./conf/sdk.key");
 
     config->cert_config = cert_config;
     config->sm_cert_config = NULL;
