@@ -26,8 +26,8 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "/usr/bin/time")
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "/usr/bin/time")
     # Use ISO C++17 standard language.
-    set(CMAKE_CXX_FLAGS "-std=c++17 -pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_CXX_FLAGS "-std=c++17 -pthread -fPIC -fexceptions")
+    # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     # Enables all the warnings about constructions that some users consider questionable,
     # and that are easy to avoid.  Also enable some extra warning flags that are not
     # enabled by -Wall.   Finally, treat at warnings-as-errors, which forces developers
@@ -153,3 +153,7 @@ else()
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl")
 endif()
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY ON)
+
+# -fPIC
+set({CMAKE_C_FLAGS} "${CMAKE_C_FLAGS} -fPIC")
+set({CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -fPIC")
