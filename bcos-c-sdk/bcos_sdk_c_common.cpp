@@ -35,7 +35,7 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
     config->message_timeout_ms = -1;
     config->heartbeat_period_ms = -1;
     config->reconnect_period_ms = -1;
-    config->disableSsl = 0;
+    config->disable_ssl = 0;
     config->cert_config = NULL;
     config->sm_cert_config = NULL;
     config->peers = NULL;
