@@ -202,3 +202,24 @@ void bcos_sdk_destroy(void* sdk)
 
     BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_destroy") << LOG_KV("sdk", sdk);
 }
+
+/**
+ * @brief: register block notifier of the group
+ *
+ * @param callback
+ */
+void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* context,
+    void (*callback)(const char* group, int64_t block_number, void* context))
+{
+    if (sdk)
+    {
+        auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+        service->registerBlockNumberNotifier(
+            group, [context, callback](const std::string& _group, int64_t _blockNumber) {
+                callback(_group.c_str(), _blockNumber, context);
+            });
+
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
+                       << LOG_KV("group", group);
+    }
+}

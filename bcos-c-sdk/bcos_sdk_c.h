@@ -68,8 +68,18 @@ void bcos_sdk_stop(void* sdk);
  */
 void bcos_sdk_destroy(void* sdk);
 
-// TODO: add impl, register block notifier of the group
-void bcos_sdk_register_block_notifier(const char* group);
+// --------------------------------------------------------------------
+/**
+ * @brief: register default block notifier
+ *
+ * @param sdk
+ * @param group
+ * @param context
+ * @param callback
+ */
+void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* context,
+    void (*callback)(const char* group, int64_t block_number, void* context));
+// --------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
