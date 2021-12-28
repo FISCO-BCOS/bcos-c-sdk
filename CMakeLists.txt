@@ -33,8 +33,8 @@ list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 # include hunter
 include(HunterGate)
 HunterGate(
-    URL https://${URL_BASE}/FISCO-BCOS/hunter/archive/858de38e7c4c654499f36171feb1057f59e88b71.tar.gz
-    SHA1 19eeb6de3c56397e7ed6b45bbc57f2b4000e5b97
+    URL https://${URL_BASE}/FISCO-BCOS/hunter/archive/bc4754a926acd8ef3b96630c457c75ea4cd55a5d.tar.gz
+    SHA1 b895385e7ea8312da8db6b1545aa89f11d18345d
     FILEPATH "${CMAKE_SOURCE_DIR}/cmake/config.cmake"
 )
 
