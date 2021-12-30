@@ -60,12 +60,10 @@ jobs:
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j2
       - name: run test
         run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
-      - name: zip lib for mac
-        run: zip libbcos-c-sdk.dylib.zip build/libbcos-c-sdk.dylib
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.dylib.zip
-          path: libbcos-c-sdk.dylib.zip
+          path: build/libbcos-c-sdk.dylib
   build_with_gcc:
     name: build_with_gcc
     runs-on: ${{ matrix.os }}
@@ -158,9 +156,7 @@ jobs:
           cmake3 ../ -DBUILD_SAMPLE=ON
           make -j2
           # CTEST_OUTPUT_ON_FAILURE=TRUE make test
-      - name: zip lib for linux
-        run: zip libbcos-c-sdk.so.zip build/libbcos-c-sdk.so
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
-          path: libbcos-c-sdk.so.zip
+          path: build/libbcos-c-sdk.so
