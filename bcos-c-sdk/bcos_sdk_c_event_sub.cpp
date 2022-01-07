@@ -27,8 +27,6 @@
 
 using namespace bcos;
 using namespace bcos::boostssl;
-using namespace bcos::boostssl::utilities;
-using namespace bcos::boostssl::utilities::protocol;
 
 // ------------------------------event interface begin ----------------------
 
