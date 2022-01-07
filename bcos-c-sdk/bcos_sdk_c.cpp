@@ -21,10 +21,10 @@
 #include "bcos_sdk_c.h"
 #include "bcos_sdk_c_error.h"
 #include <bcos-boostssl/context/ContextBuilder.h>
-#include <bcos-boostssl/utilities/BoostLog.h>
 #include <bcos-boostssl/websocket/WsService.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/SdkFactory.h>
+#include <bcos-utilities/BoostLog.h>
 #include <cstdio>
 #include <exception>
 #include <memory>

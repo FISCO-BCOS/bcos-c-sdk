@@ -39,9 +39,9 @@ list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 # include hunter
 include(HunterGate)
 HunterGate(
-    URL https://${URL_BASE}/FISCO-BCOS/hunter/archive/bc4754a926acd8ef3b96630c457c75ea4cd55a5d.tar.gz
-    SHA1 b895385e7ea8312da8db6b1545aa89f11d18345d
-    FILEPATH "${CMAKE_SOURCE_DIR}/cmake/config.cmake"
+    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/9bb4c2aa139cfa53af5779105cd0d5570c31fbf5.tar.gz"
+    SHA1 "02165406cd653bedfe88538926453ede8eca84ba"
+    FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake"
 )
 
 # project name
@@ -66,8 +66,13 @@ find_package(jsoncpp CONFIG REQUIRED)
 hunter_add_package(OpenSSL)
 find_package(OpenSSL REQUIRED)
 
+# Boost
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
+
+# bcos-utilities
+hunter_add_package(bcos-utilities)
+find_package(bcos-utilities CONFIG REQUIRED)
 
 # find bcos-boostssl
 hunter_add_package(bcos-boostssl)
@@ -111,7 +116,7 @@ endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
-    TARGETS ${BCOS_C_SDK_STATIC_TARGET}
+    TARGETS ${BCOS_C_SDK_TARGET}
     EXPORT "${TARGETS_EXPORT_NAME}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
