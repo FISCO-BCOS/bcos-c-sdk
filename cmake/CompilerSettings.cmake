@@ -135,6 +135,22 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
             set(CMAKE_C_FLAGS "-g -fprofile-arcs -ftest-coverage ${CMAKE_C_FLAGS}")
         endif()
     endif ()
+elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+    
+    # Only support visual studio 2017 and visual studio 2019
+    set(MSVC_MIN_VERSION "1914") # VS2017 15.7, for full-ish C++17 support
+    
+    message(STATUS "Compile On Windows, MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
+
+    if (MSVC_TOOLSET_VERSION EQUAL 141)
+        message(STATUS "Compile On Visual Studio 2017")
+    elseif(MSVC_TOOLSET_VERSION EQUAL 142)
+        message(STATUS "Compile On Visual Studio 2019")
+    else()
+        message(FATAL_ERROR "Unsupported Visual Studio, supported list: [2017, 2019]. Current MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
+    endif()
+
+    set(CMAKE_CXX_FLAGS"${CMAKE_CXX_FLAGS} /std:c++17")
 else ()
     message(WARNING "Your compiler is not tested, if you run into any issues, we'd welcome any patches.")
 endif ()

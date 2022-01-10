@@ -44,4 +44,4 @@ jobs:
             hunter-clang-v3-notest-${{ runner.temp }}-
       - name: configure
         if: runner.os == 'Windows'
-        run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON
+        run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON -DHUNTER_STATUS_DEBUG=ON
