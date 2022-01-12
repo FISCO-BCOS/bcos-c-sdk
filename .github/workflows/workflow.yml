@@ -55,9 +55,9 @@ jobs:
         run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_SAMPLE=ON
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ 
       - name: compile
-        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j2
+        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
         run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - uses: actions/upload-artifact@v2
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/cache@v2
         id: cache
         with:
-          path: 
+          path: |
             /home/runner/.hunter
             /github/home/.hunter
             /Users/runner/.hunter
@@ -103,9 +103,9 @@ jobs:
       - name: install Ubuntu dependencies
         run: sudo apt install -y git curl openssl build-essential cmake ccache
       - name: configure
-        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_SAMPLE=ON
+        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../
       - name: compile
-        run: cd build && make -j2
+        run: cd build && make -j4
       - name: run test
         run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
   build_with_centos:
@@ -146,17 +146,63 @@ jobs:
         run: |
           yum install -y epel-release centos-release-scl
           yum install -y git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel && source /opt/rh/devtoolset-7/enable
-      - name: configure and compile
+      - name: configure
         run: |
           source /opt/rh/devtoolset-7/enable
           mkdir -p build && cd build
-          # cmake3 .. -DBUILD_EXEC_TEST=on -DHUNTER_STATUS_DEBUG=ON
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
-          cmake3 ../ -DBUILD_SAMPLE=ON
-          make -j2
+          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON
+      - name: compile
+        run: |
+          export CFLAGS="${CFLAGS} -fPIC"
+          export CXXFLAGS="${CXXFLAGS} -fPIC"
+          cd build && make -j4
           # CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
           path: build/libbcos-c-sdk.so
+  build_with_windows:
+      name: build_with_windows
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [windows-2019]
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            fetch-depth: 5
+        - uses: actions/cache@v2
+          id: cache
+          with:
+            path: |
+              /home/runner/.hunter
+              /github/home/.hunter
+              /Users/runner/.hunter
+              /home/runner/.hunter/_Base/Download/
+              /github/home/.hunter/_Base/Download/
+              /Users/runner/.hunter/_Base/Download/
+              C:/.hunter/
+              C:/.hunter/_Base/Download/
+              ccache
+            key: hunter-msvc-v3-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
+            restore-keys: |
+              hunter-msvc-v3-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
+              hunter-msvc-v3-notest-${{ runner.temp }}-${{ github.base_ref }}-
+              hunter-msvc-v3-notest-${{ runner.temp }}-
+        - name: Add MSbuild to PATH
+          uses: microsoft/setup-msbuild@v1.1
+        - name: configure
+          if: runner.os == 'Windows'
+          run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_STATUS_DEBUG=ON -DTESTS=ON
+        - name: compile
+          run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-c-sdk.lib.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.lib
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-c-sdk.dll.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
