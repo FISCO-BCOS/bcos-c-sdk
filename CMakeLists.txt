@@ -20,17 +20,26 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
-# if (WIN32)
-#    message(STATUS "Compile on Windows")
-#    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
-# endif()
+if (WIN32)
+   message(STATUS "Compile on Windows")
+   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
+endif()
 
 # URL_BASE download domain name
 include(FetchContent)
 if (NOT DEFINED URL_BASE)
-    # set(URL_BASE "github.com")
-    set(URL_BASE "github.com.cnpmjs.org")
+    set(URL_BASE "github.com")
+    # set(URL_BASE "github.com.cnpmjs.org")
 endif()
+
+# include(FetchContent)
+# set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/bcos-cmake-scripts)
+# FetchContent_Declare(bcos-cmake-scripts
+#    GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
+#    GIT_TAG 364f603f4ec112cb79840ea4026243399d7c419b
+#   SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
+# )
+# FetchContent_MakeAvailable(bcos-cmake-scripts)
 
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
@@ -54,10 +63,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# message(STATUS "CMAKE_INSTALL_INCLUDEDIR ==> ${CMAKE_INSTALL_INCLUDEDIR}")
-# message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}")
-# message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 hunter_add_package(jsoncpp)
 find_package(jsoncpp CONFIG REQUIRED)
