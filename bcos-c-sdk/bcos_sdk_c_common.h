@@ -27,6 +27,9 @@
 
 // #define _BCOS_SDK_JNI_DEBUG_
 
+#define BCOS_C_SDK_ECDSA_TYPE (1)
+#define BCOS_C_SDK_SM_TYPE (2)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
