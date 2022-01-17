@@ -19,6 +19,7 @@
  */
 
 #include "bcos_sdk_c_uti_tx.h"
+#include "bcos_sdk_c_error.h"
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
 
 using namespace bcos;
@@ -28,10 +29,13 @@ using namespace bcos::cppsdk::utilities;
 const char* bcos_sdk_create_signed_tx(void* key_pair, const char* to, const char* data,
     const char* chain_id, const char* group_id, int64_t block_limit)
 {
-    if (!key_pair || !data || !chain_id || !group_id || block_limit <= 0)
-    {
-        return NULL;
-    }
+    bcos_sdk_clear_last_error();
+
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(data, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
+    BCOS_SDK_C_VERIFY_CONDITION((block_limit > 0), "block limit <= 0", NULL);
 
     auto bytesData = fromHexString(data);
     auto builder = std::make_shared<TransactionBuilder>();
