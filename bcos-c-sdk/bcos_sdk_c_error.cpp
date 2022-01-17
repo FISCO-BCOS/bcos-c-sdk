@@ -29,6 +29,17 @@ thread_local int g_global_error = 0;
 thread_local std::string g_global_msg;
 
 /**
+ * @brief the last sync operation success or not
+ *  Note: thread safe operation
+ *
+ * @return int
+ */
+int bcos_sdk_last_opr_success()
+{
+    return g_global_error == BCOS_SDK_C_SUCCESS;
+}
+
+/**
  * @brief gets status of the most recent sync operation
  *
  * @return int

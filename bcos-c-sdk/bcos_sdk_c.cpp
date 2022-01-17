@@ -155,12 +155,11 @@ void* bcos_sdk_create_by_config_file(const char* config_file)
 void bcos_sdk_start(void* sdk)
 {
     bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+
     try
     {
-        if (sdk)
-        {
-            ((bcos::cppsdk::Sdk*)sdk)->start();
-        }
+        ((bcos::cppsdk::Sdk*)sdk)->start();
     }
     catch (const std::exception& e)
     {
@@ -211,15 +210,59 @@ void bcos_sdk_destroy(void* sdk)
 void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* context,
     void (*callback)(const char* group, int64_t block_number, void* context))
 {
-    if (sdk)
-    {
-        auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
-        service->registerBlockNumberNotifier(
-            group, [context, callback](const std::string& _group, int64_t _blockNumber) {
-                callback(_group.c_str(), _blockNumber, context);
-            });
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(callback, );
 
-        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
-                       << LOG_KV("group", group);
+    auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+    service->registerBlockNumberNotifier(
+        group, [context, callback](const std::string& _group, int64_t _blockNumber) {
+            callback(_group.c_str(), _blockNumber, context);
+        });
+
+    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
+                   << LOG_KV("group", group);
+}
+
+
+int bcos_sdk_group_is_wasm(void* sdk, const char* group)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, -1);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, -1);
+
+    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
+    if (!groupInfo)
+    {
+        bcos_sdk_set_last_error_msg(-1, "group does not exist");
+        return -1;
     }
+
+    return groupInfo->wasm();
+}
+
+int bcos_sdk_group_sm_crypto(void* sdk, const char* group)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, -1);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, -1);
+
+    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
+    BCOS_SDK_C_VERIFY_CONDITION(groupInfo, "group does not exist", -1);
+
+    return groupInfo->smCryptoType();
+}
+
+const char* bcos_sdk_group_chain_id(void* sdk, const char* group)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, NULL);
+
+    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
+    BCOS_SDK_C_VERIFY_CONDITION(groupInfo, "group does not exist", NULL);
+
+    auto chainID = groupInfo->chainID();
+    return strdup(chainID.c_str());
 }
