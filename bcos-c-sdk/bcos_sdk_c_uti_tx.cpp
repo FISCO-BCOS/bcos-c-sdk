@@ -28,7 +28,7 @@ using namespace bcos::cppsdk::utilities;
 const char* bcos_sdk_create_signed_tx(void* key_pair, const char* to, const char* data,
     const char* chain_id, const char* group_id, int64_t block_limit)
 {
-    if (!key_pair)
+    if (!key_pair || !data || !chain_id || !group_id || block_limit <= 0)
     {
         return NULL;
     }
