@@ -36,7 +36,7 @@ thread_local std::string g_global_msg;
  */
 int bcos_sdk_last_opr_failed()
 {
-    return g_global_error == BCOS_SDK_C_SUCCESS;
+    return g_global_error != BCOS_SDK_C_SUCCESS;
 }
 
 /**
