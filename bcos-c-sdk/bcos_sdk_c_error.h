@@ -25,14 +25,14 @@
 extern "C" {
 #endif
 
-#define BCOS_SDK_C_VERIFY_CONDITION(p, msg, r)    \
-    do                                            \
-    {                                             \
-        if (!(p))                                 \
-        {                                         \
-            bcos_sdk_set_last_error_msg(-1, msg); \
-            return r;                             \
-        }                                         \
+#define BCOS_SDK_C_PARAMS_VERIFY_CONDITION(p, msg, r) \
+    do                                                \
+    {                                                 \
+        if (!(p))                                     \
+        {                                             \
+            bcos_sdk_set_last_error_msg(-1, msg);     \
+            return r;                                 \
+        }                                             \
     } while (0);
 
 #define BCOS_SDK_C_PARAMS_VERIFICATION(p, r)                                      \

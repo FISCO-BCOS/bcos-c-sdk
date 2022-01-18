@@ -33,6 +33,7 @@
 // construct WsConfig obj by struct Config
 static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sdk_c_config* config)
 {
+    // TODO: check params
     // init WsConfig by c Config
     auto wsConfig = std::make_shared<bcos::boostssl::ws::WsConfig>();
     wsConfig->setModel(bcos::boostssl::ws::WsModel::Client);
@@ -94,6 +95,7 @@ static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sd
 void* bcos_sdk_create(struct bcos_sdk_c_config* config)
 {
     bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(config, NULL);
     try
     {
         // construct sdk object
@@ -179,6 +181,7 @@ void bcos_sdk_start(void* sdk)
  */
 void bcos_sdk_stop(void* sdk)
 {
+    bcos_sdk_clear_last_error();
     if (sdk)
     {
         ((bcos::cppsdk::Sdk*)sdk)->stop();
@@ -194,8 +197,10 @@ void bcos_sdk_stop(void* sdk)
  */
 void bcos_sdk_destroy(void* sdk)
 {
+    bcos_sdk_clear_last_error();
     if (sdk)
     {
+        ((bcos::cppsdk::Sdk*)sdk)->stop();
         delete (bcos::cppsdk::Sdk*)sdk;
     }
 
@@ -225,43 +230,27 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
                    << LOG_KV("group", group);
 }
 
-
-int bcos_sdk_group_is_wasm(void* sdk, const char* group)
+void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm, int* sm_crypto)
 {
     bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, -1);
-    BCOS_SDK_C_PARAMS_VERIFICATION(group, -1);
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, );
 
     auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
-    if (!groupInfo)
-    {
-        bcos_sdk_set_last_error_msg(-1, "group does not exist");
-        return -1;
-    }
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(groupInfo, "group does not exist", );
 
-    return groupInfo->wasm();
+    *wasm = groupInfo->wasm();
+    *sm_crypto = groupInfo->smCryptoType();
 }
 
-int bcos_sdk_group_sm_crypto(void* sdk, const char* group)
-{
-    bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, -1);
-    BCOS_SDK_C_PARAMS_VERIFICATION(group, -1);
-
-    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
-    BCOS_SDK_C_VERIFY_CONDITION(groupInfo, "group does not exist", -1);
-
-    return groupInfo->smCryptoType();
-}
-
-const char* bcos_sdk_group_chain_id(void* sdk, const char* group)
+const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(sdk, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(group, NULL);
 
     auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
-    BCOS_SDK_C_VERIFY_CONDITION(groupInfo, "group does not exist", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(groupInfo, "group does not exist", NULL);
 
     auto chainID = groupInfo->chainID();
     return strdup(chainID.c_str());
