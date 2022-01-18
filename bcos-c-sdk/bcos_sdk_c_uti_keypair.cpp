@@ -33,24 +33,28 @@ using namespace bcos::cppsdk::utilities;
 
 void* bcos_sdk_create_keypair(int crypto_type)
 {
+    bcos_sdk_clear_last_error();
     try
     {
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
-        auto keyPair = keyPairBuilder->genKeyPair(
-            crypto_type == 1 ? CryptoSuiteType::ECDSA_TYPE : CryptoSuiteType::SM_TYPE);
+        auto keyPair = keyPairBuilder->genKeyPair(crypto_type == BCOS_C_SDK_ECDSA_TYPE ?
+                                                      CryptoSuiteType::ECDSA_TYPE :
+                                                      CryptoSuiteType::SM_TYPE);
         return keyPair.release();
     }
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair") << LOG_KV("errorMsg", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair") << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
 }
 
-void* bcos_sdk_load_keypair(const char* pem_path)
+void* bcos_sdk_load_keypair(const char* pem)
 {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(pem, NULL);
     try
     {
         /*
@@ -58,59 +62,54 @@ void* bcos_sdk_load_keypair(const char* pem_path)
         SM_TYPE  2
         */
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
-        auto keyPair = keyPairBuilder->loadKeyPair(std::string(pem_path));
+        auto keyPair = keyPairBuilder->loadKeyPair(std::string(pem));
         return keyPair.release();
     }
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_load_keypair") << LOG_KV("pemPath", pem_path)
-                        << LOG_KV("errorMsg", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_load_keypair") << LOG_KV("pem file", pem)
+                        << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
 }
 
 void bcos_sdk_destroy_keypair(void* key_pair)
 {
+    bcos_sdk_clear_last_error();
     if (key_pair)
     {
         delete (KeyPair*)key_pair;
         key_pair = NULL;
     }
-    return;
 }
 
 const char* bcos_sdk_get_keypair_address(void* key_pair)
 {
-    if (key_pair)
-    {
-        auto cryptoSuite = std::make_shared<CryptoSuite>(*((KeyPair*)key_pair));
-        auto address = cryptoSuite->address();
-        return strdup(address.hexPrefixed().c_str());
-    }
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, NULL);
 
-    return NULL;
+    auto cryptoSuite = std::make_shared<CryptoSuite>(*((KeyPair*)key_pair));
+    auto address = cryptoSuite->address();
+    return strdup(address.hexPrefixed().c_str());
 }
 
 const char* bcos_sdk_get_keypair_public_key(void* key_pair)
 {
-    if (key_pair)
-    {
-        auto priKey = ((KeyPair*)key_pair)->hexPublicKey();
-        return strdup(priKey.c_str());
-    }
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, NULL);
 
-    return NULL;
+    auto priKey = ((KeyPair*)key_pair)->hexPublicKey();
+    return strdup(priKey.c_str());
 }
 
 const char* bcos_sdk_get_keypair_private_key(void* key_pair)
 {
-    if (key_pair)
-    {
-        auto priKey = ((KeyPair*)key_pair)->hexPrivateKey();
-        return strdup(priKey.c_str());
-    }
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, NULL);
 
-    return NULL;
+    auto priKey = ((KeyPair*)key_pair)->hexPrivateKey();
+    return strdup(priKey.c_str());
 }

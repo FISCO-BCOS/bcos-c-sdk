@@ -130,6 +130,10 @@ void bcos_sdk_c_config_destroy(void* p)
 void bcos_sdk_c_handle_response(
     void* error, void* data, size_t size, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    if (!callback)
+    {
+        return;
+    }
     // auto resp = new bcos_sdk_c_struct_response();
     bcos_sdk_c_struct_response temp_resp;
     auto resp = &temp_resp;

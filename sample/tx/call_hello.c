@@ -117,7 +117,10 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    int sm_crypto = bcos_sdk_group_sm_crypto(sdk, group_id);
+    int sm_crypto = 0;
+    int wasm = 0;
+
+    bcos_sdk_get_group_wasm_and_crypto(sdk, group_id, &wasm, &sm_crypto);
     if (bcos_sdk_last_opr_failed())
     {
         printf(" [CallHello] bcos_sdk_group_sm_crypto failed, error: %s\n",
@@ -125,12 +128,12 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [CallHello] sm crypto: %d\n", sm_crypto);
+    printf(" [CallHello] wasm: %d, sm crypto: %d\n", wasm, sm_crypto);
 
-    const char* chain_id = bcos_sdk_group_chain_id(sdk, group_id);
+    const char* chain_id = bcos_sdk_get_group_chain_id(sdk, group_id);
     if (bcos_sdk_last_opr_failed())
     {
-        printf(" [CallHello] bcos_sdk_group_chain_id failed, error: %s\n",
+        printf(" [CallHello] bcos_sdk_get_group_chain_id failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
         exit(-1);
     }
