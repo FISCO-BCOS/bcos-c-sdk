@@ -28,8 +28,8 @@ endif()
 # URL_BASE download domain name
 include(FetchContent)
 if (NOT DEFINED URL_BASE)
-    set(URL_BASE "github.com")
-    # set(URL_BASE "github.com.cnpmjs.org")
+    # set(URL_BASE "github.com")
+    set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
 # include(FetchContent)
@@ -58,7 +58,6 @@ project(bcos-c-sdk VERSION "3.0.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -74,6 +73,18 @@ find_package(OpenSSL REQUIRED)
 # Boost
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
+
+# TarsCpp
+hunter_add_package(tarscpp)
+find_package(tarscpp CONFIG REQUIRED)
+
+# TASSL
+hunter_add_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
+
+# wedpr-crypto
+hunter_add_package(wedpr-crypto)
+find_package(wedpr-crypto CONFIG REQUIRED)
 
 # bcos-utilities
 hunter_add_package(bcos-utilities)
@@ -96,6 +107,13 @@ include(InstallConfig)
 include(InstallInclude)
 
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
+
+# rust static library linking requirements for macos
+if(APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -framework Security -framework Foundation")
+else()
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif()
 
 # static lib
 set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")

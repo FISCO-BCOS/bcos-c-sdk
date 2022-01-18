@@ -39,6 +39,6 @@ hunter_config(bcos-boostssl
 
 hunter_config(bcos-cpp-sdk
 	VERSION 3.0.0-local
-	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/22d640b5535ff7ac7972db9cb497f38aa0f122a6.tar.gz
-	SHA1 f38fd137d9bde1cd8a7e1e67f2343bf2523d844a
+	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/ef71872a8896cdd373e9e33697fd928f5c36842f.tar.gz
+	SHA1 ddc640b9a4e896bb223a2ed549bc4bdbdce40980
 )
