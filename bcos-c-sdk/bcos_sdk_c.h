@@ -81,6 +81,14 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
     void (*callback)(const char* group, int64_t block_number, void* context));
 // --------------------------------------------------------------------
 
+// --------------------------------------------------------------------
+int bcos_sdk_group_is_wasm(void* sdk, const char* group);
+
+int bcos_sdk_group_sm_crypto(void* sdk, const char* group);
+
+const char* bcos_sdk_group_chain_id(void* sdk, const char* group);
+// --------------------------------------------------------------------
+
 #ifdef __cplusplus
 }
 #endif

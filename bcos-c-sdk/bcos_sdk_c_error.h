@@ -25,6 +25,36 @@
 extern "C" {
 #endif
 
+#define BCOS_SDK_C_VERIFY_CONDITION(p, msg, r)    \
+    do                                            \
+    {                                             \
+        if (!(p))                                 \
+        {                                         \
+            bcos_sdk_set_last_error_msg(-1, msg); \
+            return r;                             \
+        }                                         \
+    } while (0);
+
+#define BCOS_SDK_C_PARAMS_VERIFICATION(p, r)                                      \
+    do                                                                            \
+    {                                                                             \
+        if (!p)                                                                   \
+        {                                                                         \
+            bcos_sdk_set_last_error_msg(-1, "illegal parameter, " #p " is NULL"); \
+            return r;                                                             \
+        }                                                                         \
+    } while (0);
+
+#define BCOS_SDK_C_SUCCESS (0)
+
+/**
+ * @brief the last sync operation success or not
+ *  Note: thread safe operation
+ *
+ * @return int
+ */
+extern int bcos_sdk_last_opr_failed();
+
 /**
  * @brief gets status of the recent sync operation
  *  Note: thread safe operation
