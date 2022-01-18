@@ -21,6 +21,11 @@
 #ifndef __INCLUDE_BCOS_SDK__
 #define __INCLUDE_BCOS_SDK__
 
+#if defined(WIN32) || defined(WIN64) || defined(_WIN32) || defined(_WIN32_)
+#pragma comment(lib, "userenv.lib")
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 #include "bcos_sdk_c_common.h"
 
 #ifdef __cplusplus

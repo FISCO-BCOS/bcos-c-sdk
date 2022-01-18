@@ -68,6 +68,7 @@ const char* bcos_event_sub_subscribe_event(void* sdk, const char* group, const c
  */
 void bcos_event_sub_unsubscribe_event(void* sdk, const char* event_sub_id)
 {
+    bcos_sdk_clear_last_error();
     auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
     auto eventSub = sdkPointer->eventSub();
     eventSub->unsubscribeEvent(event_sub_id);
