@@ -74,10 +74,6 @@ find_package(OpenSSL REQUIRED)
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
 
-# TarsCpp
-hunter_add_package(tarscpp)
-find_package(tarscpp CONFIG REQUIRED)
-
 # TASSL
 hunter_add_package(OpenSSL)
 find_package(OpenSSL REQUIRED)

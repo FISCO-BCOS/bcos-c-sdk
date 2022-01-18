@@ -64,9 +64,10 @@ const char* getGetData(int sm)
 void usage()
 {
     printf("Desc: call HelloWorld contract set function\n");
-    printf("Usage: call_hello <config> <groupID> <address>\n");
+    printf("Usage: call_hello <config> <group_id> <contract address>\n");
     printf("Example:\n");
-    printf("    ./call_hello ./config_sample.ini group0 0x...\n");
+    printf(
+        "    ./call_hello ./config_sample.ini group0 713aB8e2926bCE2CF29efB0Dd9A82F02BCFc96e6\n");
     exit(0);
 }
 
