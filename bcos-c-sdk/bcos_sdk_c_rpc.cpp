@@ -52,6 +52,7 @@ using namespace bcos::boostssl;
 void bcos_rpc_generic_method_call(
     void* sdk, const char* data, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(data, context, callback);
 
@@ -68,6 +69,7 @@ void bcos_rpc_generic_method_call(
 void bcos_rpc_generic_method_call_to_group(void* sdk, const char* group, const char* data,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(data, context, callback);
 
@@ -85,6 +87,7 @@ void bcos_rpc_generic_method_call_to_group(void* sdk, const char* group, const c
 void bcos_rpc_generic_method_call_to_group_node(void* sdk, const char* group, const char* node,
     const char* data, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(data, context, callback);
 
@@ -104,6 +107,7 @@ void bcos_rpc_generic_method_call_to_group_node(void* sdk, const char* group, co
 void bcos_rpc_call(void* sdk, const char* group, const char* node, const char* to, const char* data,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(to, context, callback);
@@ -123,6 +127,7 @@ void bcos_rpc_call(void* sdk, const char* group, const char* node, const char* t
 void bcos_rpc_send_transaction(void* sdk, const char* group, const char* node, const char* data,
     int proof, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(data, context, callback);
@@ -141,6 +146,7 @@ void bcos_rpc_send_transaction(void* sdk, const char* group, const char* node, c
 void bcos_rpc_get_transaction(void* sdk, const char* group, const char* node, const char* tx_hash,
     int proof, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(tx_hash, context, callback);
@@ -159,6 +165,7 @@ void bcos_rpc_get_transaction(void* sdk, const char* group, const char* node, co
 void bcos_rpc_get_transaction_receipt(void* sdk, const char* group, const char* node,
     const char* tx_hash, int proof, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(tx_hash, context, callback);
@@ -178,6 +185,7 @@ void bcos_rpc_get_block_by_hash(void* sdk, const char* group, const char* node,
     const char* block_hash, int only_header, int only_tx_hash,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(block_hash, context, callback);
@@ -197,6 +205,7 @@ void bcos_rpc_get_block_by_number(void* sdk, const char* group, const char* node
     int64_t block_number, int only_header, int only_tx_hash, bcos_sdk_c_struct_response_cb callback,
     void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -214,6 +223,7 @@ void bcos_rpc_get_block_by_number(void* sdk, const char* group, const char* node
 void bcos_rpc_get_block_hash_by_number(void* sdk, const char* group, const char* node,
     int64_t block_number, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -243,6 +253,7 @@ int64_t bcos_rpc_get_block_limit(void* sdk, const char* group)
 void bcos_rpc_get_block_number(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -259,6 +270,7 @@ void bcos_rpc_get_block_number(void* sdk, const char* group, const char* node,
 void bcos_rpc_get_code(void* sdk, const char* group, const char* node, const char* address,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(address, context, callback);
@@ -277,6 +289,7 @@ void bcos_rpc_get_code(void* sdk, const char* group, const char* node, const cha
 void bcos_rpc_get_sealer_list(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -294,6 +307,7 @@ void bcos_rpc_get_sealer_list(void* sdk, const char* group, const char* node,
 void bcos_rpc_get_observer_list(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -311,6 +325,7 @@ void bcos_rpc_get_observer_list(void* sdk, const char* group, const char* node,
 void bcos_rpc_get_pbft_view(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -328,6 +343,7 @@ void bcos_rpc_get_pbft_view(void* sdk, const char* group, const char* node,
 void bcos_rpc_get_pending_tx_size(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -345,6 +361,7 @@ void bcos_rpc_get_pending_tx_size(void* sdk, const char* group, const char* node
 void bcos_rpc_get_sync_status(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -362,6 +379,7 @@ void bcos_rpc_get_sync_status(void* sdk, const char* group, const char* node,
 void bcos_rpc_get_consensus_status(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -379,6 +397,7 @@ void bcos_rpc_get_consensus_status(void* sdk, const char* group, const char* nod
 void bcos_rpc_get_system_config_by_key(void* sdk, const char* group, const char* node,
     const char* key, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(key, context, callback);
@@ -397,6 +416,7 @@ void bcos_rpc_get_system_config_by_key(void* sdk, const char* group, const char*
 void bcos_rpc_get_total_transaction_count(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -414,6 +434,7 @@ void bcos_rpc_get_total_transaction_count(void* sdk, const char* group, const ch
 void bcos_rpc_get_group_peers(
     void* sdk, const char* group, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -429,6 +450,7 @@ void bcos_rpc_get_group_peers(
 // getPeers
 void bcos_rpc_get_peers(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
 
     auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
@@ -443,6 +465,7 @@ void bcos_rpc_get_peers(void* sdk, bcos_sdk_c_struct_response_cb callback, void*
 // getGroupList
 void bcos_rpc_get_group_list(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
 
     auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
@@ -458,6 +481,7 @@ void bcos_rpc_get_group_list(void* sdk, bcos_sdk_c_struct_response_cb callback, 
 void bcos_rpc_get_group_info(
     void* sdk, const char* group, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
 
@@ -473,6 +497,7 @@ void bcos_rpc_get_group_info(
 // getGroupInfoList
 void bcos_rpc_get_group_info_list(void* sdk, bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
 
     auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
@@ -488,6 +513,7 @@ void bcos_rpc_get_group_info_list(void* sdk, bcos_sdk_c_struct_response_cb callb
 void bcos_rpc_get_group_node_info(void* sdk, const char* group, const char* node,
     bcos_sdk_c_struct_response_cb callback, void* context)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(sdk, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(group, context, callback);
     BCOS_SDK_C_RPC_PARAMS_VERIFICATION(node, context, callback);

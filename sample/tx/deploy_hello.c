@@ -122,7 +122,7 @@ const char* getBinary(int _sm)
 void usage()
 {
     printf("Desc: deploy HelloWorld contract\n");
-    printf("Usage: deploy_hello <config> <groupID>\n");
+    printf("Usage: deploy_hello <config> <group_id>\n");
     printf("Example:\n");
     printf("    ./deploy_hello ./config_sample.ini group0\n");
     exit(0);

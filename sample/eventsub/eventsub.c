@@ -34,9 +34,9 @@
 void usage()
 {
     printf("Desc: subscribe contract events by command params\n");
-    printf("Usage: eventsub <config> <group> <from> <to> <address>[Optional]\n");
+    printf("Usage: eventsub <config> <group_id> <from> <to> <address>[Optional]\n");
     printf("Example:\n");
-    printf("    ./eventsub ./config_sample.ini group -1 -1\n");
+    printf("    ./eventsub ./config_sample.ini group0 -1 -1\n");
     exit(0);
 }
 

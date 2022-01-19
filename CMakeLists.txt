@@ -48,8 +48,8 @@ list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 # include hunter
 include(HunterGate)
 HunterGate(
-    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/9bb4c2aa139cfa53af5779105cd0d5570c31fbf5.tar.gz"
-    SHA1 "02165406cd653bedfe88538926453ede8eca84ba"
+    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/f1eaf0b9e1fc5e33b10fcc0166dbd107a34c1fbb.tar.gz"
+    SHA1 "b879745ced060797f4b27514abc9a1f7c512e487"
     FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake"
 )
 
@@ -73,10 +73,6 @@ find_package(OpenSSL REQUIRED)
 # Boost
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
-
-# TarsCpp
-hunter_add_package(tarscpp)
-find_package(tarscpp CONFIG REQUIRED)
 
 # TASSL
 hunter_add_package(OpenSSL)
