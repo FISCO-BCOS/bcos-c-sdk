@@ -51,6 +51,11 @@ int main(int argc, char** argv)
             printf(" =>  address: %s\n", bcos_sdk_get_keypair_address(key_pair));
             printf(" =>  pub: %s\n", bcos_sdk_get_keypair_public_key(key_pair));
             printf(" =>  pri: %s\n", bcos_sdk_get_keypair_private_key(key_pair));
+
+            void *key_pair_new = bcos_sdk_create_keypair_by_hex_prikey(bcos_sdk_get_keypair_type(key_pair), bcos_sdk_get_keypair_private_key(key_pair));
+            printf(" =>  new key pair address: %s\n", bcos_sdk_get_keypair_address(key_pair_new));
+            printf(" =>  new key pair pub: %s\n", bcos_sdk_get_keypair_public_key(key_pair_new));
+            printf(" =>  new key pair pri: %s\n", bcos_sdk_get_keypair_private_key(key_pair_new));
         }
         else
         {
@@ -67,6 +72,11 @@ int main(int argc, char** argv)
             printf(" =>  address: %s\n", bcos_sdk_get_keypair_address(key_pair));
             printf(" =>  pub: %s\n", bcos_sdk_get_keypair_public_key(key_pair));
             printf(" =>  pri: %s\n", bcos_sdk_get_keypair_private_key(key_pair));
+
+            void *key_pair_new = bcos_sdk_create_keypair_by_hex_prikey(bcos_sdk_get_keypair_type(key_pair), bcos_sdk_get_keypair_private_key(key_pair));
+            printf(" =>  new key pair address: %s\n", bcos_sdk_get_keypair_address(key_pair_new));
+            printf(" =>  new key pair pub: %s\n", bcos_sdk_get_keypair_public_key(key_pair_new));
+            printf(" =>  new key pair pri: %s\n", bcos_sdk_get_keypair_private_key(key_pair_new));
         }
         else
         {

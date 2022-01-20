@@ -25,7 +25,10 @@
 #include <bcos-cpp-sdk/utilities/crypto/CryptoSuite.h>
 #include <bcos-cpp-sdk/utilities/crypto/KeyPair.h>
 #include <bcos-cpp-sdk/utilities/crypto/KeyPairBuilder.h>
+#include <bcos-utilities/Common.h>
+#include <cstddef>
 #include <exception>
+#include <memory>
 
 using namespace bcos;
 using namespace bcos::cppsdk;
@@ -47,6 +50,60 @@ void* bcos_sdk_create_keypair(int crypto_type)
         std::string errorMsg = boost::diagnostic_information(e);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
         BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair") << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void *private_key, unsigned len) {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    try
+    {
+        auto priBytes = std::make_shared<bcos::bytes>((bcos::byte *)private_key, (bcos::byte *)private_key + len);
+        /*
+        ECDSA_TYPE  1,
+        SM_TYPE  2
+        */
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->genKeyPair(crypto_type == BCOS_C_SDK_ECDSA_TYPE ?
+                                                      CryptoSuiteType::ECDSA_TYPE :
+                                                      CryptoSuiteType::SM_TYPE , priBytes);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_prikey") << LOG_KV("crypto_type", crypto_type)
+                        << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char *private_key) {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    try
+    {
+        auto priBytes =  fromHexString(std::string(private_key));
+        /*
+        ECDSA_TYPE  1,
+        SM_TYPE  2
+        */
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->genKeyPair(crypto_type == BCOS_C_SDK_ECDSA_TYPE ?
+                                                      CryptoSuiteType::ECDSA_TYPE :
+                                                      CryptoSuiteType::SM_TYPE , priBytes);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_prikey") << LOG_KV("crypto_type", crypto_type)
+                        << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
 }
@@ -84,6 +141,14 @@ void bcos_sdk_destroy_keypair(void* key_pair)
         delete (KeyPair*)key_pair;
         key_pair = NULL;
     }
+}
+
+int bcos_sdk_get_keypair_type(void* key_pair) {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, -1);
+
+    auto keyPair = (KeyPair*)key_pair; 
+    return (int)keyPair->cryptoSuiteType();
 }
 
 const char* bcos_sdk_get_keypair_address(void* key_pair)
