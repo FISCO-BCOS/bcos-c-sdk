@@ -27,9 +27,15 @@ extern "C" {
 
 void* bcos_sdk_create_keypair(int crypto_type);
 
+void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void *private_key, unsigned len);
+
+void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char *private_key);
+
 void* bcos_sdk_load_keypair(const char* pem_path);
 
 void bcos_sdk_destroy_keypair(void* key_pair);
+
+int bcos_sdk_get_keypair_type(void* key_pair);
 
 const char* bcos_sdk_get_keypair_address(void* key_pair);
 
