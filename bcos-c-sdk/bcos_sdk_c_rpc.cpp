@@ -245,8 +245,7 @@ int64_t bcos_rpc_get_block_limit(void* sdk, const char* group)
     BCOS_SDK_C_PARAMS_VERIFICATION(group, -1);
 
     auto sdkPointer = (bcos::cppsdk::Sdk*)sdk;
-    auto rpc = sdkPointer->jsonRpc();
-    return rpc->getBlockLimit(group);
+    return sdkPointer->service()->getBlockLimit(group);
 }
 
 // getBlockNumber
