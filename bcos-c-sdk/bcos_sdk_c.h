@@ -88,8 +88,25 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
 
 // --------------------------------------------------------------------
 
+/**
+ * @brief: query group wasm && sm crypto info 
+ * 
+ * @param sdk: c sdk object pinter
+ * @param group: group id 
+ * @param wasm: if the group runs the WASM contract engine
+ *          0: No, 1: Yes
+ * @param sm_crypto: if the group runs sm cryptography component
+ *          0: No sm, 1: Yes
+ */
 void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm, int* sm_crypto);
 
+/**
+ * @brief: query chain id of the group  
+ * 
+ * @param sdk: c sdk object pinter
+ * @param group: group id 
+ * @return const char* : chain id 
+ */
 const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group);
 // --------------------------------------------------------------------
 

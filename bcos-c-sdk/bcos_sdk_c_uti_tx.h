@@ -27,6 +27,17 @@
 extern "C" {
 #endif
 
+/**
+ * @brief : create signed transaction data
+ * 
+ * @param key_pair  : key pair object pointer   
+ * @param to        : contract address, NULL or "" if a deploy contract transaction
+ * @param data      : encoded params data, solidify/liquid
+ * @param chain_id  : chain id  
+ * @param group_id  : group id 
+ * @param block_limit : block limit
+ * @return const char*: signed transaction data in hex string format, return NULL on failure
+ */
 const char* bcos_sdk_create_signed_tx(void* key_pair, const char* to, const char* data,
     const char* chain_id, const char* group_id, int64_t block_limit);
 
