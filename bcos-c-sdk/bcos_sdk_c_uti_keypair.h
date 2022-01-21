@@ -25,22 +25,84 @@
 extern "C" {
 #endif
 
+/**
+ * @brief : create key pair used for transaction sign
+ * 
+ * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ *
+ * @return void*: key pair object pointer, return NULL on failure 
+ */
 void* bcos_sdk_create_keypair(int crypto_type);
 
-void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void *private_key, unsigned len);
+/**
+ * @brief : create key pair used for transaction sign
+ * 
+ * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param private_key: private key in bytes format
+ * @param length     : private key bytes length
+ *
+ * @return void*: key pair object pointer, return NULL on failure 
+ */
+void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void *private_key, unsigned length);
 
+/**
+ * @brief : create key pair used for transaction sign
+ * 
+ * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param private_key: private key in hex string format
+ *
+ * @return void*: key pair object pointer, return NULL on failure 
+ */
 void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char *private_key);
 
+/**
+ * @brief : load key pair from pem file
+ *
+ * @param void*: key pair object pointer, return NULL on failure 
+ */
 void* bcos_sdk_load_keypair(const char* pem_path);
 
+/**
+ * @brief : destroy the keypair object
+ *
+ * @param key_pair: key pair object pointer 
+ */
 void bcos_sdk_destroy_keypair(void* key_pair);
 
+/**
+ * @brief : get the crypto type of the keypair
+ * 
+ * @param key_pair: key pair object pointer 
+ *
+ * @return int : ECDSA: 1, SM: 2, return -1 on failure
+ */
 int bcos_sdk_get_keypair_type(void* key_pair);
 
+/**
+ * @brief : get the address of the keypair private key
+ * 
+ * @param key_pair : key pair object pointer 
+ *
+ * @return const char* : keypair address
+ */
 const char* bcos_sdk_get_keypair_address(void* key_pair);
 
+/**
+ * @brief : get the publish key of the keypair
+ * 
+ * @param key_pair : key pair object pointer 
+ *
+ * @return const char* : hex string format publish key, return NULL on failure
+ */
 const char* bcos_sdk_get_keypair_public_key(void* key_pair);
 
+/**
+ * @brief : get the private key of the keypair
+ * 
+ * @param key_pair : key pair object pointer 
+ *
+ * @return const char* : hex string format private key, return NULL on failure
+ */
 const char* bcos_sdk_get_keypair_private_key(void* key_pair);
 
 // --------------------------------------------------------------------
