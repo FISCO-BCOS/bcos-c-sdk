@@ -28,8 +28,8 @@ endif()
 # URL_BASE download domain name
 include(FetchContent)
 if (NOT DEFINED URL_BASE)
-    # set(URL_BASE "github.com")
-    set(URL_BASE "github.com.cnpmjs.org")
+    set(URL_BASE "github.com")
+    # set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
 # include(FetchContent)
