@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 
     void* sdk = bcos_sdk_create_by_config_file(config);
     // check success or not
-    if (bcos_sdk_last_opr_failed())
+    if (!bcos_sdk_is_last_opr_success())
     {
         printf(
             " bcos_sdk_create_by_config_file failed, error: %s\n", bcos_sdk_get_last_error_msg());
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 
     printf(" [CallHello] start sdk ... \n");
     bcos_sdk_start(sdk);
-    if (bcos_sdk_last_opr_failed())
+    if (!bcos_sdk_is_last_opr_success())
     {
         printf(" [CallHello] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     int wasm = 0;
 
     bcos_sdk_get_group_wasm_and_crypto(sdk, group_id, &wasm, &sm_crypto);
-    if (bcos_sdk_last_opr_failed())
+    if (!bcos_sdk_is_last_opr_success())
     {
         printf(" [CallHello] bcos_sdk_group_sm_crypto failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     printf(" [CallHello] wasm: %d, sm crypto: %d\n", wasm, sm_crypto);
 
     const char* chain_id = bcos_sdk_get_group_chain_id(sdk, group_id);
-    if (bcos_sdk_last_opr_failed())
+    if (!bcos_sdk_is_last_opr_success())
     {
         printf(" [CallHello] bcos_sdk_get_group_chain_id failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
