@@ -215,16 +215,12 @@ int main(int argc, char** argv)
     const char* address = bcos_sdk_get_keypair_address(key_pair);
     printf(" [DeployHello] new account, address: %s\n", address);
 
-    const char* signed_tx = bcos_sdk_create_signed_tx(
-        key_pair, "", getBinary(sm_crypto), chain_id, group_id, block_limit);
-    if (signed_tx == NULL)
-    {
-        printf(
-            " [DeployHello] create signed transaction failed, please check the input params. \n");
-        exit(-1);
-    }
+    char* tx_hash = NULL;
+    char* signed_tx = NULL;
 
-    printf(" [DeployHello] create signed transaction success");
+    bcos_sdk_create_deploy_contract_tx(
+        key_pair, group_id, chain_id, getBinary(sm_crypto), "", block_limit, &tx_hash, &signed_tx);
+    printf(" [DeployHello] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
 
     bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_recv_resp_callback, NULL);
 

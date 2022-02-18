@@ -160,15 +160,12 @@ int main(int argc, char** argv)
     const char* account = bcos_sdk_get_keypair_address(key_pair);
     printf(" [CallHello] new account, address: %s\n", account);
 
-    const char* signed_tx = bcos_sdk_create_signed_tx(
-        key_pair, address, getSetData(sm_crypto), chain_id, group_id, block_limit);
-    if (signed_tx == NULL)
-    {
-        printf(" [CallHello] create signed transaction failed, please check the input params. \n");
-        exit(-1);
-    }
+    char* tx_hash = NULL;
+    char* signed_tx = NULL;
+    bcos_sdk_create_signed_tx(key_pair, group_id, chain_id, address, getSetData(sm_crypto),
+        block_limit, 0, &tx_hash, &signed_tx);
 
-    printf(" [CallHello] create signed transaction. \n");
+    printf(" [CallHello] create signed transaction, tx_hash: %s \n", tx_hash);
 
     printf(" [CallHello] call HelloWorld set function. \n");
 

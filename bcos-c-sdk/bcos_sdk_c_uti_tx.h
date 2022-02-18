@@ -28,18 +28,36 @@ extern "C" {
 #endif
 
 /**
- * @brief : create signed transaction data
- * 
- * @param key_pair  : key pair object pointer   
- * @param to        : contract address, NULL or "" if a deploy contract transaction
- * @param data      : encoded params data, solidify/liquid
- * @param chain_id  : chain id  
- * @param group_id  : group id 
- * @param block_limit : block limit
- * @return const char*: signed transaction data in hex string format, return NULL on failure
+ * @brief
+ *
+ * @param key_pair
+ * @param group_id
+ * @param chain_id
+ * @param code
+ * @param abi
+ * @param block_limit
+ * @param tx_hash
+ * @param signed_tx
  */
-const char* bcos_sdk_create_signed_tx(void* key_pair, const char* to, const char* data,
-    const char* chain_id, const char* group_id, int64_t block_limit);
+void bcos_sdk_create_deploy_contract_tx(void* key_pair, const char* group_id, const char* chain_id,
+    const char* code, const char* abi, int64_t block_limit, char** tx_hash, char** signed_tx);
+
+/**
+ * @brief create signed transaction data
+ *
+ * @param key_pair
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param data
+ * @param abi
+ * @param block_limit
+ * @param attribute
+ * @return
+ */
+void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char* chain_id,
+    const char* to, const char* data, int64_t block_limit, int32_t attribute, char** tx_hash,
+    char** signed_tx);
 
 #ifdef __cplusplus
 }
