@@ -39,8 +39,9 @@ extern "C" {
  * @param tx_hash
  * @param signed_tx
  */
-void bcos_sdk_create_deploy_contract_tx(void* key_pair, const char* group_id, const char* chain_id,
-    const char* code, const char* abi, int64_t block_limit, char** tx_hash, char** signed_tx);
+void bcos_sdk_create_deploy_contract_signed_tx(void* key_pair, const char* group_id,
+    const char* chain_id, const char* code, const char* abi, int64_t block_limit, char** tx_hash,
+    char** signed_tx);
 
 /**
  * @brief create signed transaction data
@@ -56,7 +57,7 @@ void bcos_sdk_create_deploy_contract_tx(void* key_pair, const char* group_id, co
  * @return
  */
 void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char* chain_id,
-    const char* to, const char* data, int64_t block_limit, int32_t attribute, char** tx_hash,
+    const char* to, const char* data, int64_t block_limit, int32_t attribute, char** S,
     char** signed_tx);
 
 #ifdef __cplusplus

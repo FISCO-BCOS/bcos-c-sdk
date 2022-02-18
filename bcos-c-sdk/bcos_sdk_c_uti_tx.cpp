@@ -41,8 +41,9 @@ using namespace bcos::cppsdk::utilities;
  * @param tx_hash
  * @param signed_tx
  */
-void bcos_sdk_create_deploy_contract_tx(void* key_pair, const char* group_id, const char* chain_id,
-    const char* code, const char* abi, int64_t block_limit, char** tx_hash, char** signed_tx)
+void bcos_sdk_create_deploy_contract_signed_tx(void* key_pair, const char* group_id,
+    const char* chain_id, const char* code, const char* abi, int64_t block_limit, char** tx_hash,
+    char** signed_tx)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, );
