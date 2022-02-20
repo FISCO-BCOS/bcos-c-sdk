@@ -50,7 +50,7 @@ void* bcos_sdk_create_keypair(int crypto_type)
     {
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
         auto keyPair = keyPairBuilder->genKeyPair(
-            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::ECDSA : CryptoType::SM);
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2);
         return keyPair.release();
     }
     catch (const std::exception& e)
@@ -89,7 +89,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
         */
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
         auto keyPair = keyPairBuilder->genKeyPair(
-            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::ECDSA : CryptoType::SM,
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             bytesConstRef((byte*)private_key, len));
         return keyPair.release();
     }
@@ -128,7 +128,7 @@ void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private
         */
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
         auto keyPair = keyPairBuilder->genKeyPair(
-            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::ECDSA : CryptoType::SM,
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             bytesConstRef((byte*)priBytes->data(), priBytes->size()));
         return keyPair.release();
     }
