@@ -160,12 +160,44 @@ int main(int argc, char** argv)
     const char* account = bcos_sdk_get_keypair_address(key_pair);
     printf(" [CallHello] new account, address: %s\n", account);
 
-    char* tx_hash = NULL;
-    char* signed_tx = NULL;
-    bcos_sdk_create_signed_tx(key_pair, group_id, chain_id, address, getSetData(sm_crypto),
-        block_limit, 0, &tx_hash, &signed_tx);
+    void* transaction_data = bcos_sdk_create_transaction_data(
+        group_id, chain_id, address, getSetData(sm_crypto), "", block_limit);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        printf(" [CallHello] bcos_sdk_create_transaction_data failed, error: %s\n",
+            bcos_sdk_get_last_error_msg());
+        exit(-1);
+    }
+    printf(" [CallHello] create transaction data\n");
 
-    printf(" [CallHello] create signed transaction, tx_hash: %s \n", tx_hash);
+    const char* transaction_data_hash =
+        bcos_sdk_calc_transaction_data_hash(sm_crypto ? 2 : 1, transaction_data);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        printf(" [CallHello] bcos_sdk_calc_transaction_data_hash failed, error: %s\n",
+            bcos_sdk_get_last_error_msg());
+        exit(-1);
+    }
+    printf(" [CallHello] calc transaction data hash, hash: %s\n", transaction_data_hash);
+
+    const char* signed_data = bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        printf(" [CallHello] bcos_sdk_sign_transaction_data_hash failed, error: %s\n",
+            bcos_sdk_get_last_error_msg());
+        exit(-1);
+    }
+    printf(" [CallHello] sign transaction data hash, signed data: %s\n", signed_data);
+
+    const char* signed_tx = bcos_sdk_create_signed_tx_with_signed_data(
+        transaction_data, signed_data, transaction_data_hash, 0);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        printf(" [CallHello] bcos_sdk_create_signed_tx_with_signed_data failed, error: %s\n",
+            bcos_sdk_get_last_error_msg());
+        exit(-1);
+    }
+    printf(" [CallHello] create signed transaction, signed tx: %s\n", signed_tx);
 
     printf(" [CallHello] call HelloWorld set function. \n");
 
@@ -181,13 +213,19 @@ int main(int argc, char** argv)
 
     // release keypair
     bcos_sdk_destroy_keypair(key_pair);
+    // release transaction data
+    bcos_sdk_destroy_transaction_data(transaction_data);
 
     // free chain_id
     free((void*)chain_id);
-    // free signed_tx
-    free((void*)signed_tx);
     // free account
     free((void*)account);
+    // free transaction_data_hash
+    free((void*)transaction_data_hash);
+    // free signed_data
+    free((void*)signed_data);
+    // free tx
+    free((void*)signed_tx);
 
     // stop sdk
     bcos_sdk_stop(sdk);

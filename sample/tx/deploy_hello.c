@@ -218,8 +218,8 @@ int main(int argc, char** argv)
     char* tx_hash = NULL;
     char* signed_tx = NULL;
 
-    bcos_sdk_create_deploy_contract_signed_tx(
-        key_pair, group_id, chain_id, getBinary(sm_crypto), "", block_limit, &tx_hash, &signed_tx);
+    bcos_sdk_create_signed_tx(key_pair, group_id, chain_id, "", getBinary(sm_crypto), "",
+        block_limit, 0, &tx_hash, &signed_tx);
     printf(" [DeployHello] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
 
     bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_recv_resp_callback, NULL);
