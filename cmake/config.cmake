@@ -32,8 +32,8 @@ hunter_config(bcos-utilities VERSION 3.0.0-rc2-local
 )
 
 hunter_config(bcos-crypto VERSION 3.0.0-local
-    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/52cf6db2c082ec723f5d150abaae312c8dd293d0.tar.gz
-	SHA1 531f31424c3377a9bc8b68a739cfa9ce95f5e8e0
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/eb042091bb6aef907aecfe84dfe365da006b2952.tar.gz
+    SHA1 dbfe8d9f79311fd62c8f69e0f870b1150077f4ed
     CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON SM2_OPTIMIZE=ON
 )
 
@@ -45,6 +45,6 @@ hunter_config(bcos-boostssl
 
 hunter_config(bcos-cpp-sdk
 	VERSION 3.0.0-local
-	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/fb263d1c877fae9dd617a21758b9dad6a2cfd733.tar.gz
-	SHA1 902d037a88995d04d4f42695c9253b2bc8afdbb2
+	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/aaeb8154a4234e6610f61ab7039612abd1afb2bc.tar.gz
+	SHA1 52bb0201fa7bbbbf6fde7b1cd97a67ee1697f192
 )
