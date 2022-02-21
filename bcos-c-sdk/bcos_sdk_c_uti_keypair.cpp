@@ -37,15 +37,15 @@ using namespace bcos::cppsdk::utilities;
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
 void* bcos_sdk_create_keypair(int crypto_type)
 {
     bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 1 || crypto_type == 2),
-        "invalid crypto type, it must be 1(ecdsa crypto type) or 2(sm crypto type)", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 0 || crypto_type == 1),
+        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
     try
     {
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
@@ -65,7 +65,7 @@ void* bcos_sdk_create_keypair(int crypto_type)
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  * @param private_key: private key in bytes format
  * @param length     : private key bytes length
  *
@@ -77,8 +77,8 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
     BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (len > 0), "invalid private key length, it must greate than zero", NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 1 || crypto_type == 2),
-        "invalid crypto type, it must be 1(ecdsa crypto type) or 2(sm crypto type)", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 0 || crypto_type == 1),
+        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
     try
     {
         auto priBytes =
@@ -107,7 +107,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  * @param private_key: private key in hex string format
  *
  * @return void*: key pair object pointer, return NULL on failure
@@ -117,8 +117,8 @@ void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private
     bcos_sdk_clear_last_error();
 
     BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 1 || crypto_type == 2),
-        "invalid crypto type, it must be 1(ecdsa crypto type) or 2(sm crypto type)", NULL)
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 0 || crypto_type == 1),
+        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL)
     try
     {
         auto priBytes = fromHexString(std::string(private_key));
@@ -195,7 +195,7 @@ void bcos_sdk_destroy_keypair(void* key_pair)
  *
  * @param key_pair: key pair object pointer
  *
- * @return int : ECDSA: 1, SM: 2, return -1 on failure
+ * @return int : ECDSA: 0, SM: 1, return -1 on failure
  */
 int bcos_sdk_get_keypair_type(void* key_pair)
 {

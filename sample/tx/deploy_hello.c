@@ -205,12 +205,15 @@ int main(int argc, char** argv)
 
     printf(" [DeployHello] block limit: %lld\n", block_limit);
 
-    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 2 : 1);
+    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 1 : 0);
     if (!key_pair)
     {
         printf(" [DeployHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
+
+    printf(" [DeployHello] bcos_sdk_get_keypair_type: %d\n", bcos_sdk_get_keypair_type(key_pair));
+
 
     const char* address = bcos_sdk_get_keypair_address(key_pair);
     printf(" [DeployHello] new account, address: %s\n", address);
