@@ -130,14 +130,14 @@ const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transacti
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 1 || crypto_type == 2),
-        "invalid crypto type, it must be 1(ecdsa crypto type) or 2(sm crypto type)", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 0 || crypto_type == 1),
+        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
 
     try
     {
         auto builder = std::make_shared<TransactionBuilder>();
         auto transactionDataHash = builder->calculateTransactionDataHash(
-            crypto_type == 1 ? CryptoType::Secp256K1 : CryptoType::SM2,
+            crypto_type == 0 ? CryptoType::Secp256K1 : CryptoType::SM2,
             *(bcostars::TransactionData*)transaction_data);
         return strdup(toHexString(transactionDataHash)->c_str());
     }

@@ -28,7 +28,7 @@ extern "C" {
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
@@ -37,7 +37,7 @@ void* bcos_sdk_create_keypair(int crypto_type);
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  * @param private_key: private key in bytes format
  * @param length     : private key bytes length
  *
@@ -48,7 +48,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
 /**
  * @brief : create key pair used for transaction sign
  *
- * @param crypto_type: crypto type, ECDSA: 1, SM: 2
+ * @param crypto_type: crypto type, ECDSA: 0, SM: 1
  * @param private_key: private key in hex string format
  *
  * @return void*: key pair object pointer, return NULL on failure
@@ -74,7 +74,7 @@ void bcos_sdk_destroy_keypair(void* key_pair);
  *
  * @param key_pair: key pair object pointer
  *
- * @return int : ECDSA: 1, SM: 2, return -1 on failure
+ * @return int : ECDSA: 0, SM: 1, return -1 on failure
  */
 int bcos_sdk_get_keypair_type(void* key_pair);
 

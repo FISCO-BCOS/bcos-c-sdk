@@ -150,12 +150,14 @@ int main(int argc, char** argv)
 
     printf(" [CallHello] block limit: %lld\n", block_limit);
 
-    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 2 : 1);
+    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 1 : 0);
     if (!key_pair)
     {
         printf(" [CallHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
+
+    printf(" [CallHello] bcos_sdk_get_keypair_type: %d\n", bcos_sdk_get_keypair_type(key_pair));
 
     const char* account = bcos_sdk_get_keypair_address(key_pair);
     printf(" [CallHello] new account, address: %s\n", account);
@@ -171,7 +173,7 @@ int main(int argc, char** argv)
     printf(" [CallHello] create transaction data\n");
 
     const char* transaction_data_hash =
-        bcos_sdk_calc_transaction_data_hash(sm_crypto ? 2 : 1, transaction_data);
+        bcos_sdk_calc_transaction_data_hash(sm_crypto ? 1 : 0, transaction_data);
     if (!bcos_sdk_is_last_opr_success())
     {
         printf(" [CallHello] bcos_sdk_calc_transaction_data_hash failed, error: %s\n",
