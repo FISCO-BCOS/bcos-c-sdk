@@ -53,7 +53,7 @@ extern "C" {
  *
  * @return int
  */
-extern int bcos_sdk_last_opr_failed();
+extern int bcos_sdk_is_last_opr_success();
 
 /**
  * @brief gets status of the recent sync operation

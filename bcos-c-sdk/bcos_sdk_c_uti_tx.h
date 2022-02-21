@@ -28,18 +28,81 @@ extern "C" {
 #endif
 
 /**
- * @brief : create signed transaction data
- * 
- * @param key_pair  : key pair object pointer   
- * @param to        : contract address, NULL or "" if a deploy contract transaction
- * @param data      : encoded params data, solidify/liquid
- * @param chain_id  : chain id  
- * @param group_id  : group id 
- * @param block_limit : block limit
- * @return const char*: signed transaction data in hex string format, return NULL on failure
+ * @brief
+ *
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param data
+ * @param abi
+ * @param block_limit
+ * @return void*
  */
-const char* bcos_sdk_create_signed_tx(void* key_pair, const char* to, const char* data,
-    const char* chain_id, const char* group_id, int64_t block_limit);
+void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_id, const char* to,
+    const char* data, const char* abi, int64_t block_limit);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ */
+void bcos_sdk_destroy_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_encode_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param crypto_type
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param keypair
+ * @param transcation_hash
+ * @return const char*
+ */
+const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* transcation_hash);
+
+/**
+ * @brief
+ *
+ * @param key_pair
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param data
+ * @param abi
+ * @param block_limit
+ * @param attribute
+ * @param tx_hash
+ * @param signed_tx
+ */
+void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char* chain_id,
+    const char* to, const char* data, const char* abi, int64_t block_limit, int32_t attribute,
+    char** tx_hash, char** signed_tx);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @param signed_transaction_data
+ * @param transaction_data_hash
+ * @param attribute
+ * @return const char*
+ */
+const char* bcos_sdk_create_signed_tx_with_signed_data(void* transaction_data,
+    const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute);
 
 #ifdef __cplusplus
 }
