@@ -83,7 +83,7 @@ struct bcos_sdk_c_config* create_config(int sm_ssl, char* host, int port)
     // --- set connected peers ---------
 
     // do not disable ssl
-    config->disableSsl = 0;
+    config->disable_ssl = 0;
 
     // set ssl type
     config->ssl_type = my_strdup(sm_ssl ? "sm_ssl" : "ssl");

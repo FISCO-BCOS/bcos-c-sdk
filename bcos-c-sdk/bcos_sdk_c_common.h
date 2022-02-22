@@ -80,7 +80,7 @@ struct bcos_sdk_c_config
     size_t peers_count;
 
     // the switch for disable ssl connection
-    int disableSsl;
+    int disable_ssl;
 
     // ssl or sm_ssl
     char* ssl_type;

@@ -20,9 +20,9 @@
 
 #include "bcos_sdk_c_amop.h"
 #include "bcos_sdk_c_common.h"
-#include <bcos-boostssl/utilities/Common.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/amop/AMOP.h>
+#include <bcos-utilities/Common.h>
 #include <set>
 #include <string>
 
@@ -30,8 +30,6 @@
 
 using namespace bcos;
 using namespace bcos::boostssl;
-using namespace bcos::boostssl::utilities;
-using namespace bcos::boostssl::utilities::protocol;
 
 void bcos_amop_subscribe_topic(void* sdk, char** topics, size_t topic_count)
 {
@@ -69,14 +67,14 @@ void bcos_amop_subscribe_topic_with_cb(
             // create resp obj
             bcos_sdk_c_struct_response resp;
             resp.context = context;
-            if (error && error->errorCode() != CommonError::SUCCESS)
+            if (error && error->errorCode() != 0)
             {
                 resp.error = error->errorCode();
                 resp.desc = (char*)error->errorMessage().data();
             }
             else
             {
-                resp.error = CommonError::SUCCESS;
+                resp.error = 0;
                 resp.data = (void*)data.data();
                 resp.size = data.size();
             }
@@ -155,14 +153,14 @@ void bcos_amop_set_subscribe_topic_cb(void* sdk, bcos_sdk_c_amop_subscribe_cb cb
             // create resp obj
             bcos_sdk_c_struct_response resp;
             resp.context = context;
-            if (error && error->errorCode() != CommonError::SUCCESS)
+            if (error && error->errorCode() != 0)
             {
                 resp.error = error->errorCode();
                 resp.desc = (char*)error->errorMessage().data();
             }
             else
             {
-                resp.error = CommonError::SUCCESS;
+                resp.error = 0;
                 resp.data = (void*)data.data();
                 resp.size = data.size();
             }
