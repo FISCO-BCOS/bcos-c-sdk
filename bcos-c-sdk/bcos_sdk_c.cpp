@@ -21,10 +21,10 @@
 #include "bcos_sdk_c.h"
 #include "bcos_sdk_c_error.h"
 #include <bcos-boostssl/context/ContextBuilder.h>
-#include <bcos-boostssl/utilities/BoostLog.h>
 #include <bcos-boostssl/websocket/WsService.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/SdkFactory.h>
+#include <bcos-utilities/BoostLog.h>
 #include <cstdio>
 #include <exception>
 #include <memory>
@@ -47,13 +47,13 @@ static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sd
     }
 
     wsConfig->setConnectedPeers(peers);
-    wsConfig->setDisableSsl(config->disableSsl);
+    wsConfig->setDisableSsl(config->disable_ssl);
     wsConfig->setThreadPoolSize(config->thread_pool_size);
     wsConfig->setReconnectPeriod(config->reconnect_period_ms);
     wsConfig->setHeartbeatPeriod(config->heartbeat_period_ms);
     wsConfig->setSendMsgTimeout(config->message_timeout_ms);
 
-    if (!config->disableSsl)
+    if (!config->disable_ssl)
     {
         auto contextConfig = std::make_shared<bcos::boostssl::context::ContextConfig>();
         contextConfig->setSslType(config->ssl_type);
@@ -201,4 +201,25 @@ void bcos_sdk_destroy(void* sdk)
     }
 
     BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_destroy") << LOG_KV("sdk", sdk);
+}
+
+/**
+ * @brief: register block notifier of the group
+ *
+ * @param callback
+ */
+void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* context,
+    void (*callback)(const char* group, int64_t block_number, void* context))
+{
+    if (sdk)
+    {
+        auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+        service->registerBlockNumberNotifier(
+            group, [context, callback](const std::string& _group, int64_t _blockNumber) {
+                callback(_group.c_str(), _blockNumber, context);
+            });
+
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
+                       << LOG_KV("group", group);
+    }
 }

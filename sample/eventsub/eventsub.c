@@ -54,6 +54,14 @@ void on_event_sub_callback(struct bcos_sdk_c_struct_response* resp)
     }
 }
 
+// callback for bcos_event_sub_subscribe_event
+void on_block_notifier_callback(const char* group, int64_t block, void* context)
+{
+    (void)context;
+    printf(" \t recv block notifier from server ===>>>> group: %s, block number: %lld\n", group,
+        (long long)block);
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 5)
@@ -90,6 +98,8 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
+    bcos_sdk_register_block_notifier(sdk, group, sdk, on_block_notifier_callback);
+
     printf("[EventSub] start sdk...\n");
     bcos_sdk_start(sdk);
     // check success or not
@@ -101,16 +111,16 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    int id = rand();
-
     printf("[EventSub] start sdk ... \n");
 
     char params[1024] = {0};
     snprintf(params, sizeof(params),
-        "{\"group\":\"%s\",\"id\":\"%d\",\"params\":{\"addresses\":["
+        "{\"addresses\":["
         "\"%s\"],\"fromBlock\":%d,\"toBlock\":%d,"
-        "\"topics\":[]}}",
-        group, id, address, from, to);
+        "\"topics\":[]}",
+        address, from, to);
+
+    printf("[EventSub] params: %s\n", params);
 
     bcos_event_sub_subscribe_event(sdk, group, params, on_event_sub_callback, sdk);
 
