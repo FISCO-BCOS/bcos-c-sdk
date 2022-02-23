@@ -191,11 +191,12 @@ int main(int argc, char** argv)
     }
     printf(" [CallHello] sign transaction data hash, signed data: %s\n", signed_data);
 
-    const char* signed_tx = bcos_sdk_create_signed_tx_with_signed_data(
+    const char* signed_tx = bcos_sdk_create_signed_transaction_with_signed_data(
         transaction_data, signed_data, transaction_data_hash, 0);
     if (!bcos_sdk_is_last_opr_success())
     {
-        printf(" [CallHello] bcos_sdk_create_signed_tx_with_signed_data failed, error: %s\n",
+        printf(
+            " [CallHello] bcos_sdk_create_signed_transaction_with_signed_data failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
         exit(-1);
     }

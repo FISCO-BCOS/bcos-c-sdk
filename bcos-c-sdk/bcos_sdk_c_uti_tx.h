@@ -88,7 +88,7 @@ const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* trans
  * @param tx_hash
  * @param signed_tx
  */
-void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char* chain_id,
+void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, const char* chain_id,
     const char* to, const char* data, const char* abi, int64_t block_limit, int32_t attribute,
     char** tx_hash, char** signed_tx);
 
@@ -101,8 +101,54 @@ void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char*
  * @param attribute
  * @return const char*
  */
-const char* bcos_sdk_create_signed_tx_with_signed_data(void* transaction_data,
+const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
     const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute);
+
+/**
+ * @brief
+ *
+ * @param sdk
+ * @param group_id
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_builder_service(void* sdk, const char* group_id);
+
+/**
+ * @brief
+ *
+ * @param sdk
+ * @param group_id
+ * @return void*
+ */
+void bcos_sdk_destroy_transaction_builder_service(void* service);
+
+/**
+ * @brief
+ * @param tx_builder_service
+ * @param to
+ * @param data
+ * @param abi
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_data_with_tx_builder_service(
+    void* tx_builder_service, const char* to, const char* data, const char* abi);
+
+/**
+ * @brief
+ *
+ * @param tx_builder_service
+ * @param key_pair
+ * @param to
+ * @param data
+ * @param abi
+ * @param attribute
+ * @param tx_hash
+ * @param signed_tx
+ * @return void*
+ */
+void bcos_sdk_create_signed_transaction_with_tx_builder_service(void* tx_builder_service,
+    void* key_pair, const char* to, const char* data, const char* abi, int32_t attribute,
+    char** tx_hash, char** signed_tx);
 
 #ifdef __cplusplus
 }
