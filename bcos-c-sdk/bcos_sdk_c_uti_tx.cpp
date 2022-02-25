@@ -20,10 +20,13 @@
 
 #include "bcos_sdk_c_uti_tx.h"
 #include "bcos_sdk_c_error.h"
+#include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
+#include <bcos-cpp-sdk/utilities/tx/TransactionBuilderService.h>
 #include <cstring>
 #include <exception>
+#include <memory>
 #include <system_error>
 
 using namespace bcos;
@@ -201,7 +204,7 @@ const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* trans
  * @param tx_hash
  * @param signed_tx
  */
-void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char* chain_id,
+void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, const char* chain_id,
     const char* to, const char* data, const char* abi, int64_t block_limit, int32_t attribute,
     char** tx_hash, char** signed_tx)
 {
@@ -229,10 +232,10 @@ void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char*
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_tx") << LOG_DESC("exception")
-                          << LOG_KV("key_pair", key_pair) << LOG_KV("group_id", group_id)
-                          << LOG_KV("chain_id", chain_id) << LOG_KV("to", to)
-                          << LOG_KV("data", data) << LOG_KV("abi", abi)
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction")
+                          << LOG_DESC("exception") << LOG_KV("key_pair", key_pair)
+                          << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
+                          << LOG_KV("to", to) << LOG_KV("data", data) << LOG_KV("abi", abi)
                           << LOG_KV("block_limit", block_limit) << LOG_KV("attribute", attribute)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -248,7 +251,7 @@ void bcos_sdk_create_signed_tx(void* key_pair, const char* group_id, const char*
  * @param attribute
  * @return const char*
  */
-const char* bcos_sdk_create_signed_tx_with_signed_data(void* transaction_data,
+const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
     const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute)
 {
     bcos_sdk_clear_last_error();
@@ -267,7 +270,7 @@ const char* bcos_sdk_create_signed_tx_with_signed_data(void* transaction_data,
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_tx_with_signed_data")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_with_signed_data")
                           << LOG_DESC("exception")
                           << LOG_KV("signed_transaction_data", signed_transaction_data)
                           << LOG_KV("transaction_data_hash", transaction_data_hash)
@@ -275,4 +278,132 @@ const char* bcos_sdk_create_signed_tx_with_signed_data(void* transaction_data,
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
     return NULL;
+}
+
+/**
+ * @brief
+ *
+ * @param sdk
+ * @param group_id
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_builder_service(void* sdk, const char* group_id)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
+
+    try
+    {
+        auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+        auto transactionBuilderService =
+            std::make_unique<bcos::cppsdk::utilities::TransactionBuilderService>(
+                service, std::string(group_id));
+        return transactionBuilderService.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_builder_service")
+                          << LOG_DESC("exception") << LOG_KV("group_id", group_id)
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+    return NULL;
+}
+
+/**
+ * @brief
+ *
+ * @param sdk
+ * @param group_id
+ * @return void*
+ */
+void bcos_sdk_destroy_transaction_builder_service(void* service)
+{
+    bcos_sdk_clear_last_error();
+    if (service)
+    {
+        delete (bcos::cppsdk::utilities::TransactionBuilderService*)service;
+    }
+}
+
+/**
+ * @brief
+ *
+ * @param tx_builder_service
+ * @param to
+ * @param data
+ * @param abi
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_data_with_tx_builder_service(
+    void* tx_builder_service, const char* to, const char* data, const char* abi)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(tx_builder_service, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(data, NULL);
+
+    try
+    {
+        auto service = (bcos::cppsdk::utilities::TransactionBuilderService*)tx_builder_service;
+        auto bytesData = fromHexString(data);
+        auto transactionData = service->createTransactionData(
+            to ? std::string(to) : "", *bytesData, abi ? std::string(abi) : "");
+        return transactionData.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_with_tx_builder_service")
+                          << LOG_DESC("exception") << LOG_KV("to", to) << LOG_KV("data", data)
+                          << LOG_KV("abi", abi ? abi : "") << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+    return NULL;
+}
+
+/**
+ * @brief
+ *
+ * @param tx_builder_service
+ * @param key_pair
+ * @param to
+ * @param data
+ * @param abi
+ * @param attribute
+ * @param tx_hash
+ * @param signed_tx
+ * @return void*
+ */
+void bcos_sdk_create_signed_transaction_with_tx_builder_service(void* tx_builder_service,
+    void* key_pair, const char* to, const char* data, const char* abi, int32_t attribute,
+    char** tx_hash, char** signed_tx)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(tx_builder_service, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(data, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, );
+
+    try
+    {
+        auto bytesData = fromHexString(data);
+        auto service = (bcos::cppsdk::utilities::TransactionBuilderService*)tx_builder_service;
+
+        auto r = service->createSignedTransaction(*((bcos::crypto::KeyPairInterface*)key_pair),
+            std::string(to ? to : ""), *bytesData, std::string(abi ? abi : ""), attribute);
+
+        *tx_hash = strdup(r.first.c_str());
+        *signed_tx = strdup(r.second.c_str());
+    }
+    catch (std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_with_tx_builder_service")
+                          << LOG_DESC("exception") << LOG_KV("to", to) << LOG_KV("data", data)
+                          << LOG_KV("abi", abi ? abi : "") << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
 }

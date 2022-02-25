@@ -221,7 +221,7 @@ int main(int argc, char** argv)
     char* tx_hash = NULL;
     char* signed_tx = NULL;
 
-    bcos_sdk_create_signed_tx(key_pair, group_id, chain_id, "", getBinary(sm_crypto), "",
+    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "", getBinary(sm_crypto), "",
         block_limit, 0, &tx_hash, &signed_tx);
     printf(" [DeployHello] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
 
