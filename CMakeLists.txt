@@ -48,17 +48,17 @@ list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 # include hunter
 include(HunterGate)
 HunterGate(
-    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/41051088cf9eb0abd0e33b4f1641727cbea57aff.tar.gz"
-    SHA1 "8330e7840f53aaba6ef8b6996f5b1fd82f29d0b4"
+    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/2b5b25ecffaba74393740bf0b8758c4e8d9297cf.tar.gz"
+    SHA1 "5d8365a327be260cf24d2b125a71ee7069aca28f"
     FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake"
 )
 
 # project name
 project(bcos-c-sdk VERSION "3.0.0")
-set(VERSION_SUFFIX "-rc2")
+set(VERSION_SUFFIX "-rc3")
+
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -75,9 +75,21 @@ find_package(OpenSSL REQUIRED)
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
 
+# TASSL
+hunter_add_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
+
+# wedpr-crypto
+hunter_add_package(wedpr-crypto)
+find_package(wedpr-crypto CONFIG REQUIRED)
+
 # bcos-utilities
 hunter_add_package(bcos-utilities)
 find_package(bcos-utilities CONFIG REQUIRED)
+
+# find bcos-crypto
+hunter_add_package(bcos-crypto)
+find_package(bcos-crypto CONFIG REQUIRED)
 
 # find bcos-boostssl
 hunter_add_package(bcos-boostssl)
@@ -96,6 +108,13 @@ include(InstallConfig)
 include(InstallInclude)
 
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
+
+# rust static library linking requirements for macos
+if(APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -framework Security -framework Foundation")
+else()
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif()
 
 # static lib
 set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
