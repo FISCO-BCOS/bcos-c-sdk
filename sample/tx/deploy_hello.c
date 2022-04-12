@@ -205,7 +205,8 @@ int main(int argc, char** argv)
 
     printf(" [DeployHello] block limit: %lld\n", block_limit);
 
-    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 1 : 0);
+    void* key_pair =
+        bcos_sdk_create_keypair(sm_crypto ? BCOS_C_SDK_SM_TYPE : BCOS_C_SDK_ECDSA_TYPE);
     if (!key_pair)
     {
         printf(" [DeployHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
