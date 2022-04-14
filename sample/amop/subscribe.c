@@ -49,8 +49,8 @@ void on_recv_amop_subscribe_resp(
     else
     {
         printf(
-            "\t recv message and would echo message to publish, endpoint: %s, seq: %s, msg: %s\n",
-            endpoint, seq, (char*)resp->data);
+            "\t recv message and would echo message to publish, endpoint: %s, seq: %s, msg size: %lu\n",
+            endpoint, seq, strlen((char*)resp->data));
 
         bcos_amop_send_response(resp->context, endpoint, seq, resp->data, resp->size);
     }
