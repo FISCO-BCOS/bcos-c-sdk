@@ -123,8 +123,8 @@ void bcos_amop_publish(void* sdk, const char* topic, void* data, size_t size, ui
             std::shared_ptr<bcos::boostssl::ws::WsSession> session) {
             std::ignore = session;
 
-            void* data = msg ? msg->data()->data() : NULL;
-            size_t size = msg ? msg->data()->size() : 0;
+            void* data = msg ? msg->payload()->data() : NULL;
+            size_t size = msg ? msg->payload()->size() : 0;
 
             bcos_sdk_c_handle_response(error ? error.get() : NULL, data, size, cb, context);
         });
