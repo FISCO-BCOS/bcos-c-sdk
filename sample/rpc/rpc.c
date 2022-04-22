@@ -33,10 +33,10 @@
 void usage()
 {
     printf("Desc: rpc methods call test\n");
-    printf("Usage: rpc <host> <port> <ssl type> <group>\n");
+    printf("Usage: rpc <host> <port> <ssl type> <group_id>\n");
     printf("Example:\n");
-    printf("   ./rpc 127.0.0.1 20200 ssl group\n");
-    printf("   ./rpc 127.0.0.1 20200 sm_ssl group\n");
+    printf("   ./rpc 127.0.0.1 20200 ssl group0\n");
+    printf("   ./rpc 127.0.0.1 20200 sm_ssl group0\n");
     exit(0);
 }
 
