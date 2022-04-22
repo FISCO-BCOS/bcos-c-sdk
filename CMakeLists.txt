@@ -55,7 +55,7 @@ HunterGate(
 
 # project name
 project(bcos-c-sdk VERSION "3.0.0")
-set(VERSION_SUFFIX "-rc3")
+set(VERSION_SUFFIX "-rc4")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
@@ -63,41 +63,7 @@ set(CMAKE_BUILD_TYPE Release)
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-hunter_add_package(jsoncpp)
-find_package(jsoncpp CONFIG REQUIRED)
-
-# find OpenSSL
-hunter_add_package(OpenSSL)
-find_package(OpenSSL REQUIRED)
-
-# Boost
-hunter_add_package(Boost COMPONENTS all)
-find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
-
-# TASSL
-hunter_add_package(OpenSSL)
-find_package(OpenSSL REQUIRED)
-
-# wedpr-crypto
-hunter_add_package(wedpr-crypto)
-find_package(wedpr-crypto CONFIG REQUIRED)
-
-# bcos-utilities
-hunter_add_package(bcos-utilities)
-find_package(bcos-utilities CONFIG REQUIRED)
-
-# find bcos-crypto
-hunter_add_package(bcos-crypto)
-find_package(bcos-crypto CONFIG REQUIRED)
-
-# find bcos-boostssl
-hunter_add_package(bcos-boostssl)
-find_package(bcos-boostssl CONFIG REQUIRED)
-
-# find bcos-cpp-sdk
-hunter_add_package(bcos-cpp-sdk)
-find_package(bcos-cpp-sdk REQUIRED)
+include(InstallDependencies)
 
 # basic settings
 include(Options)
