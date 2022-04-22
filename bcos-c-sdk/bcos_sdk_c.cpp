@@ -21,10 +21,10 @@
 #include "bcos_sdk_c.h"
 #include "bcos_sdk_c_error.h"
 #include <bcos-boostssl/context/ContextBuilder.h>
-#include <bcos-boostssl/utilities/BoostLog.h>
 #include <bcos-boostssl/websocket/WsService.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/SdkFactory.h>
+#include <bcos-utilities/BoostLog.h>
 #include <cstdio>
 #include <exception>
 #include <memory>
@@ -33,6 +33,7 @@
 // construct WsConfig obj by struct Config
 static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sdk_c_config* config)
 {
+    // TODO: check params
     // init WsConfig by c Config
     auto wsConfig = std::make_shared<bcos::boostssl::ws::WsConfig>();
     wsConfig->setModel(bcos::boostssl::ws::WsModel::Client);
@@ -94,6 +95,7 @@ static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sd
 void* bcos_sdk_create(struct bcos_sdk_c_config* config)
 {
     bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(config, NULL);
     try
     {
         // construct sdk object
@@ -155,12 +157,11 @@ void* bcos_sdk_create_by_config_file(const char* config_file)
 void bcos_sdk_start(void* sdk)
 {
     bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+
     try
     {
-        if (sdk)
-        {
-            ((bcos::cppsdk::Sdk*)sdk)->start();
-        }
+        ((bcos::cppsdk::Sdk*)sdk)->start();
     }
     catch (const std::exception& e)
     {
@@ -180,6 +181,7 @@ void bcos_sdk_start(void* sdk)
  */
 void bcos_sdk_stop(void* sdk)
 {
+    bcos_sdk_clear_last_error();
     if (sdk)
     {
         ((bcos::cppsdk::Sdk*)sdk)->stop();
@@ -195,8 +197,10 @@ void bcos_sdk_stop(void* sdk)
  */
 void bcos_sdk_destroy(void* sdk)
 {
+    bcos_sdk_clear_last_error();
     if (sdk)
     {
+        ((bcos::cppsdk::Sdk*)sdk)->stop();
         delete (bcos::cppsdk::Sdk*)sdk;
     }
 
@@ -211,15 +215,60 @@ void bcos_sdk_destroy(void* sdk)
 void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* context,
     void (*callback)(const char* group, int64_t block_number, void* context))
 {
-    if (sdk)
-    {
-        auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
-        service->registerBlockNumberNotifier(
-            group, [context, callback](const std::string& _group, int64_t _blockNumber) {
-                callback(_group.c_str(), _blockNumber, context);
-            });
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(callback, );
 
-        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
-                       << LOG_KV("group", group);
-    }
+    auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+    service->registerBlockNumberNotifier(
+        group, [context, callback](const std::string& _group, int64_t _blockNumber) {
+            callback(_group.c_str(), _blockNumber, context);
+        });
+
+    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
+                   << LOG_KV("group", group);
+}
+
+/**
+ * @brief: query group wasm && sm crypto info 
+ * 
+ * @param sdk: c sdk object pinter
+ * @param group: group id 
+ * @param wasm: if the group runs the WASM contract engine
+ *          0: No, 1: Yes
+ * @param sm_crypto: if the group runs sm cryptography component
+ *          0: No sm, 1: Yes
+ */
+void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm, int* sm_crypto)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, );
+
+    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(groupInfo, "group does not exist", );
+
+    *wasm = groupInfo->wasm();
+    *sm_crypto = groupInfo->smCryptoType();
+}
+
+/**
+ * @brief: query chain id of the group  
+ * 
+ * @param sdk: c sdk object pinter
+ * @param group: group id 
+ * @return const char* : chain id 
+ */
+const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(group, NULL);
+
+    auto groupInfo = ((bcos::cppsdk::Sdk*)sdk)->service()->getGroupInfo(std::string(group));
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(groupInfo, "group does not exist", NULL);
+
+    auto chainID = groupInfo->chainID();
+    return strdup(chainID.c_str());
 }

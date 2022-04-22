@@ -20,17 +20,26 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
-# if (WIN32)
-#    message(STATUS "Compile on Windows")
-#    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
-# endif()
+if (WIN32)
+   message(STATUS "Compile on Windows")
+   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
+endif()
 
 # URL_BASE download domain name
 include(FetchContent)
 if (NOT DEFINED URL_BASE)
-    # set(URL_BASE "github.com")
-    set(URL_BASE "github.com.cnpmjs.org")
+    set(URL_BASE "github.com")
+    # set(URL_BASE "github.com.cnpmjs.org")
 endif()
+
+# include(FetchContent)
+# set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/bcos-cmake-scripts)
+# FetchContent_Declare(bcos-cmake-scripts
+#    GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
+#    GIT_TAG 364f603f4ec112cb79840ea4026243399d7c419b
+#   SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
+# )
+# FetchContent_MakeAvailable(bcos-cmake-scripts)
 
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
@@ -39,25 +48,21 @@ list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 # include hunter
 include(HunterGate)
 HunterGate(
-    URL https://${URL_BASE}/FISCO-BCOS/hunter/archive/bc4754a926acd8ef3b96630c457c75ea4cd55a5d.tar.gz
-    SHA1 b895385e7ea8312da8db6b1545aa89f11d18345d
-    FILEPATH "${CMAKE_SOURCE_DIR}/cmake/config.cmake"
+    URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/2b5b25ecffaba74393740bf0b8758c4e8d9297cf.tar.gz"
+    SHA1 "5d8365a327be260cf24d2b125a71ee7069aca28f"
+    FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake"
 )
 
 # project name
 project(bcos-c-sdk VERSION "3.0.0")
+set(VERSION_SUFFIX "-rc3")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# message(STATUS "CMAKE_INSTALL_INCLUDEDIR ==> ${CMAKE_INSTALL_INCLUDEDIR}")
-# message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}")
-# message(STATUS "CMAKE_CURRENT_SOURCE_DIR ==> ${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 hunter_add_package(jsoncpp)
 find_package(jsoncpp CONFIG REQUIRED)
@@ -66,8 +71,25 @@ find_package(jsoncpp CONFIG REQUIRED)
 hunter_add_package(OpenSSL)
 find_package(OpenSSL REQUIRED)
 
+# Boost
 hunter_add_package(Boost COMPONENTS all)
 find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
+
+# TASSL
+hunter_add_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
+
+# wedpr-crypto
+hunter_add_package(wedpr-crypto)
+find_package(wedpr-crypto CONFIG REQUIRED)
+
+# bcos-utilities
+hunter_add_package(bcos-utilities)
+find_package(bcos-utilities CONFIG REQUIRED)
+
+# find bcos-crypto
+hunter_add_package(bcos-crypto)
+find_package(bcos-crypto CONFIG REQUIRED)
 
 # find bcos-boostssl
 hunter_add_package(bcos-boostssl)
@@ -87,15 +109,22 @@ include(InstallInclude)
 
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 
+# rust static library linking requirements for macos
+if(APPLE)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -framework Security -framework Foundation")
+else()
+   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+endif()
+
 # static lib
 set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
 add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 
 # dynamic lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::cpp-sdk)
+target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 
 # build sample exec
 if (BUILD_SAMPLE)
@@ -110,6 +139,15 @@ endif()
 # endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+install(
+    TARGETS ${BCOS_C_SDK_TARGET}
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
 install(
     TARGETS ${BCOS_C_SDK_STATIC_TARGET}
     EXPORT "${TARGETS_EXPORT_NAME}"
