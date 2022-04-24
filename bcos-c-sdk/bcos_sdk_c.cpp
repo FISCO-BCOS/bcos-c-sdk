@@ -41,10 +41,10 @@ static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sd
     auto peers = std::make_shared<bcos::boostssl::ws::EndPoints>();
     for (size_t i = 0; i < config->peers_count; i++)
     {
-        bcos::boostssl::ws::EndPoint ep;
-        ep.host = config->peers[i].host;
-        ep.port = config->peers[i].port;
-        peers->push_back(ep);
+        auto host = config->peers[i].host;
+        auto port = config->peers[i].port;
+        bcos::boostssl::NodeIPEndpoint endpoint = bcos::boostssl::NodeIPEndpoint(host, port);
+        peers->insert(endpoint);
     }
 
     wsConfig->setConnectedPeers(peers);
@@ -231,10 +231,10 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
 }
 
 /**
- * @brief: query group wasm && sm crypto info 
- * 
+ * @brief: query group wasm && sm crypto info
+ *
  * @param sdk: c sdk object pinter
- * @param group: group id 
+ * @param group: group id
  * @param wasm: if the group runs the WASM contract engine
  *          0: No, 1: Yes
  * @param sm_crypto: if the group runs sm cryptography component
@@ -254,11 +254,11 @@ void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm,
 }
 
 /**
- * @brief: query chain id of the group  
- * 
+ * @brief: query chain id of the group
+ *
  * @param sdk: c sdk object pinter
- * @param group: group id 
- * @return const char* : chain id 
+ * @param group: group id
+ * @return const char* : chain id
  */
 const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group)
 {
