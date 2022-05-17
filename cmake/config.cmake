@@ -38,12 +38,12 @@ hunter_config(bcos-crypto VERSION 1.0.0-rc2-local
 )
 
 hunter_config(bcos-boostssl VERSION 1.0.0-rc3-local
-	URL https://github.com/LucasLi1024/bcos-boostssl/archive/7fbf9e3b182a0d7140628ebf145566779466e262.tar.gz
-	SHA1 9e321a215028ae665ad2302a0a7a29532f38a6e1
+	URL https://github.com/LucasLi1024/bcos-boostssl/archive/96e7da273c767bc20395418779a02d9f73f44882.tar.gz
+	SHA1 b2cb6df0b1a58de92443756b6b9216c37700245f
 )
 
 hunter_config(bcos-cpp-sdk
 	VERSION 3.0.0-rc4-local
-	URL https://github.com/LucasLi1024/bcos-cpp-sdk/archive/e6ec662ffdd0974dd1ee8df7c17dd80f52daf65e.tar.gz
-	SHA1 33a7d6fa0e62d57c60836998dc46d68bef60ada4
+	URL https://github.com/LucasLi1024/bcos-cpp-sdk/archive/b1f5ad67c467c2883623fd938fa0aef093b8aba3.tar.gz
+	SHA1 ff264cae34c22577d25e3dfd49a31218c821aeea
 )
