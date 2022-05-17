@@ -61,14 +61,7 @@ int main(int argc, char** argv)
 
     const char* config = argv[1];
     const char* topic = argv[2];
-    // const char* msg = argv[3];
-    char* msg;
-    msg = (char *)malloc(sizeof(char) * 15000000);
-    for(int i = 0; i < 15000000; i++)
-    {
-        msg[i] = '*';
-    }
-
+    const char* msg = argv[3];
 
     printf(" [AMOP][Publish]] params ===>>>> \n");
     printf(" \t config: %s\n", config);
