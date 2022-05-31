@@ -46,6 +46,11 @@ set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The c
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 
 # include hunter
+include(Options)
+set(ARCH_NATIVE OFF)
+if ("${ARCHITECTURE}" MATCHES "aarch64")
+    set(ARCH_NATIVE ON)
+endif()
 include(HunterGate)
 HunterGate(
     URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/2b5b25ecffaba74393740bf0b8758c4e8d9297cf.tar.gz"
