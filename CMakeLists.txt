@@ -16,7 +16,7 @@
 # limitations under the License.
 #------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.14)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
@@ -89,11 +89,20 @@ endif()
 
 # static lib
 set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
-add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 
 # dynamic lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
+
+# add suffix for arm
+if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+    message(STATUS "Building arm architecture, CMAKE_HOST_SYSTEM_PROCESSOR => ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    set(BCOS_C_SDK_TARGET "bcos-c-sdk-aarch64")
+    set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static-aarch64")
+endif()
+
+add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
+
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 

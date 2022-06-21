@@ -21,6 +21,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_rpc.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include <bcos-c-sdk/bcos_sdk_c.h>
+#include <bcos-c-sdk/bcos_sdk_c_common.h>
 #include <bcos-c-sdk/bcos_sdk_c_uti_tx.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,7 +151,8 @@ int main(int argc, char** argv)
 
     printf(" [CallHello] block limit: %lld\n", block_limit);
 
-    void* key_pair = bcos_sdk_create_keypair(sm_crypto ? 1 : 0);
+    void* key_pair =
+        bcos_sdk_create_keypair(sm_crypto ? BCOS_C_SDK_SM_TYPE : BCOS_C_SDK_ECDSA_TYPE);
     if (!key_pair)
     {
         printf(" [CallHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
