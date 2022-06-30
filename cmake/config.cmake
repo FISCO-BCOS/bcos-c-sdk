@@ -25,25 +25,27 @@ hunter_config(
     40f7f34551012f68e822664a0b179e7e6cac5a97
 )
 
-hunter_config(bcos-utilities VERSION 1.0.0-rc2-local
-    URL https://${URL_BASE}/FISCO-BCOS/bcos-utilities/archive/55d6bf357719aa030e3898b060b4a3ff2476434b.tar.gz
-	SHA1 d0aeb11cf064a5e9793c50dd7bb8487e2d251f02
+hunter_config(bcos-utilities VERSION 1.0.0-rc3-local
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-utilities/archive/632cbeb0412d6ffa3c5217630fe6039f4092f3a4.tar.gz
+	SHA1 37b46cd3174ec1b66e28f19e6e8f31f209b61e4b
     CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON
 )
 
-hunter_config(bcos-crypto VERSION 1.0.0-rc2-local
-    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/86fdc960741bd26cea3c9f04e61f138f508c7add.tar.gz
-    SHA1 53dcac50016f5e1bd517ae8d595b586e358ad118
-    CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON SM2_OPTIMIZE=ON
+hunter_config(bcos-crypto VERSION 1.0.0-rc3-local
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/34ca9b28f3d2f31948c118a70523df6fa4695e23.tar.gz
+	SHA1 64e7b64652ccad212a497d9247fd238fea75578a
+    CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON
 )
 
-hunter_config(bcos-boostssl VERSION 1.0.0-rc3-local
-	URL https://${URL_BASE}/FISCO-BCOS/bcos-boostssl/archive/1c9cecf7ec9ed59d0bdaa9f390c618c8f4208cf2.tar.gz
-	SHA1 95774f3638b4bcb27a6708fca0a28389a7cfa9c3
+hunter_config(bcos-boostssl
+    VERSION 1.0.0-rc4-local
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-boostssl/archive/1e02d74bd4bdebd6bada02117e92df892e65a53c.tar.gz
+    SHA1 55d6421eb8001dca0067881f3c16d04cef8f6596
+    CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON ARCH_NATIVE=${ARCH_NATIVE} URL_BASE=${URL_BASE}
 )
 
 hunter_config(bcos-cpp-sdk
-	VERSION 3.0.0-rc3-local
-	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/3acd53306211bc6b851cc6c7ff778e216e361c9b.tar.gz
-	SHA1 0a6532a31da25e3e3af209401718ad8629423eca
+	VERSION 3.0.0-rc4-local
+	URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/da0874f6fc3545694b2c9aa25518479ae1403aae.tar.gz
+    SHA1 b3c98c4ef15dcb900b44adf06029ace9c9a36626
 )

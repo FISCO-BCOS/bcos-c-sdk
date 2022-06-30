@@ -16,7 +16,7 @@
 # limitations under the License.
 #------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.14)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
@@ -46,6 +46,11 @@ set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The c
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 
 # include hunter
+include(Options)
+set(ARCH_NATIVE OFF)
+if ("${ARCHITECTURE}" MATCHES "aarch64")
+    set(ARCH_NATIVE ON)
+endif()
 include(HunterGate)
 HunterGate(
     URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/2b5b25ecffaba74393740bf0b8758c4e8d9297cf.tar.gz"
@@ -55,7 +60,7 @@ HunterGate(
 
 # project name
 project(bcos-c-sdk VERSION "3.0.0")
-set(VERSION_SUFFIX "-rc3")
+set(VERSION_SUFFIX "-rc4")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
@@ -63,41 +68,7 @@ set(CMAKE_BUILD_TYPE Release)
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-hunter_add_package(jsoncpp)
-find_package(jsoncpp CONFIG REQUIRED)
-
-# find OpenSSL
-hunter_add_package(OpenSSL)
-find_package(OpenSSL REQUIRED)
-
-# Boost
-hunter_add_package(Boost COMPONENTS all)
-find_package(Boost CONFIG REQUIRED log chrono system filesystem thread iostreams)
-
-# TASSL
-hunter_add_package(OpenSSL)
-find_package(OpenSSL REQUIRED)
-
-# wedpr-crypto
-hunter_add_package(wedpr-crypto)
-find_package(wedpr-crypto CONFIG REQUIRED)
-
-# bcos-utilities
-hunter_add_package(bcos-utilities)
-find_package(bcos-utilities CONFIG REQUIRED)
-
-# find bcos-crypto
-hunter_add_package(bcos-crypto)
-find_package(bcos-crypto CONFIG REQUIRED)
-
-# find bcos-boostssl
-hunter_add_package(bcos-boostssl)
-find_package(bcos-boostssl CONFIG REQUIRED)
-
-# find bcos-cpp-sdk
-hunter_add_package(bcos-cpp-sdk)
-find_package(bcos-cpp-sdk REQUIRED)
+include(InstallDependencies)
 
 # basic settings
 include(Options)
@@ -118,11 +89,20 @@ endif()
 
 # static lib
 set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static")
-add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
-target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 
 # dynamic lib
 set(BCOS_C_SDK_TARGET "bcos-c-sdk")
+
+# add suffix for arm
+if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+    message(STATUS "Building arm architecture, CMAKE_HOST_SYSTEM_PROCESSOR => ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    set(BCOS_C_SDK_TARGET "bcos-c-sdk-aarch64")
+    set(BCOS_C_SDK_STATIC_TARGET "bcos-c-sdk-static-aarch64")
+endif()
+
+add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
+
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 

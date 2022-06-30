@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file deploy_hello.c
+ * @file tx_sign_perf.c
  * @author: octopus
  * @date 2022-01-17
  */
@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <chrono>
+#include <cstdio>
+#include <string>
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -121,131 +124,78 @@ const char* getBinary(int _sm)
 
 void usage()
 {
-    printf("Desc: deploy HelloWorld contract\n");
-    printf("Usage: deploy_hello <config> <group_id>\n");
+    printf("Desc: create signed transaction[HelloWorld set] perf test\n");
+    printf("Usage: tx_sign_perf isSM txCount\n");
     printf("Example:\n");
-    printf("    ./deploy_hello ./config_sample.ini group0\n");
+    printf("    ./tx_sign_perf true 30000\n");
+    printf("    ./tx_sign_perf false 30000\n");
     exit(0);
-}
-
-// callback for rpc interfaces
-void on_recv_resp_callback(struct bcos_sdk_c_struct_response* resp)
-{
-    if (resp->error != BCOS_SDK_C_SUCCESS)
-    {
-        printf("\t something is wrong, error: %d, errorMessage: %s\n", resp->error, resp->desc);
-        exit(-1);
-    }
-    else
-    {
-        printf(" \t recv rpc resp from server ===>>>> resp: %s\n", (char*)resp->data);
-    }
 }
 
 int main(int argc, char** argv)
 {
-    if (argc < 3)
+    if (argc < 2)
     {
         usage();
     }
 
-    const char* config = argv[1];
-    const char* group_id = argv[2];
+    bool smCrypto = (std::string(argv[1]) == "true");
+    uint32_t txCount = std::stoul(argv[2]);
 
-    printf("[DeployHello] params ===>>>> \n");
-    printf("\t # config: %s\n", config);
-    printf("\t # group_id: %s\n", group_id);
+    printf("[Create Signed Tx Perf Test] ===>>>> smCrypto: %d, txCount: %u\n", smCrypto, txCount);
 
-    void* sdk = bcos_sdk_create_by_config_file(config);
-    // check success or not
-    if (!bcos_sdk_is_last_opr_success())
-    {
-        printf(
-            " bcos_sdk_create_by_config_file failed, error: %s\n", bcos_sdk_get_last_error_msg());
-        exit(-1);
-    }
-
-    printf(" [DeployHello] start sdk ... \n");
-    bcos_sdk_start(sdk);
-    if (!bcos_sdk_is_last_opr_success())
-    {
-        printf(" [DeployHello] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
-        exit(-1);
-    }
-
-    int sm_crypto = 0;
-    int wasm = 0;
-
-    bcos_sdk_get_group_wasm_and_crypto(sdk, group_id, &wasm, &sm_crypto);
-    if (!bcos_sdk_is_last_opr_success())
-    {
-        printf(" [CallHello] bcos_sdk_group_sm_crypto failed, error: %s\n",
-            bcos_sdk_get_last_error_msg());
-        exit(-1);
-    }
-
-    printf(" [DeployHello] sm crypto: %d\n", sm_crypto);
-
-    const char* chain_id = bcos_sdk_get_group_chain_id(sdk, group_id);
-    if (!bcos_sdk_is_last_opr_success())
-    {
-        printf(" [DeployHello] bcos_sdk_get_group_chain_id failed, error: %s\n",
-            bcos_sdk_get_last_error_msg());
-        exit(-1);
-    }
-
-    printf(" [DeployHello] chain id: %s\n", chain_id);
-
-    long long block_limit = bcos_rpc_get_block_limit(sdk, group_id);
-    if (block_limit < 0)
-    {
-        printf(" [DeployHello] group not exist, group: %s\n", group_id);
-        exit(-1);
-    }
-
-    printf(" [DeployHello] block limit: %lld\n", block_limit);
-
-    void* key_pair =
-        bcos_sdk_create_keypair(sm_crypto ? BCOS_C_SDK_SM_TYPE : BCOS_C_SDK_ECDSA_TYPE);
+    void* key_pair = bcos_sdk_create_keypair(smCrypto ? 1 : 0);
     if (!key_pair)
     {
-        printf(" [DeployHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
+        printf(" [Create Signed Tx Perf Test] create keypair failed, error: %s\n",
+            bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
-    printf(" [DeployHello] bcos_sdk_get_keypair_type: %d\n", bcos_sdk_get_keypair_type(key_pair));
-
-
     const char* address = bcos_sdk_get_keypair_address(key_pair);
-    printf(" [DeployHello] new account, address: %s\n", address);
+    printf(" [Create Signed Tx Perf Test] new account, address: %s\n", address);
 
-    char* tx_hash = NULL;
-    char* signed_tx = NULL;
+    int64_t block_limit = 111111;
+    const char* group_id = "group0";
+    const char* chain_id = "chain0";
 
-    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "", getBinary(sm_crypto), "",
-        block_limit, 0, &tx_hash, &signed_tx);
-    printf(" [DeployHello] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
+    uint32_t i = 0;
+    uint32_t _10Per = txCount / 10;
+    auto startPoint = std::chrono::high_resolution_clock::now();
+    while (i < txCount)
+    {
+        if (i % _10Per == 0)
+        {
+            printf(" ..process : %lf %% \n", ((double)i / txCount) * 100);
+        }
 
-    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_recv_resp_callback, NULL);
+        char* tx_hash = NULL;
+        char* signed_tx = NULL;
+        bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "",
+            getBinary(smCrypto ? 1 : 0), "", block_limit, 0, &tx_hash, &signed_tx);
+        free((void*)tx_hash);
+        free((void*)signed_tx);
+        i++;
+    }
 
-    // wait for async operation done
-    sleep(3);
+    auto endPoint = std::chrono::high_resolution_clock::now();
+    auto elapsedMS =
+        (long long)std::chrono::duration_cast<std::chrono::milliseconds>(endPoint - startPoint)
+            .count();
+    auto elapsedUS =
+        (long long)std::chrono::duration_cast<std::chrono::microseconds>(endPoint - startPoint)
+            .count();
+
+    printf(
+        " [Create Signed Tx Perf Test] total txs: %u, total elapsed(ms): %lld, avg(us): %lld, "
+        "txs/s: %lld \n",
+        txCount, elapsedMS, elapsedUS / txCount, 1000 * txCount / elapsedMS);
 
     // release keypair
     bcos_sdk_destroy_keypair(key_pair);
 
-    // free chain_id
-    free((void*)chain_id);
-    // free signed_tx
-    free((void*)signed_tx);
     // free address
     free((void*)address);
-
-    // stop sdk
-    bcos_sdk_stop(sdk);
-    // release sdk
-    bcos_sdk_destroy(sdk);
-
 
     return 0;
 }

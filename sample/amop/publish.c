@@ -49,7 +49,7 @@ void on_recv_amop_publish_resp(struct bcos_sdk_c_struct_response* resp)
         return;
     }
 
-    printf(" \t recv response message, msg: %s", (char*)resp->data);
+    printf(" \t recv response message, msg size: %lu", strlen((char*)resp->data));
 }
 
 int main(int argc, char** argv)
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     printf(" [AMOP][Publish]] params ===>>>> \n");
     printf(" \t config: %s\n", config);
     printf(" \t topic: %s\n", topic);
-    printf(" \t message: %s\n", msg);
+    printf(" \t message size: %lu\n", strlen(msg));
 
     void* sdk = bcos_sdk_create_by_config_file(config);
     int error = bcos_sdk_get_last_error();
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     int i = 0;
     while (1)
     {
-        printf("[AMOP][Publish] publish message, topic: %s, msg: %s\n", topic, msg);
+        printf("[AMOP][Publish] publish message, topic: %s, msg size: %lu\n", topic, strlen(msg));
 
         bcos_amop_publish(sdk, topic, (void*)msg, strlen(msg), 0, on_recv_amop_publish_resp, sdk);
 
