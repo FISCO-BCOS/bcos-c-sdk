@@ -19,7 +19,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/ethereum/evmc/bindings/go/evmc"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,7 +49,6 @@ func NewSDK(config *C.struct_bcos_sdk_c_config, groupID string, privateKey []byt
 		logrus.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
 		return nil
 	}
-	evmc.Call()
 	C.bcos_sdk_start(sdk)
 	var wasm, smCrypto C.int
 	group := C.CString(groupID)
