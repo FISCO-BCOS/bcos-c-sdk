@@ -1,4 +1,4 @@
-package main
+package csdk
 
 // #cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/libs/darwin -lbcos-c-sdk-arm64
 // #cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/libs/darwin -lbcos-c-sdk-x86_64
@@ -16,7 +16,6 @@ import "C"
 import (
 	"encoding/hex"
 	"fmt"
-	"time"
 	"unsafe"
 
 	"github.com/ethereum/evmc/bindings/go/evmc"
@@ -122,7 +121,7 @@ func (sdk *SDK) Close() {
 }
 
 // tx functions
-func CreateSignedTransaction(groupID, chainID, to string, data []byte, abi string, blockLimit int64) unsafe.Pointer {
+func (sdk *SDK) CreateSignedTransaction(groupID, chainID, to string, data []byte, abi string, blockLimit int64) unsafe.Pointer {
 	cGroupID := C.CString(groupID)
 	cChainID := C.CString(chainID)
 	cTo := C.CString(to)
@@ -136,23 +135,4 @@ func CreateSignedTransaction(groupID, chainID, to string, data []byte, abi strin
 	defer C.free(unsafe.Pointer(cData))
 	defer C.free(unsafe.Pointer(cAbi))
 	return C.bcos_sdk_create_transaction_data(cGroupID, cChainID, cTo, cData, cAbi, cBlockLimit)
-}
-
-func main() {
-	sdk := NewSDKByConfigFile("./config_sample.ini", "group0", nil)
-	logrus.Infof("group id:%s", C.GoString(sdk.GroupID))
-
-	sdk.bcos_rpc_get_group_list()
-	time.Sleep(3 * time.Second)
-
-	sdk.bcos_rpc_get_sealer_list()
-	time.Sleep(3 * time.Second)
-
-	sdk.bcos_rpc_get_block_number()
-	time.Sleep(3 * time.Second)
-
-	logrus.Infof("Get Block Limit:%d", sdk.GetBlockLimit)
-	logrus.Infof("chain id:%s", C.GoString(sdk.ChainID))
-
-	defer sdk.Close()
 }
