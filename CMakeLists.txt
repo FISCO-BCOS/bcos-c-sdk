@@ -60,7 +60,6 @@ HunterGate(
 
 # project name
 project(bcos-c-sdk VERSION "3.0.0")
-set(VERSION_SUFFIX "-rc4")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
