@@ -1,3 +1,11 @@
+### 3.0.0
+
+(2022-08-23)
+
+**更新**
+
+- 更新`bcos-boostssl`、`bcos-cpp-sdk`，详细功能更新参考`bcos-boostssl`、`bcos-cpp-sdk` ChangeLog
+
 ### 3.0.0-rc4
 
 (2022-06-30)
