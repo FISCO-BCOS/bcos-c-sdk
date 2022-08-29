@@ -102,6 +102,12 @@ struct bcos_sdk_c_config
 struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty();
 
 /**
+ * @brief create bcos_sdk_c_config 
+ * @return struct bcos_sdk_c_config*
+ */
+struct bcos_sdk_c_config* bcos_sdk_create_config(int sm_ssl, char* host, int port);
+
+/**
  * @brief destroy config object, release resource of the object
  *
  * @param p: pointer to the bcos_sdk_c_config object
