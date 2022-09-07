@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 
     printf(" [CallHello] chain id: %s\n", chain_id);
 
-    int64_t block_limit = bcos_rpc_get_block_limit(sdk, group_id);
+    long long block_limit = bcos_rpc_get_block_limit(sdk, group_id);
     if (block_limit < 0)
     {
         printf(" [CallHello] group not exist, group: %s\n", group_id);
