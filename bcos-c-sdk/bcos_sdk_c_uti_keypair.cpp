@@ -46,7 +46,9 @@ void* bcos_sdk_create_keypair(int crypto_type)
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
-        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
     try
     {
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
@@ -77,10 +79,12 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (len > 0), "invalid private key length, it must greate than zero", NULL);
+        (len > 0), "invalid private key length, it must greater than zero", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
-        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
     try
     {
         auto priBytes =

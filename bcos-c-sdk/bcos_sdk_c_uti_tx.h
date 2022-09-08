@@ -51,14 +51,6 @@ void bcos_sdk_destroy_transaction_data(void* transaction_data);
 /**
  * @brief
  *
- * @param transaction_data
- * @return const char*
- */
-const char* bcos_sdk_encode_transaction_data(void* transaction_data);
-
-/**
- * @brief
- *
  * @param crypto_type
  * @param transaction_data
  * @return const char*
