@@ -151,8 +151,7 @@ int main(int argc, char** argv)
 
     printf(" [CallHello] block limit: %lld\n", block_limit);
 
-    void* key_pair =
-        bcos_sdk_create_keypair(sm_crypto ? BCOS_C_SDK_SM_TYPE : BCOS_C_SDK_ECDSA_TYPE);
+    void* key_pair = bcos_sdk_create_keypair(sm_crypto);
     if (!key_pair)
     {
         printf(" [CallHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());

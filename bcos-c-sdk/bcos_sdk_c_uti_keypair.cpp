@@ -151,38 +151,6 @@ void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private
 }
 
 /**
- * @brief : load key pair from pem file
- *
- * @param void*: key pair object pointer, return NULL on failure
- */
-void* bcos_sdk_load_keypair(const char* pem)
-{
-    std::ignore = pem;
-    // TODO: impl load pem
-    /*
-    bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(pem, NULL);
-    try
-    {
-
-    auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
-    auto keyPair = keyPairBuilder->loadKeyPair(std::string(pem));
-    return keyPair.release();
-    }
-    catch (const std::exception& e)
-    {
-        std::string errorMsg = boost::diagnostic_information(e);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
-
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_load_keypair") << LOG_KV("pem file", pem)
-                        << LOG_KV("errorMsg", errorMsg);
-        return NULL;
-    }
-    */
-    return NULL;
-}
-
-/**
  * @brief : destroy the keypair object
  *
  * @param key_pair: key pair object pointer

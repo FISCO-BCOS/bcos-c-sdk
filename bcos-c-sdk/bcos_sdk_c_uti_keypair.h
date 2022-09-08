@@ -56,13 +56,6 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
 void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private_key);
 
 /**
- * @brief : load key pair from pem file
- *
- * @param void*: key pair object pointer, return NULL on failure
- */
-void* bcos_sdk_load_keypair(const char* pem_path);
-
-/**
  * @brief : destroy the keypair object
  *
  * @param key_pair: key pair object pointer
