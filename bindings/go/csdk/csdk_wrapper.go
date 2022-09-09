@@ -1,9 +1,9 @@
 package csdk
 
-// #cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/libs/darwin -lbcos-c-sdk-arm64
-// #cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/libs/darwin -lbcos-c-sdk-x86_64
-// #cgo linux,amd64 LDFLAGS: -L${SRCDIR}/libs/linux -lbcos-c-sdk
-// #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
+// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-arm64
+// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-x86_64
+// #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk
+// #cgo windows,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
 // #include "../../../bcos-c-sdk/bcos_sdk_c.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_error.h"
@@ -63,8 +63,8 @@ func on_recv_amop_subscribe_resp(endpoint *C.char, seq *C.char, resp *C.struct_b
 	} else {
 		data := C.GoString((*C.char)(resp.data))
 		chanData := (*ChanData)(unsafe.Pointer(resp.context))
-		logrus.Infof("\t recv amop message and would echo message to publish, endpoint: %s, seq: %s, msg size: %d\n", C.GoString(endpoint), C.GoString(seq), resp.size)
-		logrus.Infof(" \t  *****recv amop resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
+		//logrus.Infof("\t recv amop message and would echo message to publish, endpoint: %s, seq: %s, msg size: %d\n", C.GoString(endpoint), C.GoString(seq), resp.size)
+		//logrus.Infof(" \t  *****recv amop resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
 		C.bcos_amop_send_response(unsafe.Pointer(chanData.Sdk), endpoint, seq, resp.data, resp.size)
 		chanData.Data <- data[:resp.size]
 	}
@@ -77,8 +77,8 @@ func on_recv_amop_publish_resp(resp *C.struct_bcos_sdk_c_struct_response) {
 	} else {
 		data := C.GoString((*C.char)(resp.data))
 		chanData := (*ChanData)(unsafe.Pointer(resp.context))
-		logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> size: %d\n", resp.size)
+		//logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
+		//logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> size: %d\n", resp.size)
 		chanData.Data <- data[:resp.size]
 	}
 }
@@ -90,8 +90,8 @@ func on_recv_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
 	} else {
 		data := C.GoString((*C.char)(resp.data))
 		chanData := (*ChanData)(unsafe.Pointer(resp.context))
-		logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
+		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
+		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
 		chanData.Data <- data[:resp.size]
 	}
 }
@@ -103,8 +103,8 @@ func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
 	} else {
 		data := C.GoString((*C.char)(resp.data))
 		chanData := (*ChanData)(unsafe.Pointer(resp.context))
-		logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
+		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
+		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
 		chanData.Data <- data[:resp.size]
 	}
 }
@@ -377,7 +377,6 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 		return
 	}
 
-	//key_pair := C.bcos_sdk_create_keypair(csdk.SMCrypto)
 	key_pair := C.bcos_sdk_create_keypair_by_prikey(csdk.SMCrypto, unsafe.Pointer(csdk.PrivateKey), csdk.PrivateKeyLen)
 
 	//address := C.bcos_sdk_get_keypair_address(key_pair)
