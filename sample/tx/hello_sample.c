@@ -260,7 +260,7 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [HelloSample] block limit: %lld\n", block_limit);
+    printf(" [HelloSample] block limit: %d\n", (int32_t)block_limit);
     // 6. load or create keypair for transaction sign
     void* key_pair = bcos_sdk_create_keypair(sm_crypto);
     if (!key_pair)
