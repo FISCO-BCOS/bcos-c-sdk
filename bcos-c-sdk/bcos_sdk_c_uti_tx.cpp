@@ -95,36 +95,6 @@ void bcos_sdk_destroy_transaction_data(void* transaction_data)
 /**
  * @brief
  *
- * @param transaction_data
- * @return const char*
- */
-const char* bcos_sdk_encode_transaction_data(void* transaction_data)
-{
-    bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
-
-    try
-    {
-        auto builder = std::make_shared<TransactionBuilder>();
-        auto transactionData =
-            builder->encodeTransactionData(*(bcostars::TransactionData*)transaction_data);
-        return strdup(toHexString(*transactionData)->c_str());
-    }
-    catch (const std::exception& e)
-    {
-        std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data") << LOG_DESC("exception")
-                          << LOG_KV("transaction_data", transaction_data)
-                          << LOG_KV("error", errorMsg);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
-    }
-
-    return NULL;
-}
-
-/**
- * @brief
- *
  * @param crypto_type
  * @param transaction_data
  * @return const char*
@@ -133,14 +103,17 @@ const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transacti
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((crypto_type == 0 || crypto_type == 1),
-        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
 
     try
     {
         auto builder = std::make_shared<TransactionBuilder>();
         auto transactionDataHash = builder->calculateTransactionDataHash(
-            crypto_type == 0 ? CryptoType::Secp256K1 : CryptoType::SM2,
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             *(bcostars::TransactionData*)transaction_data);
         return strdup(toHexString(transactionDataHash)->c_str());
     }
