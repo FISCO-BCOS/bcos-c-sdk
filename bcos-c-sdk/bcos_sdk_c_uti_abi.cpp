@@ -257,7 +257,7 @@ const char* bcos_sdk_abi_decode_method_input(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeMethodInput(abi, method_name, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -304,7 +304,7 @@ const char* bcos_sdk_abi_decode_method_input_by_method_id(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeMethodInputByMethodID(abi, method_id, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -350,7 +350,7 @@ const char* bcos_sdk_abi_decode_method_input_by_method_sig(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeMethodInputByMethodSig(method_sig, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -397,7 +397,7 @@ const char* bcos_sdk_abi_decode_method_output(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeMethodOutput(abi, method_name, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -444,7 +444,7 @@ const char* bcos_sdk_abi_decode_method_output_by_method_id(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeMethodOutputByMethodID(abi, method_id, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -491,7 +491,7 @@ const char* bcos_sdk_abi_decode_event(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeEvent(abi, event_name, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
@@ -538,7 +538,7 @@ const char* bcos_sdk_abi_decode_event_by_topic(
         ContractABICodec codec(hashImpl, solcImpl);
 
         auto r = codec.decodeEventByTopic(abi, topic, *fromHexString(data));
-        return strdup(toHexStringWithPrefix(r).c_str());
+        return strdup(r.c_str());
     }
     catch (const std::exception& e)
     {
