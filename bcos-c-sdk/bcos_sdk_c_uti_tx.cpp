@@ -269,9 +269,10 @@ void* bcos_sdk_create_transaction_builder_service(void* sdk, const char* group_i
     try
     {
         auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
+        auto txBuilder = std::make_shared<bcos::cppsdk::utilities::TransactionBuilder>();
         auto transactionBuilderService =
             std::make_unique<bcos::cppsdk::utilities::TransactionBuilderService>(
-                service, std::string(group_id));
+                service, std::string(group_id), txBuilder);
         return transactionBuilderService.release();
     }
     catch (const std::exception& e)
