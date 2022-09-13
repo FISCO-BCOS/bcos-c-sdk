@@ -3,7 +3,7 @@ package csdk
 // #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-arm64
 // #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-x86_64
 // #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk
-// #cgo windows,amd64 LDFLAGS: -LD:\bcos-c-sdk\libs\win -lbcos-c-sdk
+// #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
 // #include "../../../bcos-c-sdk/bcos_sdk_c.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_error.h"
@@ -108,7 +108,6 @@ func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
 		chanData.Data <- data[:resp.size]
 	}
 }
-
 
 func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey string) *CSDK {
 	cHost := C.CString(host)
@@ -259,7 +258,6 @@ func (csdk *CSDK) GetPeers(chanData *ChanData) {
 	C.bcos_rpc_get_peers(csdk.Sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-
 func (csdk *CSDK) GetBlockNumber(chanData *ChanData) {
 	C.bcos_rpc_get_block_number(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
@@ -268,7 +266,6 @@ func (csdk *CSDK) GetBlockHashByNumber(hc *ChanData, blockNumber int64) {
 	cBlockNumber := C.int64_t(blockNumber)
 	C.bcos_rpc_get_block_hash_by_number(csdk.Sdk, csdk.GroupID, nil, cBlockNumber, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
-
 
 func (csdk *CSDK) GetBlockByhash(hc *ChanData, blockHash string, onlyHeader int32, onlyTxHash int32) {
 	cBlockHash := C.CString(blockHash)
