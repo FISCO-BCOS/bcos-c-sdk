@@ -292,20 +292,47 @@ int main(int argc, char** argv)
     printf(" [HelloSample] set operation\n");
     // 9. HelloWorld set
     // 9.1 abi encode params
-    const char* set_data = bcos_sdk_abi_encode_method(
-        g_hw_abi, "set", "[\"Hello FISCO-BCOS 3.0!!!\"]", BCOS_C_SDK_ECDSA_TYPE);
+    const char* set_data =
+        bcos_sdk_abi_encode_method(g_hw_abi, "set", "[\"Hello FISCO-BCOS 3.0!!!\"]", sm_crypto);
     // 9.2 create signed transaction
-    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, contract_address, set_data,
-        g_hw_abi, block_limit, 0, &tx_hash, &signed_tx);
-    // 9.3 call rpc interface, sendTransaction
-    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
+    {
+        // 9.2.1 create transaction data
+        void* transaction_data = bcos_sdk_create_transaction_data(
+            group_id, chain_id, contract_address, set_data, g_hw_abi, block_limit);
+        // 9.2.2 calc transaction data hash
+        const char* transaction_data_hash =
+            bcos_sdk_calc_transaction_data_hash(sm_crypto, transaction_data);
+        printf(" [HelloSample] set tx hash: %s\n", transaction_data_hash);
+        // 9.2.3 sign transaction hash
+        const char* signed_hash =
+            bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
+        // 9.2.4 create signed transaction
+        const char* signed_tx = bcos_sdk_create_signed_transaction_with_signed_data(
+            transaction_data, signed_hash, transaction_data_hash, 0);
 
-    // wait for async operation done, just for sample
-    sleep(3);
+        // 9.3 call rpc interface, sendTransaction
+        bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
+
+        // wait for async operation done, just for sample
+        sleep(3);
+
+        bcos_sdk_destroy_transaction_data(transaction_data);
+        free((void*)transaction_data_hash);
+        free((void*)signed_hash);
+        free((void*)signed_tx);
+    }
+
+
+    // 9.4 abi decode for params
+    const char* decode_params =
+        bcos_sdk_abi_decode_method_input(g_hw_abi, "set", set_data, sm_crypto);
+    printf(" [HelloSample] set data: %s\n", set_data);
+    printf(" [HelloSample] decode params: %s\n", decode_params);
+
 
     // 10. HelloWorld get
     // 10.1 abi encode params
-    const char* get_data = bcos_sdk_abi_encode_method(g_hw_abi, "get", "[]", BCOS_C_SDK_ECDSA_TYPE);
+    const char* get_data = bcos_sdk_abi_encode_method(g_hw_abi, "get", "[]", sm_crypto);
 
     printf(" [HelloSample] get operation\n");
     // 10.2 call rpc interface, call

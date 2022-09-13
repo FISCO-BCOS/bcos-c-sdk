@@ -115,7 +115,7 @@ const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transacti
         auto transactionDataHash = builder->calculateTransactionDataHash(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             *(bcostars::TransactionData*)transaction_data);
-        return strdup(toHexString(transactionDataHash)->c_str());
+        return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
     }
     catch (const std::exception& e)
     {
@@ -148,7 +148,7 @@ const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* trans
         bcos::crypto::HashType hashType(transcation_hash);
         auto signData =
             builder->signTransactionDataHash(*(crypto::KeyPairInterface*)keypair, hashType);
-        return strdup(toHexString(*signData)->c_str());
+        return strdup(bcos::toHexStringWithPrefix(*signData).c_str());
     }
     catch (const std::exception& e)
     {
@@ -238,7 +238,7 @@ const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transactio
         auto signedBytes = builder->createSignedTransaction(
             *(bcostars::TransactionData*)transaction_data, *fromHexString(signed_transaction_data),
             bcos::crypto::HashType(transaction_data_hash), attribute);
-        return strdup(toHexString(*signedBytes)->c_str());
+        return strdup(bcos::toHexStringWithPrefix(*signedBytes).c_str());
     }
     catch (const std::exception& e)
     {
