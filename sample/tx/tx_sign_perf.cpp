@@ -173,8 +173,8 @@ int main(int argc, char** argv)
         char* signed_tx = NULL;
         bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "",
             getBinary(smCrypto ? 1 : 0), "", block_limit, 0, &tx_hash, &signed_tx);
-        free((void*)tx_hash);
-        free((void*)signed_tx);
+        bcos_sdk_c_free((void*)tx_hash);
+        bcos_sdk_c_free((void*)signed_tx);
         i++;
     }
 
@@ -195,7 +195,7 @@ int main(int argc, char** argv)
     bcos_sdk_destroy_keypair(key_pair);
 
     // free address
-    free((void*)address);
+    bcos_sdk_c_free((void*)address);
 
     return 0;
 }
