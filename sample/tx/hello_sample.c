@@ -282,6 +282,7 @@ int main(int argc, char** argv)
     // 8.1 create signed transaction
     bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "",
         sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, 0, &tx_hash, &signed_tx);
+
     printf(" [HelloSample] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
     // 8.2 call rpc interface, send transaction
     bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_deploy_resp_callback, NULL);
@@ -317,9 +318,9 @@ int main(int argc, char** argv)
         sleep(3);
 
         bcos_sdk_destroy_transaction_data(transaction_data);
-        free((void*)transaction_data_hash);
-        free((void*)signed_hash);
-        free((void*)signed_tx);
+        bcos_sdk_c_free((void*)transaction_data_hash);
+        bcos_sdk_c_free((void*)signed_hash);
+        bcos_sdk_c_free((void*)signed_tx);
     }
 
 
@@ -342,16 +343,16 @@ int main(int argc, char** argv)
     sleep(3);
 
     // free chain_id
-    free((void*)chain_id);
+    bcos_sdk_c_free((void*)chain_id);
     // free tx_hash
-    free((void*)tx_hash);
+    bcos_sdk_c_free((void*)tx_hash);
     // free signed_tx
-    free((void*)signed_tx);
+    bcos_sdk_c_free((void*)signed_tx);
     // free address
-    free((void*)address);
+    bcos_sdk_c_free((void*)address);
     if (contract_address)
     {
-        free((void*)contract_address);
+        bcos_sdk_c_free((void*)contract_address);
     }
 
     // stop sdk
