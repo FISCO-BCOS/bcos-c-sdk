@@ -33,6 +33,13 @@ extern "C" {
 #endif
 
 /**
+ * @brief: obtain the c-sdk version information
+ *
+ * @return const char*
+ */
+const char* bcos_sdk_version();
+
+/**
  * @brief: create bcos sdk object by config object
  *
  * @param config: config for sdk, refer to the bcos_sdk_c_config definition
@@ -89,10 +96,10 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
 // --------------------------------------------------------------------
 
 /**
- * @brief: query group wasm && sm crypto info 
- * 
+ * @brief: query group wasm && sm crypto info
+ *
  * @param sdk: c sdk object pinter
- * @param group: group id 
+ * @param group: group id
  * @param wasm: if the group runs the WASM contract engine
  *          0: No, 1: Yes
  * @param sm_crypto: if the group runs sm cryptography component
@@ -101,11 +108,11 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
 void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm, int* sm_crypto);
 
 /**
- * @brief: query chain id of the group  
- * 
+ * @brief: query chain id of the group
+ *
  * @param sdk: c sdk object pinter
- * @param group: group id 
- * @return const char* : chain id 
+ * @param group: group id
+ * @return const char* : chain id
  */
 const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group);
 // --------------------------------------------------------------------

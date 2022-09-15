@@ -209,6 +209,10 @@ int main(int argc, char** argv)
     printf("\t # config: %s\n", config);
     printf("\t # group_id: %s\n", group_id);
 
+    // const char* version = bcos_sdk_version();
+    // printf("\t # c-sdk version: \n%s", version);
+    // bcos_sdk_c_free((void*)version);
+
     // 1. create sdk object by config
     void* sdk = bcos_sdk_create_by_config_file(config);
     // check success or not

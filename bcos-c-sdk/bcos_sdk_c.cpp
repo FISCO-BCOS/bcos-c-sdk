@@ -20,15 +20,49 @@
 
 #include "bcos_sdk_c.h"
 #include "bcos_sdk_c_error.h"
+#include "include/BuildInfo.h"
 #include <bcos-boostssl/context/ContextBuilder.h>
 #include <bcos-boostssl/websocket/WsService.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/SdkFactory.h>
 #include <bcos-utilities/BoostLog.h>
 #include <cstdio>
+#include <cstring>
 #include <exception>
 #include <memory>
 #include <mutex>
+
+/**
+ * @brief: obtain the c-sdk version information
+ *
+ * @return const char*
+ */
+const char* bcos_sdk_version()
+{
+    std::string version;
+    version += "FISCO BCOS C SDK Version : ";
+    version += FISCO_BCOS_C_SDK_PROJECT_VERSION;
+    version += "\n";
+    version += "Build Time         : ";
+    version += FISCO_BCOS_C_SDK_BUILD_TIME;
+    version += "\n";
+
+    version += "Build Type         : ";
+    version += FISCO_BCOS_C_SDK_BUILD_PLATFORM;
+    version += "/";
+    version += FISCO_BCOS_C_SDK_BUILD_TYPE;
+    version += "\n";
+
+    version += "Git Branch         : ";
+    version += FISCO_BCOS_C_SDK_BUILD_BRANCH;
+    version += "\n";
+
+    version += "Git Commit         : ";
+    version += FISCO_BCOS_C_SDK_COMMIT_HASH;
+    version += "\n";
+
+    return strdup(version.c_str());
+}
 
 // construct WsConfig obj by struct Config
 static std::shared_ptr<bcos::boostssl::ws::WsConfig> initWsConfig(struct bcos_sdk_c_config* config)
