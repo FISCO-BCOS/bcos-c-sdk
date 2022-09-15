@@ -74,7 +74,7 @@ void* bcos_sdk_create_keypair(int crypto_type)
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsigned len)
+void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key, unsigned len)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
@@ -104,7 +104,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
         std::string errorMsg = boost::diagnostic_information(e);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
 
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_prikey")
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_private_key")
                         << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
@@ -118,7 +118,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private_key)
+void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* private_key)
 {
     bcos_sdk_clear_last_error();
 
@@ -144,7 +144,7 @@ void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private
         std::string errorMsg = boost::diagnostic_information(e);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
 
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_prikey")
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_private_key")
                         << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
