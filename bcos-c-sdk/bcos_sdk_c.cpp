@@ -137,8 +137,11 @@ void* bcos_sdk_create(struct bcos_sdk_c_config* config)
         auto wsConfig = initWsConfig(config);
         auto sdk = factory->buildSdk(wsConfig);
         auto sdkPointer = sdk.release();
+
+        auto version = bcos_sdk_version();
         BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_create") << LOG_DESC("[NEWOBJ]")
-                       << LOG_KV("sdk", sdkPointer);
+                       << LOG_KV("sdk", sdkPointer) << LOG_KV("version", version);
+        bcos_sdk_c_free((void*)version);
         return sdkPointer;
     }
     catch (const std::exception& e)
@@ -166,8 +169,11 @@ void* bcos_sdk_create_by_config_file(const char* config_file)
         auto factory = std::make_shared<bcos::cppsdk::SdkFactory>();
         auto sdk = factory->buildSdk(config_file);
         auto sdkPointer = sdk.release();
+        auto version = bcos_sdk_version();
+
         BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_create_by_config_file") << LOG_DESC("[NEWOBJ]")
-                       << LOG_KV("sdk", sdkPointer);
+                       << LOG_KV("sdk", sdkPointer) << LOG_KV("version", version);
+        bcos_sdk_c_free((void*)version);
         return sdkPointer;
     }
     catch (const std::exception& e)
