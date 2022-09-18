@@ -46,7 +46,9 @@ void* bcos_sdk_create_keypair(int crypto_type)
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
-        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
     try
     {
         auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
@@ -72,15 +74,17 @@ void* bcos_sdk_create_keypair(int crypto_type)
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsigned len)
+void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key, unsigned len)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (len > 0), "invalid private key length, it must greate than zero", NULL);
+        (len > 0), "invalid private key length, it must greater than zero", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
-        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL);
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
     try
     {
         auto priBytes =
@@ -100,7 +104,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
         std::string errorMsg = boost::diagnostic_information(e);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
 
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_prikey")
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_private_key")
                         << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
@@ -114,7 +118,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private_key)
+void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* private_key)
 {
     bcos_sdk_clear_last_error();
 
@@ -140,42 +144,10 @@ void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private
         std::string errorMsg = boost::diagnostic_information(e);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
 
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_prikey")
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_private_key")
                         << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
-}
-
-/**
- * @brief : load key pair from pem file
- *
- * @param void*: key pair object pointer, return NULL on failure
- */
-void* bcos_sdk_load_keypair(const char* pem)
-{
-    std::ignore = pem;
-    // TODO: impl load pem
-    /*
-    bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(pem, NULL);
-    try
-    {
-
-    auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
-    auto keyPair = keyPairBuilder->loadKeyPair(std::string(pem));
-    return keyPair.release();
-    }
-    catch (const std::exception& e)
-    {
-        std::string errorMsg = boost::diagnostic_information(e);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
-
-        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_load_keypair") << LOG_KV("pem file", pem)
-                        << LOG_KV("errorMsg", errorMsg);
-        return NULL;
-    }
-    */
-    return NULL;
 }
 
 /**
