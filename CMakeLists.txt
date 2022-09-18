@@ -77,8 +77,8 @@ include(InstallDependencies)
 include(Options)
 configure_project()
 include(CompilerSettings)
-include(InstallConfig)
 include(BuildInfoGenerator)
+include(InstallConfig)
 
 # install the include files for hash
 include(InstallInclude)
@@ -110,6 +110,9 @@ target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-
 
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
+
+add_dependencies(${BCOS_C_SDK_STATIC_TARGET} BuildInfo.h)
+add_dependencies(${BCOS_C_SDK_TARGET} BuildInfo.h)
 
 # build sample exec
 if(BUILD_SAMPLE)
