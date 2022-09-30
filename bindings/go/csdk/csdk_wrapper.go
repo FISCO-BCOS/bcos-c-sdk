@@ -50,7 +50,7 @@ const (
 
 //export on_recv_notify_resp_callback
 func on_recv_notify_resp_callback(group *C.char, block C.int64_t, context unsafe.Pointer) {
-	logrus.Infof(" \t recv block notifier from server ===>>>> group: %s, block number: %d\n", C.GoString(group), block)
+	//logrus.Infof(" \t recv block notifier from server ===>>>> group: %s, block number: %d\n", C.GoString(group), block)
 	chanData := (*ChanData)(unsafe.Pointer(context))
 	blockNum := strconv.Itoa(int(block))
 	chanData.Data <- blockNum
@@ -287,6 +287,10 @@ func (csdk *CSDK) GetGroupnodeInfo(hc *ChanData, nodeId string) {
 	C.bcos_rpc_get_group_node_info(csdk.Sdk, csdk.GroupID, cNodeId, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
+func (csdk *CSDK) GetGroupNodeInfoList(hc *ChanData) {
+	C.bcos_rpc_get_group_info_list(csdk.Sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+}
+
 func (csdk *CSDK) GetTotalTransactionCount(hc *ChanData) {
 	C.bcos_rpc_get_total_transaction_count(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
@@ -339,7 +343,6 @@ func (csdk *CSDK) BroadcastAmopMsg(chanData *ChanData, topic string, data string
 }
 
 //event
-
 func (csdk *CSDK) SubscribeEvent(chanData *ChanData, params string) string {
 	cParams := C.CString(params)
 	defer C.free(unsafe.Pointer(cParams))
@@ -376,17 +379,13 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 
 	key_pair := C.bcos_sdk_create_keypair_by_prikey(csdk.SMCrypto, unsafe.Pointer(csdk.PrivateKey), csdk.PrivateKeyLen)
 
-	//address := C.bcos_sdk_get_keypair_address(key_pair)
-	//logrus.Infof("new account, address: %s\n", C.GoString(address))
-
-	C.bcos_sdk_create_signed_transaction(key_pair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
-	//logrus.Infof("create deploy contract transaction success, tx_hash: %s\n", C.GoString(tx_hash))
+	C.bcos_sdk_create_signed_transaction(key_pair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0x8, &tx_hash, &signed_tx)
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
 		logrus.Errorf("bcos_sdk_create_signed_transaction_with_signed_data failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
-
 		return
 	}
+
 	C.bcos_rpc_send_transaction(csdk.Sdk, csdk.GroupID, nil, signed_tx, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
