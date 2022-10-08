@@ -379,7 +379,7 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 
 	key_pair := C.bcos_sdk_create_keypair_by_prikey(csdk.SMCrypto, unsafe.Pointer(csdk.PrivateKey), csdk.PrivateKeyLen)
 
-	C.bcos_sdk_create_signed_transaction(key_pair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0x8, &tx_hash, &signed_tx)
+	C.bcos_sdk_create_signed_transaction(key_pair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
 		logrus.Errorf("bcos_sdk_create_signed_transaction_with_signed_data failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
