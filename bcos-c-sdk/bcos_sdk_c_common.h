@@ -155,6 +155,14 @@ typedef void (*bcos_sdk_c_struct_response_cb)(struct bcos_sdk_c_struct_response*
 void bcos_sdk_c_handle_response(
     void* error, void* data, size_t size, bcos_sdk_c_struct_response_cb callback, void* context);
 
+/**
+ * @brief free char* pointer
+ * Note: The *p must be created by malloc or it may have serious bad effects
+ *
+ * @param p
+ */
+void bcos_sdk_c_free(void* p);
+
 //--------------- callback end------------
 
 #ifdef __cplusplus

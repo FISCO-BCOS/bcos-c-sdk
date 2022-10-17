@@ -19,13 +19,19 @@
  */
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_rpc.h"
+#include "bcos-c-sdk/bcos_sdk_c_uti_abi.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include <bcos-c-sdk/bcos_sdk_c.h>
 #include <bcos-c-sdk/bcos_sdk_c_uti_tx.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#else
 #include <unistd.h>
+#endif
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -52,7 +58,7 @@ contract HelloWorld {
     }
 }
 */
-const char* hwBIN =
+const char* g_hw_bin =
     "608060405234801561001057600080fd5b506040518060400160405280600d81526020017f48656c6c6f2c20576f72"
     "6c6421000000000000000000000000000000000000008152506000908051906020019061005c929190610062565b50"
     "610107565b828054600181600116156101000203166002900490600052602060002090601f01602090048101928260"
@@ -77,7 +83,7 @@ const char* hwBIN =
     "008160009055506001016102bb565b5090565b9056fea2646970667358221220b5943f43c48cc93c6d71cdcf27aee5"
     "072566c88755ce9186e32ce83b24e8dc6c64736f6c634300060a0033";
 
-const char* hwSmBIN =
+const char* g_hw_sm_bin =
     "608060405234801561001057600080fd5b506040518060400160405280600d81526020017f48656c6c6f2c20576f72"
     "6c6421000000000000000000000000000000000000008152506000908051906020019061005c929190610062565b50"
     "610107565b828054600181600116156101000203166002900490600052602060002090601f01602090048101928260"
@@ -102,6 +108,13 @@ const char* hwSmBIN =
     "008160009055506001016102bb565b5090565b9056fea26469706673582212209871cb2bcf390d53645807cbaedfe0"
     "52d739ef9cff9d84787f74c4f379e1854664736f6c634300060a0033";
 
+const char* g_hw_abi =
+    "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],"
+    "\"name\":\"get\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]"
+    ",\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":"
+    "\"string\",\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],"
+    "\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+
 /*
 {
     "6d4ce63c": "get()",
@@ -114,32 +127,72 @@ const char* hwSmBIN =
 }
 */
 
-const char* getBinary(int _sm)
-{
-    return _sm ? hwSmBIN : hwBIN;
-}
-
 void usage()
 {
-    printf("Desc: deploy HelloWorld contract\n");
-    printf("Usage: deploy_hello <config> <group_id>\n");
+    printf("Desc: HelloWorld contract sample\n");
+    printf("Usage: hello_sample <config> <group_id>\n");
     printf("Example:\n");
-    printf("    ./deploy_hello ./config_sample.ini group0\n");
+    printf("    ./hello_sample ./config_sample.ini group0\n");
     exit(0);
 }
 
+// contract address
+char* contract_address = NULL;
+
 // callback for rpc interfaces
-void on_recv_resp_callback(struct bcos_sdk_c_struct_response* resp)
+void on_deploy_resp_callback(struct bcos_sdk_c_struct_response* resp)
 {
     if (resp->error != BCOS_SDK_C_SUCCESS)
     {
-        printf("\t something is wrong, error: %d, errorMessage: %s\n", resp->error, resp->desc);
+        printf("\t deploy contract failed, error: %d, message: %s\n", resp->error, resp->desc);
         exit(-1);
     }
-    else
+
+    const char* cflag = "contractAddress\" : \"";
+    // find the "contractAddress": "0xxxxx"
+    char* p0 = strstr((char*)resp->data, cflag);
+    if (p0 == NULL)
     {
-        printf(" \t recv rpc resp from server ===>>>> resp: %s\n", (char*)resp->data);
+        printf("\t cannot find the \"contractAddress\" filed, resp: %s\n", (char*)resp->data);
+        exit(-1);
     }
+
+    char* p1 = (char*)p0 + strlen(cflag);
+    char* p2 = strstr(p1, "\"");
+    if (p2 == NULL)
+    {
+        printf("\t cannot find the \"contractAddress\" filed, resp: %s\n", (char*)resp->data);
+        exit(-1);
+    }
+
+    contract_address = (char*)malloc(p2 - p1 + 1);
+
+    memcpy(contract_address, p1, p2 - p1);
+    contract_address[p2 - p1] = '\0';
+
+    printf(" [HelloSample] contractAddress ===>>>>: %s\n", contract_address);
+}
+
+void on_send_tx_resp_callback(struct bcos_sdk_c_struct_response* resp)
+{
+    if (resp->error != BCOS_SDK_C_SUCCESS)
+    {
+        printf("\t send tx failed, error: %d, message: %s\n", resp->error, resp->desc);
+        exit(-1);
+    }
+
+    printf(" ===>> send tx resp: %s\n", (char*)resp->data);
+}
+
+void on_call_resp_callback(struct bcos_sdk_c_struct_response* resp)
+{
+    if (resp->error != BCOS_SDK_C_SUCCESS)
+    {
+        printf("\t call failed, error: %d, message: %s\n", resp->error, resp->desc);
+        exit(-1);
+    }
+
+    printf(" ===>> call resp: %s\n", (char*)resp->data);
 }
 
 int main(int argc, char** argv)
@@ -152,10 +205,15 @@ int main(int argc, char** argv)
     const char* config = argv[1];
     const char* group_id = argv[2];
 
-    printf("[DeployHello] params ===>>>> \n");
+    printf("[HelloSample] params ===>>>> \n");
     printf("\t # config: %s\n", config);
     printf("\t # group_id: %s\n", group_id);
 
+    // const char* version = bcos_sdk_version();
+    // printf("\t # c-sdk version: \n%s", version);
+    // bcos_sdk_c_free((void*)version);
+
+    // 1. create sdk object by config
     void* sdk = bcos_sdk_create_by_config_file(config);
     // check success or not
     if (!bcos_sdk_is_last_opr_success())
@@ -165,17 +223,20 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [DeployHello] start sdk ... \n");
+    printf(" [HelloSample] start sdk ... \n");
+
+    // 2. start bcos c sdk
     bcos_sdk_start(sdk);
     if (!bcos_sdk_is_last_opr_success())
     {
-        printf(" [DeployHello] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
+        printf(" [HelloSample] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
     int sm_crypto = 0;
     int wasm = 0;
 
+    // 3. get sm_crypto of the group_id
     bcos_sdk_get_group_wasm_and_crypto(sdk, group_id, &wasm, &sm_crypto);
     if (!bcos_sdk_is_last_opr_success())
     {
@@ -184,68 +245,126 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [DeployHello] sm crypto: %d\n", sm_crypto);
-
+    printf(" [HelloSample] sm crypto: %d\n", sm_crypto);
+    // 4. get chain_id of the group_id
     const char* chain_id = bcos_sdk_get_group_chain_id(sdk, group_id);
     if (!bcos_sdk_is_last_opr_success())
     {
-        printf(" [DeployHello] bcos_sdk_get_group_chain_id failed, error: %s\n",
+        printf(" [HelloSample] bcos_sdk_get_group_chain_id failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
-    printf(" [DeployHello] chain id: %s\n", chain_id);
-
-    long long block_limit = bcos_rpc_get_block_limit(sdk, group_id);
+    printf(" [HelloSample] chain id: %s\n", chain_id);
+    // 5. get blocklimit of the group_id
+    int64_t block_limit = bcos_rpc_get_block_limit(sdk, group_id);
     if (block_limit < 0)
     {
-        printf(" [DeployHello] group not exist, group: %s\n", group_id);
+        printf(" [HelloSample] group not exist, group: %s\n", group_id);
         exit(-1);
     }
 
-    printf(" [DeployHello] block limit: %lld\n", block_limit);
-
-    void* key_pair =
-        bcos_sdk_create_keypair(sm_crypto ? BCOS_C_SDK_SM_TYPE : BCOS_C_SDK_ECDSA_TYPE);
+    printf(" [HelloSample] block limit: %d\n", (int32_t)block_limit);
+    // 6. load or create keypair for transaction sign
+    void* key_pair = bcos_sdk_create_keypair(sm_crypto);
     if (!key_pair)
     {
-        printf(" [DeployHello] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
+        printf(" [HelloSample] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
-    printf(" [DeployHello] bcos_sdk_get_keypair_type: %d\n", bcos_sdk_get_keypair_type(key_pair));
+    // printf(" [HelloSample] bcos_sdk_get_keypair_type: %d\n",
+    // bcos_sdk_get_keypair_type(key_pair));
 
-
+    // 7. get account address of the keypair
     const char* address = bcos_sdk_get_keypair_address(key_pair);
-    printf(" [DeployHello] new account, address: %s\n", address);
+    printf(" [HelloSample] new account, address: %s\n", address);
 
     char* tx_hash = NULL;
     char* signed_tx = NULL;
+    // 8. deploy HelloWorld contract
+    // 8.1 create signed transaction
+    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "",
+        sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, 0, &tx_hash, &signed_tx);
 
-    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "", getBinary(sm_crypto), "",
-        block_limit, 0, &tx_hash, &signed_tx);
-    printf(" [DeployHello] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
+    printf(" [HelloSample] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
+    // 8.2 call rpc interface, send transaction
+    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_deploy_resp_callback, NULL);
 
-    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_recv_resp_callback, NULL);
+    // wait for async operation done, just for sample
+    sleep(5);
 
-    // wait for async operation done
+    printf(" [HelloSample] set operation\n");
+    // 9. HelloWorld set
+    // 9.1 abi encode params
+    const char* set_data =
+        bcos_sdk_abi_encode_method(g_hw_abi, "set", "[\"Hello FISCO-BCOS 3.0!!!\"]", sm_crypto);
+    // 9.2 create signed transaction
+    {
+        // 9.2.1 create transaction data
+        void* transaction_data = bcos_sdk_create_transaction_data(
+            group_id, chain_id, contract_address, set_data, g_hw_abi, block_limit);
+        // 9.2.2 calc transaction data hash
+        const char* transaction_data_hash =
+            bcos_sdk_calc_transaction_data_hash(sm_crypto, transaction_data);
+        printf(" [HelloSample] set tx hash: %s\n", transaction_data_hash);
+        // 9.2.3 sign transaction hash
+        const char* signed_hash =
+            bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
+        // 9.2.4 create signed transaction
+        const char* signed_tx = bcos_sdk_create_signed_transaction_with_signed_data(
+            transaction_data, signed_hash, transaction_data_hash, 0);
+
+        // 9.3 call rpc interface, sendTransaction
+        bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
+
+        // wait for async operation done, just for sample
+        sleep(3);
+
+        bcos_sdk_destroy_transaction_data(transaction_data);
+        bcos_sdk_c_free((void*)transaction_data_hash);
+        bcos_sdk_c_free((void*)signed_hash);
+        bcos_sdk_c_free((void*)signed_tx);
+    }
+
+
+    // 9.4 abi decode for params
+    const char* decode_params =
+        bcos_sdk_abi_decode_method_input(g_hw_abi, "set", set_data, sm_crypto);
+    printf(" [HelloSample] set data: %s\n", set_data);
+    printf(" [HelloSample] decode params: %s\n", decode_params);
+
+
+    // 10. HelloWorld get
+    // 10.1 abi encode params
+    const char* get_data = bcos_sdk_abi_encode_method(g_hw_abi, "get", "[]", sm_crypto);
+
+    printf(" [HelloSample] get operation\n");
+    // 10.2 call rpc interface, call
+    bcos_rpc_call(sdk, group_id, "", contract_address, get_data, on_call_resp_callback, NULL);
+
+    // wait for async operation done, just for sample
     sleep(3);
 
-    // release keypair
-    bcos_sdk_destroy_keypair(key_pair);
-
     // free chain_id
-    free((void*)chain_id);
+    bcos_sdk_c_free((void*)chain_id);
+    // free tx_hash
+    bcos_sdk_c_free((void*)tx_hash);
     // free signed_tx
-    free((void*)signed_tx);
+    bcos_sdk_c_free((void*)signed_tx);
     // free address
-    free((void*)address);
+    bcos_sdk_c_free((void*)address);
+    if (contract_address)
+    {
+        bcos_sdk_c_free((void*)contract_address);
+    }
 
     // stop sdk
     bcos_sdk_stop(sdk);
     // release sdk
     bcos_sdk_destroy(sdk);
-
+    // release keypair
+    bcos_sdk_destroy_keypair(key_pair);
 
     return 0;
 }

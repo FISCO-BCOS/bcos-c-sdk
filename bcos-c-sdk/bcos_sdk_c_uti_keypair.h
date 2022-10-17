@@ -43,7 +43,7 @@ void* bcos_sdk_create_keypair(int crypto_type);
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsigned length);
+void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key, unsigned length);
 
 /**
  * @brief : create key pair used for transaction sign
@@ -53,14 +53,7 @@ void* bcos_sdk_create_keypair_by_prikey(int crypto_type, void* private_key, unsi
  *
  * @return void*: key pair object pointer, return NULL on failure
  */
-void* bcos_sdk_create_keypair_by_hex_prikey(int crypto_type, const char* private_key);
-
-/**
- * @brief : load key pair from pem file
- *
- * @param void*: key pair object pointer, return NULL on failure
- */
-void* bcos_sdk_load_keypair(const char* pem_path);
+void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* private_key);
 
 /**
  * @brief : destroy the keypair object

@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Top-level CMake file for bcos-c-sdk
 # ------------------------------------------------------------------------------
 # Copyright (C) 2021 bcos-c-sdk
@@ -14,43 +14,47 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.14)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
-if (WIN32)
-   message(STATUS "Compile on Windows")
-   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
+if(WIN32)
+    message(STATUS "Compile on Windows")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
 endif()
 
 # URL_BASE download domain name
 include(FetchContent)
-if (NOT DEFINED URL_BASE)
+
+if(NOT DEFINED URL_BASE)
     set(URL_BASE "github.com")
+
     # set(URL_BASE "github.com.cnpmjs.org")
 endif()
 
 # include(FetchContent)
 # set(BCOS_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_BINARY_DIR}/bcos-cmake-scripts)
 # FetchContent_Declare(bcos-cmake-scripts
-#    GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
-#    GIT_TAG 364f603f4ec112cb79840ea4026243399d7c419b
-#   SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
+# GIT_REPOSITORY https://${URL_BASE}/FISCO-BCOS/bcos-cmake-scripts.git
+# GIT_TAG 364f603f4ec112cb79840ea4026243399d7c419b
+# SOURCE_DIR ${BCOS_CMAKE_SCRIPTS_DIR}
 # )
 # FetchContent_MakeAvailable(bcos-cmake-scripts)
-
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
+
 # list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 
 # include hunter
 include(Options)
 set(ARCH_NATIVE OFF)
-if ("${ARCHITECTURE}" MATCHES "aarch64")
+
+if("${ARCHITECTURE}" MATCHES "aarch64")
     set(ARCH_NATIVE ON)
 endif()
+
 include(HunterGate)
 HunterGate(
     URL "https://${URL_BASE}/FISCO-BCOS/hunter/archive/2b5b25ecffaba74393740bf0b8758c4e8d9297cf.tar.gz"
@@ -59,8 +63,7 @@ HunterGate(
 )
 
 # project name
-project(bcos-c-sdk VERSION "3.0.0")
-set(VERSION_SUFFIX "-rc4")
+project(bcos-c-sdk VERSION "3.0.1")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)
@@ -74,7 +77,9 @@ include(InstallDependencies)
 include(Options)
 configure_project()
 include(CompilerSettings)
+include(BuildInfoGenerator)
 include(InstallConfig)
+
 # install the include files for hash
 include(InstallInclude)
 
@@ -84,7 +89,7 @@ file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
 if(APPLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -framework Security -framework Foundation")
 else()
-   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-as-needed -ldl")
 endif()
 
 # static lib
@@ -106,16 +111,19 @@ target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC bcos-cpp-sdk::bcos-cpp-sdk)
 
+add_dependencies(${BCOS_C_SDK_STATIC_TARGET} BuildInfo.h)
+add_dependencies(${BCOS_C_SDK_TARGET} BuildInfo.h)
+
 # build sample exec
-if (BUILD_SAMPLE)
+if(BUILD_SAMPLE)
     add_subdirectory(sample)
 endif()
 
 # ut and binary exe
 # if (TESTS)
-#    enable_testing()
-#    set(CTEST_OUTPUT_ON_FAILURE TRUE)
-#    add_subdirectory(test)
+# enable_testing()
+# set(CTEST_OUTPUT_ON_FAILURE TRUE)
+# add_subdirectory(test)
 # endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)

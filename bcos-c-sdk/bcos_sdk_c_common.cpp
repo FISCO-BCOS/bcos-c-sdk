@@ -24,6 +24,21 @@
 
 using namespace bcos;
 
+/**
+ * @brief free char* pointer
+ * Note: The *p must be created by malloc or it should have serious bad effects
+ *
+ * @param p
+ */
+void bcos_sdk_c_free(void* p)
+{
+    if (p)
+    {
+        free(p);
+        p = NULL;
+    }
+}
+
 struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 {
     struct bcos_sdk_c_config* config =
@@ -118,20 +133,20 @@ void bcos_sdk_c_cert_config_destroy(void* p)
     struct bcos_sdk_c_cert_config* config = (struct bcos_sdk_c_cert_config*)p;
     if (config && config->ca_cert)
     {
-        free(config->ca_cert);
+        bcos_sdk_c_free(config->ca_cert);
     }
 
     if (config && config->node_cert)
     {
-        free(config->node_cert);
+        bcos_sdk_c_free(config->node_cert);
     }
 
     if (config && config->node_key)
     {
-        free(config->node_key);
+        bcos_sdk_c_free(config->node_key);
     }
 
-    free(config);
+    bcos_sdk_c_free(config);
 }
 
 void bcos_sdk_c_sm_cert_config_destroy(void* p)
@@ -144,30 +159,30 @@ void bcos_sdk_c_sm_cert_config_destroy(void* p)
     struct bcos_sdk_c_sm_cert_config* config = (struct bcos_sdk_c_sm_cert_config*)p;
     if (config && config->ca_cert)
     {
-        free(config->ca_cert);
+        bcos_sdk_c_free(config->ca_cert);
     }
 
     if (config && config->node_cert)
     {
-        free(config->node_cert);
+        bcos_sdk_c_free(config->node_cert);
     }
 
     if (config && config->node_key)
     {
-        free(config->node_key);
+        bcos_sdk_c_free(config->node_key);
     }
 
     if (config && config->en_node_key)
     {
-        free(config->en_node_key);
+        bcos_sdk_c_free(config->en_node_key);
     }
 
     if (config && config->en_node_cert)
     {
-        free(config->en_node_cert);
+        bcos_sdk_c_free(config->en_node_cert);
     }
 
-    free(config);
+    bcos_sdk_c_free(config);
 }
 
 void bcos_sdk_c_config_destroy(void* p)
@@ -186,12 +201,12 @@ void bcos_sdk_c_config_destroy(void* p)
     {
         for (size_t i = 0; i < config->peers_count; i++)
         {
-            free((void*)config->peers[i].host);
+            bcos_sdk_c_free((void*)config->peers[i].host);
         }
     }
 
-    free((void*)config->peers);
-    free((void*)config);
+    bcos_sdk_c_free((void*)config->peers);
+    bcos_sdk_c_free((void*)config);
 }
 
 void bcos_sdk_c_handle_response(
