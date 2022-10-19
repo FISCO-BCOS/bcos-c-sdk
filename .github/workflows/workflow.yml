@@ -5,6 +5,7 @@ on:
       - "docs/**"
       - "Changelog.md"
       - "README.md"
+      - "test"
   pull_request:
     paths-ignore:
       - "docs/**"
