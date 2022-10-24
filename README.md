@@ -1,27 +1,23 @@
 ![](https://github.com/FISCO-BCOS/FISCO-BCOS/raw/master/docs/images/FISCO_BCOS_Logo.svg?sanitize=true)
 
-English / [中文](doc/README_CN.md)
+bcos-c-sdk for FISCO-BCOS 3.0.0+
+
 # bcos-c-sdk
 
-bcos-c-sdk is [FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS) sdk implementation in c language, provides RPC, AMOP, contract event subscription basic function access interface, Users can develop blockchain applications in C  and language developer can also quickly implement SDKS in other languages on this basis.
+`bcos-c-sdk`是[FISCO BCOS 3.0](https://github.com/FISCO-BCOS/FISCO-BCOS)实现的c语言版本sdk版本，提供了rpc、amop、合约事件订阅基础功能的访问接口，并提供了交易编码、交易签名、ABI编解码等区块链基础工具，用户可以用于开发c语言版本的区块链应用，也可以方便开发者在此基础上快速实现其他语言版本的sdk。
 
-## Documentation
+## 文档
 
-- [FISCO BCOS 3.x documentation](https://fisco-bcos-doc.readthedocs.io/)
+- [FISCO BCOS 3.x文档](https://fisco-bcos-doc.readthedocs.io/)
 
-## Code contribution
+## 加入社区
 
-- Your contributions are most welcome and appreciated. Please read the [contribution instructions](https://mp.weixin.qq.com/s/_w_auH8X4SQQWO3lhfNrbQ).
-- If this project is useful to you, please star us on GitHub project page!
+FISCO BCOS开源社区是国内活跃的开源社区，社区长期为机构和个人开发者提供各类支持与帮助。已有来自各行业的数千名技术爱好者在研究和使用FISCO BCOS。如您对FISCO BCOS开源技术及应用感兴趣，欢迎加入社区获得更多支持与帮助。
 
-## Join Our Community
-
-The FISCO BCOS community is one of the most active open-source blockchain communities in China. It provides long-term technical support for both institutional and individual developers and users of FISCO BCOS. Thousands of technical enthusiasts from numerous industry sectors have joined this community, studying and using FISCO BCOS platform. If you are also interested, you are most welcome to join us for more support and fun.
-
-![](https://raw.githubusercontent.com/FISCO-BCOS/LargeFiles/master/images/QR_image_en.png)
+![](https://raw.githubusercontent.com/FISCO-BCOS/LargeFiles/master/images/QR_image.png)
 
 ## License
 
-[![](https://img.shields.io/github/license/FISCO-BCOS/bcos-pbft.svg)](./LICENSE)
+[![](https://img.shields.io/github/license/FISCO-BCOS/bcos-pbft.svg)](../LICENSE)
 
-All contributions are made under the Apache License, See [LICENSE](./LICENSE).
+bcos-pbft的开源协议为Apache License, 详情参考[LICENSE](../LICENSE).
