@@ -5,11 +5,11 @@ package csdk
 // #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk
 // #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
+// #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_error.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_rpc.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_uti_tx.h"
-// #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_amop.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_event_sub.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
@@ -33,6 +33,7 @@ type CSDK struct {
 	ChainID       *C.char
 	GroupID       *C.char
 	NodeID        *C.char
+	KeyPair       unsafe.Pointer
 	PrivateKey    *C.char
 	PrivateKeyLen C.uint
 	Callback      *C.bcos_sdk_c_struct_response_cb
@@ -116,7 +117,7 @@ func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey strin
 	cPrivateKey := C.CString(privateKey)
 	cPrivateKeyLen := C.uint(len(privateKey))
 	config := C.bcos_sdk_create_config(cIsSmSsl, cHost, cPort)
-	defer C.free(unsafe.Pointer(config))
+	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
 
 	sdk := C.bcos_sdk_create(config)
 	if sdk == nil {
@@ -130,6 +131,7 @@ func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey strin
 	group := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, group, &wasm, &smCrypto)
 	chainID := C.bcos_sdk_get_group_chain_id(sdk, group)
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(cPrivateKey), cPrivateKeyLen)
 	return &CSDK{
 		Sdk:           sdk,
 		SMCrypto:      smCrypto,
@@ -138,6 +140,7 @@ func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey strin
 		ChainID:       chainID,
 		PrivateKey:    cPrivateKey,
 		PrivateKeyLen: cPrivateKeyLen,
+		KeyPair:       keyPair,
 	}
 }
 
@@ -167,6 +170,7 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey string) *C
 	CGroupID := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, CGroupID, &wasm, &smCrypto)
 	chainID := C.bcos_sdk_get_group_chain_id(sdk, CGroupID)
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(cPrivateKey), cPrivateKeyLen)
 	return &CSDK{
 		Sdk:           sdk,
 		SMCrypto:      smCrypto,
@@ -175,6 +179,7 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey string) *C
 		ChainID:       chainID,
 		PrivateKey:    cPrivateKey,
 		PrivateKeyLen: cPrivateKeyLen,
+		KeyPair:       keyPair,
 		//NodeID:  C.CString("7c9e8d63a5451ef71e567216f1e2db1478147b9e3eca1c2889f864dc6711d291d3cf458606e39cad5a5dd876ab8cdc3a7dc8f227e9aff1ff1f309329a64f87a7"),
 	}
 }
@@ -182,9 +187,10 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey string) *C
 func (csdk *CSDK) Close() {
 	C.bcos_sdk_stop(csdk.Sdk)
 	C.bcos_sdk_destroy(csdk.Sdk)
-	C.free(unsafe.Pointer(csdk.GroupID))
-	C.free(unsafe.Pointer(csdk.ChainID))
+	C.bcos_sdk_c_free(unsafe.Pointer(csdk.GroupID))
+	C.bcos_sdk_c_free(unsafe.Pointer(csdk.ChainID))
 	C.free(unsafe.Pointer(csdk.PrivateKey))
+	C.bcos_sdk_destroy_keypair(csdk.KeyPair)
 }
 
 func (csdk *CSDK) Call(hc *ChanData, to string, data string) {
@@ -223,6 +229,7 @@ func (csdk *CSDK) GetGroupInfo(chanData *ChanData) {
 
 func (csdk *CSDK) GetCode(chanData *ChanData, address string) {
 	cAddress := C.CString(address)
+	defer C.free(unsafe.Pointer(cAddress))
 	C.bcos_rpc_get_code(csdk.Sdk, csdk.GroupID, nil, cAddress, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
@@ -271,6 +278,7 @@ func (csdk *CSDK) GetBlockByhash(hc *ChanData, blockHash string, onlyHeader int3
 	cBlockHash := C.CString(blockHash)
 	cOnlyHeader := C.int(onlyHeader)
 	cOnlyTxHash := C.int(onlyTxHash)
+	defer C.free(unsafe.Pointer(cBlockHash))
 	C.bcos_rpc_get_block_by_hash(csdk.Sdk, csdk.GroupID, nil, cBlockHash, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
@@ -368,18 +376,16 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 	var signed_tx *C.char
 	defer C.free(unsafe.Pointer(cTo))
 	defer C.free(unsafe.Pointer(cData))
-	defer C.free(unsafe.Pointer(cNull))
-	defer C.free(unsafe.Pointer(tx_hash))
-	defer C.free(unsafe.Pointer(signed_tx))
+	defer C.free(unsafe.Pointer(cNull)) //todo
+	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
+	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
 	block_limit := C.bcos_rpc_get_block_limit(csdk.Sdk, csdk.GroupID)
 	if block_limit < 0 {
 		logrus.Errorf("group not exist, group: %s\n", C.GoString(csdk.GroupID))
 		return
 	}
 
-	key_pair := C.bcos_sdk_create_keypair_by_prikey(csdk.SMCrypto, unsafe.Pointer(csdk.PrivateKey), csdk.PrivateKeyLen)
-
-	C.bcos_sdk_create_signed_transaction(key_pair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
+	C.bcos_sdk_create_signed_transaction(csdk.KeyPair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
 		logrus.Errorf("bcos_sdk_create_signed_transaction_with_signed_data failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
@@ -392,5 +398,4 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 		logrus.Errorf("bcos rpc send transaction failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
 		return
 	}
-	C.bcos_sdk_destroy_keypair(key_pair)
 }
