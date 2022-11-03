@@ -289,10 +289,10 @@ func (csdk *CSDK) GetBlockByNumber(hc *ChanData, blockNumber int64, onlyHeader i
 	C.bcos_rpc_get_block_by_number(csdk.Sdk, csdk.GroupID, nil, cBlockNumber, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetGroupnodeInfo(hc *ChanData, nodeId string) {
-	cNodeId := C.CString(nodeId)
-	defer C.free(unsafe.Pointer(cNodeId))
-	C.bcos_rpc_get_group_node_info(csdk.Sdk, csdk.GroupID, cNodeId, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+func (csdk *CSDK) GetGroupnodeInfo(hc *ChanData, nodeName string) {
+	cNodeName := C.CString(nodeName)
+	defer C.free(unsafe.Pointer(cNodeName))
+	C.bcos_rpc_get_group_node_info(csdk.Sdk, csdk.GroupID, cNodeName, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
 func (csdk *CSDK) GetGroupNodeInfoList(hc *ChanData) {
