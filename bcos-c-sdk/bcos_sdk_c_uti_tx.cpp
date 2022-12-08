@@ -78,6 +78,28 @@ void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_i
     return NULL;
 }
 
+void* bcos_sdk_create_transaction_data_with_json(const char* json)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(json, NULL);
+
+    try
+    {
+        auto builder = std::make_shared<TransactionBuilder>();
+        auto transactionData = builder->createTransactionDataWithJson(std::string(json));
+        return transactionData.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data") << LOG_DESC("exception")
+                          << LOG_KV("json", json) << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return NULL;
+}
+
 /**
  * @brief
  *
@@ -90,6 +112,57 @@ void bcos_sdk_destroy_transaction_data(void* transaction_data)
         delete (bcostars::TransactionData*)transaction_data;
         transaction_data = NULL;
     }
+}
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_encode_transaction_data(void* transaction_data)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
+
+    try
+    {
+        auto builder = std::make_shared<TransactionBuilder>();
+        auto transactionData =
+            builder->encodeTransactionData(*(bcostars::TransactionData*)transaction_data);
+        return strdup(toHexString(*transactionData)->c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data") << LOG_DESC("exception")
+                          << LOG_KV("transaction_data", transaction_data)
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return NULL;
+}
+
+const char* bcos_sdk_decode_transaction_data(const char* transaction_hex_str)
+{
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_hex_str, NULL);
+    try
+    {
+        auto builder = std::make_unique<TransactionBuilder>();
+        auto tx_bytes = fromHexString(transaction_hex_str);
+        auto json = builder->decodeTransactionDataToJsonObj(*tx_bytes);
+        return strdup(json.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_data") << LOG_DESC("exception")
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return NULL;
 }
 
 /**
@@ -134,18 +207,18 @@ const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transacti
  * @brief
  *
  * @param keypair
- * @param transcation_hash
+ * @param transaction_hash
  * @return const char*
  */
-const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* transcation_hash)
+const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* transaction_hash)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(keypair, NULL);
-    BCOS_SDK_C_PARAMS_VERIFICATION(transcation_hash, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_hash, NULL);
     try
     {
         auto builder = std::make_shared<TransactionBuilder>();
-        bcos::crypto::HashType hashType(transcation_hash);
+        bcos::crypto::HashType hashType(transaction_hash);
         auto signData =
             builder->signTransactionDataHash(*(crypto::KeyPairInterface*)keypair, hashType);
         return strdup(bcos::toHexStringWithPrefix(*signData).c_str());
@@ -155,7 +228,7 @@ const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* trans
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_sign_transaction_data_hash")
                           << LOG_DESC("exception") << LOG_KV("keypair", keypair)
-                          << LOG_KV("transcation_hash", transcation_hash)
+                          << LOG_KV("transaction_hash", transaction_hash)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
