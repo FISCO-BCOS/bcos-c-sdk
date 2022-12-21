@@ -95,6 +95,13 @@ struct bcos_sdk_c_config
     struct bcos_sdk_c_sm_cert_config* sm_cert_config;
 };
 
+struct bcos_sdk_c_signature_result
+{
+    uint8_t r[32];
+    uint8_t s[32];
+    uint8_t v[512];
+};
+
 /**
  * @brief create bcos_sdk_c_config in default value
  * @return struct bcos_sdk_c_config*
