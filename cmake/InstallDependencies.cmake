@@ -21,6 +21,9 @@ find_package(wedpr-crypto CONFIG REQUIRED)
 hunter_add_package(bcos-utilities)
 find_package(bcos-utilities CONFIG REQUIRED)
 
+# hsm-crypto
+include(InstallSDF)
+
 # find bcos-crypto
 hunter_add_package(bcos-crypto)
 find_package(bcos-crypto CONFIG REQUIRED)
