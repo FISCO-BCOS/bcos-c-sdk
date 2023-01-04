@@ -88,6 +88,18 @@ void* bcos_sdk_create_hsm_keypair_by_hex_private_key(
     const char* private_key, const char* hsm_lib_path);
 
 /**
+ * @brief : use hsm key pair for transaction sign according to the keyindex and password
+ *
+ * @param key_index: key index inside the HSM
+ * @param password: the password for the permission to use HSM
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_use_hsm_keypair_by_keyindex_and_password(
+    unsigned key_index, const char* password, const char* hsm_lib_path);
+
+/**
  * @brief : destroy the keypair object
  *
  * @param key_pair: key pair object pointer
