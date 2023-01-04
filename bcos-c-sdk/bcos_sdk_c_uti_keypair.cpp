@@ -244,6 +244,38 @@ void* bcos_sdk_create_hsm_keypair_by_hex_private_key(
     }
 }
 
+/**
+ * @brief : use hsm key pair for transaction sign according to the keyindex and password
+ *
+ * @param key_index: key index inside the HSM
+ * @param password: the password for the permission to use HSM
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_use_hsm_keypair_by_keyindex_and_password(
+    unsigned key_index, const char* password, const char* hsm_lib_path)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(password, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (key_index > 0), "invalid key index of HSM, it must greater than zero", NULL);
+    try
+    {
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->useHsmKeyPair(key_index, password, hsm_lib_path);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_use_hsm_keypair_by_keyindex_and_password")
+                        << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
 
 /**
  * @brief : destroy the keypair object
