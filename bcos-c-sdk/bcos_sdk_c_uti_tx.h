@@ -42,11 +42,41 @@ void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_i
     const char* data, const char* abi, int64_t block_limit);
 
 /**
+ * @param json
+ *              version:number
+ *              groupID:string
+ *              chainID:string
+ *              to:string
+ *              data:hex string
+ *              abi:string
+ *              blockLimit:number
+ *              nonce:string
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_data_with_json(const char* json);
+
+/**
  * @brief
  *
  * @param transaction_data
  */
 void bcos_sdk_destroy_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_encode_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_decode_transaction_data(const char* transaction_bytes);
 
 /**
  * @brief
