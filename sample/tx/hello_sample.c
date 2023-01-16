@@ -171,6 +171,7 @@ void on_deploy_resp_callback(struct bcos_sdk_c_struct_response* resp)
     contract_address[p2 - p1] = '\0';
 
     printf(" [HelloSample] contractAddress ===>>>>: %s\n", contract_address);
+    printf(" [HelloSample] transaction receipt ===>>>>: %s\n", (char*)resp->data);
 }
 
 void on_send_tx_resp_callback(struct bcos_sdk_c_struct_response* resp)
@@ -282,10 +283,13 @@ int main(int argc, char** argv)
 
     char* tx_hash = NULL;
     char* signed_tx = NULL;
+    const char* extra_data = "ExtraData";
+
+    printf(" [HelloSample] extra_data: %s\n", extra_data);
     // 8. deploy HelloWorld contract
     // 8.1 create signed transaction
-    bcos_sdk_create_signed_transaction(key_pair, group_id, chain_id, "",
-        sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, 0, &tx_hash, &signed_tx);
+    bcos_sdk_create_signed_transaction_ver_extra_data(key_pair, group_id, chain_id, "",
+        sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, 0, extra_data, &tx_hash, &signed_tx);
 
     printf(" [HelloSample] create deploy contract transaction success, tx_hash: %s\n", tx_hash);
     // 8.2 call rpc interface, send transaction
@@ -312,8 +316,8 @@ int main(int argc, char** argv)
         const char* signed_hash =
             bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
         // 9.2.4 create signed transaction
-        const char* signed_tx = bcos_sdk_create_signed_transaction_with_signed_data(
-            transaction_data, signed_hash, transaction_data_hash, 0);
+        const char* signed_tx = bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
+            transaction_data, signed_hash, transaction_data_hash, 0, extra_data);
 
         // 9.3 call rpc interface, sendTransaction
         bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);

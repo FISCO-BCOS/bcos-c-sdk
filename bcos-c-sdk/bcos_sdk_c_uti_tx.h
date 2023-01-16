@@ -42,11 +42,41 @@ void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_i
     const char* data, const char* abi, int64_t block_limit);
 
 /**
+ * @param json
+ *              version:number
+ *              groupID:string
+ *              chainID:string
+ *              to:string
+ *              data:hex string
+ *              abi:string
+ *              blockLimit:number
+ *              nonce:string
+ * @return void*
+ */
+void* bcos_sdk_create_transaction_data_with_json(const char* json);
+
+/**
  * @brief
  *
  * @param transaction_data
  */
 void bcos_sdk_destroy_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_encode_transaction_data(void* transaction_data);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @return const char*
+ */
+const char* bcos_sdk_decode_transaction_data(const char* transaction_bytes);
 
 /**
  * @brief
@@ -87,6 +117,25 @@ void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, co
 /**
  * @brief
  *
+ * @param key_pair
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param data
+ * @param abi
+ * @param block_limit
+ * @param attribute
+ * @param extra_data
+ * @param tx_hash
+ * @param signed_tx
+ */
+void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const char* group_id,
+    const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit,
+    int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx);
+
+/**
+ * @brief
+ *
  * @param transaction_data
  * @param signed_transaction_data
  * @param transaction_data_hash
@@ -95,6 +144,20 @@ void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, co
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
     const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute);
+
+/**
+ * @brief
+ *
+ * @param transaction_data
+ * @param signed_transaction_data
+ * @param transaction_data_hash
+ * @param attribute
+ * @param extra_data
+ * @return const char*
+ */
+const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
+    void* transaction_data, const char* signed_transaction_data, const char* transaction_data_hash,
+    int32_t attribute, const char* extra_data);
 
 /**
  * @brief
@@ -141,6 +204,24 @@ void* bcos_sdk_create_transaction_data_with_tx_builder_service(
 void bcos_sdk_create_signed_transaction_with_tx_builder_service(void* tx_builder_service,
     void* key_pair, const char* to, const char* data, const char* abi, int32_t attribute,
     char** tx_hash, char** signed_tx);
+
+/**
+ * @brief
+ *
+ * @param tx_builder_service
+ * @param key_pair
+ * @param to
+ * @param data
+ * @param abi
+ * @param attribute
+ * @param extra_data
+ * @param tx_hash
+ * @param signed_tx
+ * @return void*
+ */
+void bcos_sdk_create_signed_transaction_with_tx_builder_service_ver_extra_data(
+    void* tx_builder_service, void* key_pair, const char* to, const char* data, const char* abi,
+    int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx);
 
 #ifdef __cplusplus
 }
