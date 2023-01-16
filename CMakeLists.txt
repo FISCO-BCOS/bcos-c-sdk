@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.14)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "11.3" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
 if(WIN32)
@@ -63,7 +63,7 @@ HunterGate(
 )
 
 # project name
-project(bcos-c-sdk VERSION "3.0.1")
+project(bcos-c-sdk VERSION "3.2.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 set(CMAKE_BUILD_TYPE Release)

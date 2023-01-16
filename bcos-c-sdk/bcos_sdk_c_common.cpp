@@ -56,6 +56,73 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
     return config;
 }
 
+char* my_strdup(const char* s)
+{
+    size_t len = strlen(s) + 1;
+    char* result = (char*)malloc(len);
+    if (result == (char*)0)
+        return (char*)0;
+    return (char*)memcpy(result, s, len);
+}
+
+struct bcos_sdk_c_config* bcos_sdk_create_config(int sm_ssl, char* host, int port)
+{
+    // create c-sdk config object
+    struct bcos_sdk_c_config* config = bcos_sdk_c_config_create_empty();
+    // set thread pool size
+    config->thread_pool_size = 8;
+    // set message timeout(unit: ms)
+    config->message_timeout_ms = 10000;
+
+    // --- set connected peers ---------
+    struct bcos_sdk_c_endpoint* ep =
+        (struct bcos_sdk_c_endpoint*)malloc(sizeof(struct bcos_sdk_c_endpoint));
+    ep->host = my_strdup(host);
+    ep->port = port;
+
+    config->peers = ep;
+    config->peers_count = 1;
+    // --- set connected peers ---------
+
+    // do not disable ssl
+    config->disable_ssl = 0;
+
+    // set ssl type
+    config->ssl_type = my_strdup(sm_ssl ? "sm_ssl" : "ssl");
+
+    // --- set ssl cert ---------
+    // cert config items is the path of file ,not the content
+    config->is_cert_path = 1;
+
+    if (sm_ssl)
+    {  // sm ssl connection cert config
+        struct bcos_sdk_c_sm_cert_config* sm_cert_config =
+            (struct bcos_sdk_c_sm_cert_config*)malloc(sizeof(struct bcos_sdk_c_sm_cert_config));
+        sm_cert_config->ca_cert = my_strdup("./conf/sm_ca.crt");
+        sm_cert_config->node_cert = my_strdup("./conf/sm_sdk.crt");
+        sm_cert_config->node_key = my_strdup("./conf/sm_sdk.key");
+        sm_cert_config->en_node_key = my_strdup("./conf/sm_ensdk.key");
+        sm_cert_config->en_node_cert = my_strdup("./conf/sm_ensdk.crt");
+
+        config->sm_cert_config = sm_cert_config;
+        config->cert_config = NULL;
+    }
+    else
+    {  // ssl connection cert config
+        struct bcos_sdk_c_cert_config* cert_config =
+            (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
+        cert_config->ca_cert = my_strdup("./conf/ca.crt");
+        cert_config->node_cert = my_strdup("./conf/sdk.crt");
+        cert_config->node_key = my_strdup("./conf/sdk.key");
+
+        config->sm_cert_config = NULL;
+        config->cert_config = cert_config;
+    }
+    // --- set ssl cert ---------
+
+    return config;
+}
+
 void bcos_sdk_c_cert_config_destroy(void* p)
 {
     if (p == NULL)
