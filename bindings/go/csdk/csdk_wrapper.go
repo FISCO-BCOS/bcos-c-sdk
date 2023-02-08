@@ -1,8 +1,9 @@
 package csdk
 
-// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-arm64
-// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-x86_64
+// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-aarch64
+// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk
 // #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk
+// #cgo linux,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk-aarch64
 // #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
 // #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
@@ -21,9 +22,10 @@ package csdk
 import "C"
 
 import (
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"unsafe"
+
+	"github.com/sirupsen/logrus"
 )
 
 type CSDK struct {
@@ -309,7 +311,7 @@ func (csdk *CSDK) GetSystemConfigByKey(hc *ChanData, key string) {
 	C.bcos_rpc_get_system_config_by_key(csdk.Sdk, csdk.GroupID, nil, cKey, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-//amop
+// amop
 func (csdk *CSDK) SubscribeTopic(chanData *ChanData, topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
@@ -350,7 +352,7 @@ func (csdk *CSDK) BroadcastAmopMsg(chanData *ChanData, topic string, data string
 	C.bcos_amop_broadcast(csdk.Sdk, cTopic, unsafe.Pointer(cData), cLen)
 }
 
-//event
+// event
 func (csdk *CSDK) SubscribeEvent(chanData *ChanData, params string) string {
 	cParams := C.CString(params)
 	defer C.free(unsafe.Pointer(cParams))
