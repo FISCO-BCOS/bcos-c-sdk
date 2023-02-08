@@ -145,10 +145,14 @@ jobs:
       - name: install CentOS dependencies
         run: |
           yum install -y epel-release centos-release-scl
-          yum install -y git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel && source /opt/rh/devtoolset-7/enable
+          yum install -y git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
       - name: configure
         run: |
-          source /opt/rh/devtoolset-7/enable
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          . /opt/rh/devtoolset-11/enable
+          . /opt/rh/rh-perl530/enable
+          export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/lib64/
+          . /opt/rh/llvm-toolset-7.0/enable
           mkdir -p build && cd build
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"

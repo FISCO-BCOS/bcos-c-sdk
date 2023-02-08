@@ -37,8 +37,8 @@ hunter_config(wedpr-crypto VERSION 1.0.0
 )
 
 hunter_config(bcos-crypto VERSION 1.0.0-rc3-local
-    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/c8f91e294f7415c05f22ea08cc52aec4225f567b.tar.gz
-    SHA1 3a3bf5c9b98bb5265fd54ac8b095b1754ace5e82
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-crypto/archive/d3a42936923a28137c586c8fe8037d65b9e6403f.tar.gz
+    SHA1 690bd71f3212a0dcd22857c48922228c11e9c00d
     CMAKE_ARGS HUNTER_PACKAGE_LOG_BUILD=ON HUNTER_PACKAGE_LOG_INSTALL=ON
 )
 
@@ -51,8 +51,8 @@ hunter_config(bcos-boostssl
 
 hunter_config(bcos-cpp-sdk
     VERSION 3.2.0-local
-    URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/41b86ae8f274fc65b50914cbfb7af72743a393ec.tar.gz
-    SHA1 063ac519184656b0a175a72d00cfab706f6b9a36
+    URL https://${URL_BASE}/FISCO-BCOS/bcos-cpp-sdk/archive/4aaecdc972d5f191b1c98333dbba47868e46b464.tar.gz
+    SHA1 6556fb77a2545475c574e0598a531ceeb2e92ce6
 )
 
 hunter_config(range-v3 VERSION 1.0.0
