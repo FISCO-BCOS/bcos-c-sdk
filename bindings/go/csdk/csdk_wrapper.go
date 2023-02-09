@@ -1,9 +1,9 @@
 package csdk
 
-// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk-aarch64
-// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/darwin -lbcos-c-sdk
-// #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk
-// #cgo linux,arm64 LDFLAGS: -L/usr/local/lib/bcos-c-sdk/libs/linux -lbcos-c-sdk-aarch64
+// #cgo darwin,arm64 LDFLAGS: -lbcos-c-sdk-aarch64
+// #cgo darwin,amd64 LDFLAGS: -lbcos-c-sdk
+// #cgo linux,amd64 LDFLAGS: -lbcos-c-sdk
+// #cgo linux,arm64 LDFLAGS: -lbcos-c-sdk-aarch64
 // #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
 // #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
