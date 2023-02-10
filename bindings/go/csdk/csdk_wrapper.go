@@ -111,7 +111,7 @@ func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
 	}
 }
 
-func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte) (*CSDK, error) {
+func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, tlsCaPath, tlsKeyPath, tlsCertPash, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
 	cHost := C.CString(host)
 	cPort := C.int(port)
 	cIsSmSsl := C.int(0)
@@ -120,6 +120,28 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 	}
 	config := C.bcos_sdk_create_config(cIsSmSsl, cHost, cPort)
 	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
+	cTlsCaPath := C.CString(tlsCaPath)
+	defer C.free(unsafe.Pointer(cTlsCaPath))
+	cTlsKeyPath := C.CString(tlsKeyPath)
+	defer C.free(unsafe.Pointer(cTlsKeyPath))
+	cTlsCertPath := C.CString(tlsCertPash)
+	defer C.free(unsafe.Pointer(cTlsCertPath))
+	cTlsSmEnKey := C.CString(tlsSmEnKey)
+	defer C.free(unsafe.Pointer(cTlsSmEnKey))
+	cTlsSmEnCert := C.CString(tlsSEnCert)
+	defer C.free(unsafe.Pointer(cTlsSmEnCert))
+
+	if isSmSsl {
+		config.sm_cert_config.ca_cert = cTlsCaPath
+		config.sm_cert_config.node_key = cTlsKeyPath
+		config.sm_cert_config.node_cert = cTlsCertPath
+		config.sm_cert_config.en_node_key = cTlsSmEnKey
+		config.sm_cert_config.en_node_cert = cTlsSmEnCert
+	} else {
+		config.cert_config.ca_cert = cTlsCaPath
+		config.cert_config.node_key = cTlsKeyPath
+		config.cert_config.node_cert = cTlsCertPath
+	}
 
 	sdk := C.bcos_sdk_create(config)
 	if sdk == nil {
