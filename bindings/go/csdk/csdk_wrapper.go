@@ -22,28 +22,30 @@ package csdk
 import "C"
 
 import (
-	"strconv"
+	"encoding/binary"
+	"fmt"
 	"unsafe"
-
-	"github.com/sirupsen/logrus"
 )
 
 type CSDK struct {
-	Sdk           unsafe.Pointer
-	SMCrypto      C.int
-	WASM          bool
-	ChainID       *C.char
-	GroupID       *C.char
-	NodeID        *C.char
-	KeyPair       unsafe.Pointer
-	PrivateKey    *C.char
-	PrivateKeyLen C.uint
-	Callback      *C.bcos_sdk_c_struct_response_cb
+	sdk             unsafe.Pointer
+	smCrypto        bool
+	wasm            bool
+	chainID         *C.char
+	groupID         *C.char
+	keyPair         unsafe.Pointer
+	privateKeyBytes []byte
+	// Callback        *C.bcos_sdk_c_struct_response_cb
 }
 
-type ChanData struct {
-	Sdk  unsafe.Pointer
-	Data chan string
+type Response struct {
+	Result []byte
+	Err    error
+}
+
+type CallbackChan struct {
+	sdk  unsafe.Pointer
+	Data chan Response
 }
 
 const (
@@ -54,70 +56,68 @@ const (
 //export on_recv_notify_resp_callback
 func on_recv_notify_resp_callback(group *C.char, block C.int64_t, context unsafe.Pointer) {
 	//logrus.Infof(" \t recv block notifier from server ===>>>> group: %s, block number: %d\n", C.GoString(group), block)
-	chanData := (*ChanData)(unsafe.Pointer(context))
-	blockNum := strconv.Itoa(int(block))
-	chanData.Data <- blockNum
+	chanData := (*CallbackChan)(unsafe.Pointer(context))
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(block))
+	chanData.Data <- Response{b, nil}
 }
 
 //export on_recv_amop_subscribe_resp
 func on_recv_amop_subscribe_resp(endpoint *C.char, seq *C.char, resp *C.struct_bcos_sdk_c_struct_response) {
+	chanData := (*CallbackChan)(unsafe.Pointer(resp.context))
 	if int(resp.error) != 0 {
-		logrus.Errorf("\t something is wrong, error: %d, errorMessage: %s\n", resp.error, resp.desc)
+		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
-		data := C.GoString((*C.char)(resp.data))
-		chanData := (*ChanData)(unsafe.Pointer(resp.context))
 		//logrus.Infof("\t recv amop message and would echo message to publish, endpoint: %s, seq: %s, msg size: %d\n", C.GoString(endpoint), C.GoString(seq), resp.size)
-		//logrus.Infof(" \t  *****recv amop resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		C.bcos_amop_send_response(unsafe.Pointer(chanData.Sdk), endpoint, seq, resp.data, resp.size)
-		chanData.Data <- data[:resp.size]
+		C.bcos_amop_send_response(unsafe.Pointer(chanData.sdk), endpoint, seq, resp.data, resp.size)
+		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+		chanData.Data <- Response{data, nil}
 	}
 }
 
 //export on_recv_amop_publish_resp
 func on_recv_amop_publish_resp(resp *C.struct_bcos_sdk_c_struct_response) {
+	chanData := (*CallbackChan)(unsafe.Pointer(resp.context))
 	if int(resp.error) != 0 {
-		logrus.Errorf("\t something is wrong, error: %d, errorMessage: %s\n", resp.error, C.GoString(resp.desc))
+		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
-		data := C.GoString((*C.char)(resp.data))
-		chanData := (*ChanData)(unsafe.Pointer(resp.context))
 		//logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		//logrus.Infof(" \t  *****recv amop publish resp from server ==>>>> resp -> size: %d\n", resp.size)
-		chanData.Data <- data[:resp.size]
+		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+		chanData.Data <- Response{data, nil}
 	}
 }
 
 //export on_recv_resp_callback
 func on_recv_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
+	chanData := (*CallbackChan)(unsafe.Pointer(resp.context))
 	if int(resp.error) != 0 {
-		logrus.Errorf("\t something is wrong, error: %d, errorMessage: %s\n", resp.error, C.GoString(resp.desc))
+		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
-		data := C.GoString((*C.char)(resp.data))
-		chanData := (*ChanData)(unsafe.Pointer(resp.context))
 		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
 		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
-		chanData.Data <- data[:resp.size]
+		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+		chanData.Data <- Response{data, nil}
 	}
 }
 
 //export on_recv_event_resp_callback
 func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
+	chanData := (*CallbackChan)(unsafe.Pointer(resp.context))
 	if int(resp.error) != 0 {
-		logrus.Errorf("\t something is wrong, error: %d, errorMessage: %s\n", resp.error, C.GoString(resp.desc))
+		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
-		data := C.GoString((*C.char)(resp.data))
-		chanData := (*ChanData)(unsafe.Pointer(resp.context))
-		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> data: %s\n", data[:resp.size])
-		//logrus.Infof(" \t  *****recv rpc resp from server ==>>>> resp -> size: %d\n", resp.size)
-		chanData.Data <- data[:resp.size]
+		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+		chanData.Data <- Response{data, nil}
 	}
 }
 
-func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey string) *CSDK {
+func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte) (*CSDK, error) {
 	cHost := C.CString(host)
 	cPort := C.int(port)
-	cIsSmSsl := C.int(isSmSsl)
-	cPrivateKey := C.CString(privateKey)
-	cPrivateKeyLen := C.uint(len(privateKey))
+	cIsSmSsl := C.int(0)
+	if isSmSsl {
+		cIsSmSsl = C.int(1)
+	}
 	config := C.bcos_sdk_create_config(cIsSmSsl, cHost, cPort)
 	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
 
@@ -125,38 +125,38 @@ func NewSDK(groupID string, host string, port int, isSmSsl int, privateKey strin
 	if sdk == nil {
 		message := C.bcos_sdk_get_last_error_msg()
 		//defer C.free(unsafe.Pointer(message))
-		logrus.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
-		return nil
+		return nil, fmt.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
 	}
 	C.bcos_sdk_start(sdk)
 	var wasm, smCrypto C.int
 	group := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, group, &wasm, &smCrypto)
-	chainID := C.bcos_sdk_get_group_chain_id(sdk, group)
-	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(cPrivateKey), cPrivateKeyLen)
-	return &CSDK{
-		Sdk:           sdk,
-		SMCrypto:      smCrypto,
-		WASM:          wasm != 0,
-		GroupID:       group,
-		ChainID:       chainID,
-		PrivateKey:    cPrivateKey,
-		PrivateKeyLen: cPrivateKeyLen,
-		KeyPair:       keyPair,
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(&privateKey[0]), C.uint(len(privateKey)))
+	if keyPair == nil {
+		message := C.bcos_sdk_get_last_error_msg()
+		C.bcos_sdk_c_free(unsafe.Pointer(group))
+		return nil, fmt.Errorf("bcos_sdk_create_keypair_by_private_key failed with error: %s", C.GoString(message))
 	}
+	chainID := C.bcos_sdk_get_group_chain_id(sdk, group)
+	return &CSDK{
+		sdk:             sdk,
+		smCrypto:        smCrypto != 0,
+		wasm:            wasm != 0,
+		groupID:         group,
+		chainID:         chainID,
+		privateKeyBytes: privateKey,
+		keyPair:         keyPair,
+	}, nil
 }
 
-func NewSDKByConfigFile(configFile string, groupID string, privateKey string) *CSDK {
+func NewSDKByConfigFile(configFile string, groupID string, privateKey []byte) (*CSDK, error) {
 	config := C.CString(configFile)
-	cPrivateKey := C.CString(privateKey)
-	cPrivateKeyLen := C.uint(len(privateKey))
 	defer C.free(unsafe.Pointer(config))
 	sdk := C.bcos_sdk_create_by_config_file(config)
 	if sdk == nil {
 		message := C.bcos_sdk_get_last_error_msg()
 		//defer C.free(unsafe.Pointer(message))
-		logrus.Errorf("bcos sdk create by config file failed with error: %s", C.GoString(message))
-		return nil
+		return nil, fmt.Errorf("bcos sdk create by config file failed with error: %s", C.GoString(message))
 	}
 
 	C.bcos_sdk_start(sdk)
@@ -164,212 +164,231 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey string) *C
 	if error != 0 {
 		message := C.bcos_sdk_get_last_error_msg()
 		//defer C.free(unsafe.Pointer(message))
-		logrus.Errorf("bcos sdk start failed with error: %s", C.GoString(message))
-		return nil
+		return nil, fmt.Errorf("bcos sdk start failed with error: %s", C.GoString(message))
 	}
 
 	var wasm, smCrypto C.int
 	CGroupID := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, CGroupID, &wasm, &smCrypto)
-	chainID := C.bcos_sdk_get_group_chain_id(sdk, CGroupID)
-	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(cPrivateKey), cPrivateKeyLen)
-	return &CSDK{
-		Sdk:           sdk,
-		SMCrypto:      smCrypto,
-		WASM:          wasm != 0,
-		GroupID:       CGroupID,
-		ChainID:       chainID,
-		PrivateKey:    cPrivateKey,
-		PrivateKeyLen: cPrivateKeyLen,
-		KeyPair:       keyPair,
-		//NodeID:  C.CString("7c9e8d63a5451ef71e567216f1e2db1478147b9e3eca1c2889f864dc6711d291d3cf458606e39cad5a5dd876ab8cdc3a7dc8f227e9aff1ff1f309329a64f87a7"),
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(smCrypto, unsafe.Pointer(&privateKey[0]), C.uint(len(privateKey)))
+	if keyPair == nil {
+		message := C.bcos_sdk_get_last_error_msg()
+		C.bcos_sdk_c_free(unsafe.Pointer(CGroupID))
+		return nil, fmt.Errorf("bcos_sdk_create_keypair_by_private_key failed with error: %s", C.GoString(message))
 	}
+	chainID := C.bcos_sdk_get_group_chain_id(sdk, CGroupID)
+	return &CSDK{
+		sdk:             sdk,
+		smCrypto:        smCrypto != 0,
+		wasm:            wasm != 0,
+		groupID:         CGroupID,
+		chainID:         chainID,
+		privateKeyBytes: privateKey,
+		keyPair:         keyPair,
+	}, nil
 }
 
 func (csdk *CSDK) Close() {
-	C.bcos_sdk_stop(csdk.Sdk)
-	C.bcos_sdk_destroy(csdk.Sdk)
-	C.bcos_sdk_c_free(unsafe.Pointer(csdk.GroupID))
-	C.bcos_sdk_c_free(unsafe.Pointer(csdk.ChainID))
-	C.free(unsafe.Pointer(csdk.PrivateKey))
-	C.bcos_sdk_destroy_keypair(csdk.KeyPair)
+	C.bcos_sdk_stop(csdk.sdk)
+	C.bcos_sdk_destroy(csdk.sdk)
+	C.bcos_sdk_c_free(unsafe.Pointer(csdk.groupID))
+	C.bcos_sdk_c_free(unsafe.Pointer(csdk.chainID))
+	C.bcos_sdk_destroy_keypair(csdk.keyPair)
 }
 
-func (csdk *CSDK) Call(hc *ChanData, to string, data string) {
+func (csdk *CSDK) GroupID() string {
+	return C.GoString(csdk.groupID)
+}
+
+func (csdk *CSDK) ChainID() string {
+	return C.GoString(csdk.chainID)
+}
+
+func (csdk *CSDK) PrivateKeyBytes() []byte {
+	return csdk.privateKeyBytes
+}
+
+func (csdk *CSDK) SMCrypto() bool {
+	return csdk.smCrypto
+}
+
+func (csdk *CSDK) WASM() bool {
+	return csdk.wasm
+}
+
+func (csdk *CSDK) Call(hc *CallbackChan, to string, data string) {
 	cData := C.CString(data)
 	cTo := C.CString(to)
 	defer C.free(unsafe.Pointer(cData))
 	defer C.free(unsafe.Pointer(cTo))
-	C.bcos_rpc_call(csdk.Sdk, csdk.GroupID, nil, cTo, cData, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_call(csdk.sdk, csdk.groupID, nil, cTo, cData, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetTransaction(chanData *ChanData, txHash string) {
+func (csdk *CSDK) GetTransaction(chanData *CallbackChan, txHash string) {
 	cTxhash := C.CString(txHash)
 	cProof := C.int(proof)
 	defer C.free(unsafe.Pointer(cTxhash))
-	C.bcos_rpc_get_transaction(csdk.Sdk, csdk.GroupID, nil, cTxhash, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+	C.bcos_rpc_get_transaction(csdk.sdk, csdk.groupID, nil, cTxhash, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetTransactionReceipt(hc *ChanData, txHash string) {
+func (csdk *CSDK) GetTransactionReceipt(hc *CallbackChan, txHash string) {
 	cTxhash := C.CString(txHash)
 	cProof := C.int(proof)
 	defer C.free(unsafe.Pointer(cTxhash))
-	C.bcos_rpc_get_transaction_receipt(csdk.Sdk, csdk.GroupID, nil, cTxhash, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_get_transaction_receipt(csdk.sdk, csdk.groupID, nil, cTxhash, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
 func (csdk *CSDK) GetBlockLimit() int {
-	return int(C.bcos_rpc_get_block_limit(csdk.Sdk, csdk.GroupID))
+	return int(C.bcos_rpc_get_block_limit(csdk.sdk, csdk.groupID))
 }
 
-func (csdk *CSDK) GetGroupList(chanData *ChanData) {
-	C.bcos_rpc_get_group_list(csdk.Sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetGroupList(chanData *CallbackChan) {
+	C.bcos_rpc_get_group_list(csdk.sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetGroupInfo(chanData *ChanData) {
-	C.bcos_rpc_get_group_info(csdk.Sdk, csdk.GroupID, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetGroupInfo(chanData *CallbackChan) {
+	C.bcos_rpc_get_group_info(csdk.sdk, csdk.groupID, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetCode(chanData *ChanData, address string) {
+func (csdk *CSDK) GetCode(chanData *CallbackChan, address string) {
 	cAddress := C.CString(address)
 	defer C.free(unsafe.Pointer(cAddress))
-	C.bcos_rpc_get_code(csdk.Sdk, csdk.GroupID, nil, cAddress, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+	C.bcos_rpc_get_code(csdk.sdk, csdk.groupID, nil, cAddress, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetSealerList(chanData *ChanData) {
-	C.bcos_rpc_get_sealer_list(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetSealerList(chanData *CallbackChan) {
+	C.bcos_rpc_get_sealer_list(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetObserverList(chanData *ChanData) {
-	C.bcos_rpc_get_observer_list(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetObserverList(chanData *CallbackChan) {
+	C.bcos_rpc_get_observer_list(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetPbftView(chanData *ChanData) {
-	C.bcos_rpc_get_pbft_view(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetPbftView(chanData *CallbackChan) {
+	C.bcos_rpc_get_pbft_view(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetPendingTxSize(chanData *ChanData) {
-	C.bcos_rpc_get_pending_tx_size(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetPendingTxSize(chanData *CallbackChan) {
+	C.bcos_rpc_get_pending_tx_size(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetSyncStatus(chanData *ChanData) {
-	C.bcos_rpc_get_sync_status(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetSyncStatus(chanData *CallbackChan) {
+	C.bcos_rpc_get_sync_status(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetConsensusStatus(chanData *ChanData) {
-	C.bcos_rpc_get_consensus_status(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetConsensusStatus(chanData *CallbackChan) {
+	C.bcos_rpc_get_consensus_status(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetGroupPeers(chanData *ChanData) {
-	C.bcos_rpc_get_group_peers(csdk.Sdk, csdk.GroupID, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetGroupPeers(chanData *CallbackChan) {
+	C.bcos_rpc_get_group_peers(csdk.sdk, csdk.groupID, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetPeers(chanData *ChanData) {
-	C.bcos_rpc_get_peers(csdk.Sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetPeers(chanData *CallbackChan) {
+	C.bcos_rpc_get_peers(csdk.sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetBlockNumber(chanData *ChanData) {
-	C.bcos_rpc_get_block_number(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+func (csdk *CSDK) GetBlockNumber(chanData *CallbackChan) {
+	C.bcos_rpc_get_block_number(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) GetBlockHashByNumber(hc *ChanData, blockNumber int64) {
+func (csdk *CSDK) GetBlockHashByNumber(hc *CallbackChan, blockNumber int64) {
 	cBlockNumber := C.int64_t(blockNumber)
-	C.bcos_rpc_get_block_hash_by_number(csdk.Sdk, csdk.GroupID, nil, cBlockNumber, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_get_block_hash_by_number(csdk.sdk, csdk.groupID, nil, cBlockNumber, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetBlockByhash(hc *ChanData, blockHash string, onlyHeader int32, onlyTxHash int32) {
+func (csdk *CSDK) GetBlockByhash(hc *CallbackChan, blockHash string, onlyHeader int32, onlyTxHash int32) {
 	cBlockHash := C.CString(blockHash)
 	cOnlyHeader := C.int(onlyHeader)
 	cOnlyTxHash := C.int(onlyTxHash)
 	defer C.free(unsafe.Pointer(cBlockHash))
-	C.bcos_rpc_get_block_by_hash(csdk.Sdk, csdk.GroupID, nil, cBlockHash, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_get_block_by_hash(csdk.sdk, csdk.groupID, nil, cBlockHash, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetBlockByNumber(hc *ChanData, blockNumber int64, onlyHeader int32, onlyTxHash int32) {
+func (csdk *CSDK) GetBlockByNumber(hc *CallbackChan, blockNumber int64, onlyHeader int32, onlyTxHash int32) {
 	cBlockNumber := C.int64_t(blockNumber)
 	cOnlyHeader := C.int(onlyHeader)
 	cOnlyTxHash := C.int(onlyTxHash)
-	C.bcos_rpc_get_block_by_number(csdk.Sdk, csdk.GroupID, nil, cBlockNumber, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_get_block_by_number(csdk.sdk, csdk.groupID, nil, cBlockNumber, cOnlyHeader, cOnlyTxHash, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetGroupnodeInfo(hc *ChanData, nodeName string) {
-	cNodeName := C.CString(nodeName)
-	defer C.free(unsafe.Pointer(cNodeName))
-	C.bcos_rpc_get_group_node_info(csdk.Sdk, csdk.GroupID, cNodeName, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+func (csdk *CSDK) GetGroupNodeInfo(hc *CallbackChan) {
+	C.bcos_rpc_get_group_node_info(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetGroupNodeInfoList(hc *ChanData) {
-	C.bcos_rpc_get_group_info_list(csdk.Sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+func (csdk *CSDK) GetGroupNodeInfoList(hc *CallbackChan) {
+	C.bcos_rpc_get_group_info_list(csdk.sdk, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetTotalTransactionCount(hc *ChanData) {
-	C.bcos_rpc_get_total_transaction_count(csdk.Sdk, csdk.GroupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+func (csdk *CSDK) GetTotalTransactionCount(hc *CallbackChan) {
+	C.bcos_rpc_get_total_transaction_count(csdk.sdk, csdk.groupID, nil, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
-func (csdk *CSDK) GetSystemConfigByKey(hc *ChanData, key string) {
+func (csdk *CSDK) GetSystemConfigByKey(hc *CallbackChan, key string) {
 	cKey := C.CString(key)
 	defer C.free(unsafe.Pointer(cKey))
-	C.bcos_rpc_get_system_config_by_key(csdk.Sdk, csdk.GroupID, nil, cKey, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
+	C.bcos_rpc_get_system_config_by_key(csdk.sdk, csdk.groupID, nil, cKey, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(hc))
 }
 
 // amop
-func (csdk *CSDK) SubscribeTopic(chanData *ChanData, topic string) {
+func (csdk *CSDK) SubscribeTopic(chanData *CallbackChan, topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
 	cLen := C.size_t(len(topic))
-	C.bcos_amop_subscribe_topic(csdk.Sdk, &cTopic, cLen)
+	C.bcos_amop_subscribe_topic(csdk.sdk, &cTopic, cLen)
 }
 
-func (csdk *CSDK) SubscribeTopicWithCb(chanData *ChanData, topic string) {
+func (csdk *CSDK) SubscribeTopicWithCb(chanData *CallbackChan, topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
-	chanData.Sdk = csdk.Sdk
-	C.bcos_amop_subscribe_topic_with_cb(csdk.Sdk, cTopic, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_subscribe_resp), unsafe.Pointer(chanData))
+	chanData.sdk = csdk.sdk
+	C.bcos_amop_subscribe_topic_with_cb(csdk.sdk, cTopic, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_subscribe_resp), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) UnsubscribeTopicWithCb(chanData *ChanData, topic string) {
+func (csdk *CSDK) UnsubscribeTopicWithCb(chanData *CallbackChan, topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
 	cLen := C.size_t(len(topic))
-	C.bcos_amop_unsubscribe_topic(csdk.Sdk, &cTopic, cLen)
+	C.bcos_amop_unsubscribe_topic(csdk.sdk, &cTopic, cLen)
 }
 
-func (csdk *CSDK) PublishTopicMsg(chanData *ChanData, topic string, data string) {
+func (csdk *CSDK) PublishTopicMsg(chanData *CallbackChan, topic string, data string) {
 	cTopic := C.CString(topic)
 	cData := C.CString(data)
 	cLen := C.size_t(len(data))
 	cTimeout := C.uint32_t(timeout)
 	defer C.free(unsafe.Pointer(cTopic))
 	defer C.free(unsafe.Pointer(cData))
-	C.bcos_amop_publish(csdk.Sdk, cTopic, unsafe.Pointer(cData), cLen, cTimeout, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_publish_resp), unsafe.Pointer(chanData))
+	C.bcos_amop_publish(csdk.sdk, cTopic, unsafe.Pointer(cData), cLen, cTimeout, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_publish_resp), unsafe.Pointer(chanData))
 }
 
-func (csdk *CSDK) BroadcastAmopMsg(chanData *ChanData, topic string, data string) {
+func (csdk *CSDK) BroadcastAmopMsg(chanData *CallbackChan, topic string, data string) {
 	cTopic := C.CString(topic)
 	cData := C.CString(data)
 	cLen := C.size_t(len(data))
 	defer C.free(unsafe.Pointer(cTopic))
 	defer C.free(unsafe.Pointer(cData))
-	C.bcos_amop_broadcast(csdk.Sdk, cTopic, unsafe.Pointer(cData), cLen)
+	C.bcos_amop_broadcast(csdk.sdk, cTopic, unsafe.Pointer(cData), cLen)
 }
 
 // event
-func (csdk *CSDK) SubscribeEvent(chanData *ChanData, params string) string {
+func (csdk *CSDK) SubscribeEvent(chanData *CallbackChan, params string) string {
 	cParams := C.CString(params)
 	defer C.free(unsafe.Pointer(cParams))
-	return C.GoString(C.bcos_event_sub_subscribe_event(csdk.Sdk, csdk.GroupID, cParams, C.bcos_sdk_c_struct_response_cb(C.on_recv_event_resp_callback), unsafe.Pointer(chanData)))
+	return C.GoString(C.bcos_event_sub_subscribe_event(csdk.sdk, csdk.groupID, cParams, C.bcos_sdk_c_struct_response_cb(C.on_recv_event_resp_callback), unsafe.Pointer(chanData)))
 }
 
-func (csdk *CSDK) UnsubscribeEvent(chanData *ChanData, taskId string) {
+func (csdk *CSDK) UnsubscribeEvent(chanData *CallbackChan, taskId string) {
 	cTaskId := C.CString(taskId)
 	defer C.free(unsafe.Pointer(cTaskId))
-	C.bcos_event_sub_unsubscribe_event(csdk.Sdk, cTaskId)
+	C.bcos_event_sub_unsubscribe_event(csdk.sdk, cTaskId)
 }
 
-func (csdk *CSDK) RegisterBlockNotifier(chanData *ChanData) {
-	C.bcos_sdk_register_block_notifier(csdk.Sdk, csdk.GroupID, unsafe.Pointer(chanData), C.bcos_sdk_c_struct_response_cb(C.on_recv_notify_resp_callback))
+func (csdk *CSDK) RegisterBlockNotifier(chanData *CallbackChan) {
+	C.bcos_sdk_register_block_notifier(csdk.sdk, csdk.groupID, unsafe.Pointer(chanData), C.bcos_sdk_c_struct_response_cb(C.on_recv_notify_resp_callback))
 }
 
-func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
+func (csdk *CSDK) SendTransaction(chanData *CallbackChan, to string, data string) error {
 	cTo := C.CString(to)
 	cProof := C.int(proof)
 	cData := C.CString(data)
@@ -381,23 +400,21 @@ func (csdk *CSDK) SendTransaction(chanData *ChanData, to string, data string) {
 	defer C.free(unsafe.Pointer(cNull)) //todo
 	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
-	block_limit := C.bcos_rpc_get_block_limit(csdk.Sdk, csdk.GroupID)
+	block_limit := C.bcos_rpc_get_block_limit(csdk.sdk, csdk.groupID)
 	if block_limit < 0 {
-		logrus.Errorf("group not exist, group: %s\n", C.GoString(csdk.GroupID))
-		return
+		return fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
 
-	C.bcos_sdk_create_signed_transaction(csdk.KeyPair, csdk.GroupID, csdk.ChainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
+	C.bcos_sdk_create_signed_transaction(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, cNull, block_limit, 0, &tx_hash, &signed_tx)
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
-		logrus.Errorf("bcos_sdk_create_signed_transaction_with_signed_data failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
-		return
+		return fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
 
-	C.bcos_rpc_send_transaction(csdk.Sdk, csdk.GroupID, nil, signed_tx, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
+	C.bcos_rpc_send_transaction(csdk.sdk, csdk.groupID, nil, signed_tx, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), unsafe.Pointer(chanData))
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
-		logrus.Errorf("bcos rpc send transaction failed, error: %s\n", C.GoString(C.bcos_sdk_get_last_error_msg()))
-		return
+		return fmt.Errorf("bcos rpc send transaction failed, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
+	return nil
 }
