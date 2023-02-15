@@ -55,7 +55,7 @@ jobs:
         run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ 
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
@@ -103,7 +103,9 @@ jobs:
       - name: install Ubuntu dependencies
         run: sudo apt install -y git curl openssl build-essential cmake ccache
       - name: configure
-        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../
+        run: |
+          export GCC='gcc-10'; export CXX='g++-10'
+          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../
       - name: compile
         run: cd build && make -j4
       - name: run test
@@ -153,6 +155,7 @@ jobs:
           . /opt/rh/rh-perl530/enable
           export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/lib64/
           . /opt/rh/llvm-toolset-7.0/enable
+          alias cmake='cmake3'
           mkdir -p build && cd build
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
