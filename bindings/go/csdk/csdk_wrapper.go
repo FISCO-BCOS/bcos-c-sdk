@@ -22,7 +22,6 @@ package csdk
 import "C"
 
 import (
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"strconv"
@@ -44,23 +43,32 @@ type CSDK struct {
 }
 
 var contextCache = cache.New(5*time.Minute, 10*time.Minute)
+var indexCache = cache.New(5*time.Minute, 10*time.Minute)
+
+type AmopMessageContext struct {
+	Peer string
+	Seq  string
+	Data []byte
+}
 
 type Response struct {
-	Result []byte
+	Result interface{}
 	Err    error
 }
 
 type CallbackChan struct {
-	sdk  unsafe.Pointer
-	Data chan Response
+	sdk     unsafe.Pointer
+	Data    chan Response
+	Handler interface{}
 }
 
 //export on_recv_notify_resp_callback
 func on_recv_notify_resp_callback(group *C.char, block C.int64_t, context unsafe.Pointer) {
 	chanData := getContext(context, false)
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(block))
-	chanData.Data <- Response{b, nil}
+	// b := make([]byte, 8)
+	// binary.LittleEndian.PutUint64(b, uint64(block))
+	chanData.Handler.(func(string, uint64))(C.GoString(group), uint64(block))
+	// chanData.Data <- Response{b, nil}
 }
 
 //export on_recv_amop_subscribe_resp
@@ -69,29 +77,38 @@ func on_recv_amop_subscribe_resp(endpoint *C.char, seq *C.char, resp *C.struct_b
 	if int(resp.error) != 0 {
 		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
-		C.bcos_amop_send_response(unsafe.Pointer(chanData.sdk), endpoint, seq, resp.data, resp.size)
+		// C.bcos_amop_send_response(unsafe.Pointer(chanData.sdk), endpoint, seq, resp.data, resp.size)
 		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
-		chanData.Data <- Response{data, nil}
+		peer := C.GoString(endpoint)
+		seq := C.GoString(seq)
+		chanData.Handler.(func(string, string, []byte))(peer, seq, data)
+		// chanData.Data <- Response{AmopMessageContext{Peer: peer, Seq: seq, Data: data}, nil}
 	}
 }
 
 //export on_recv_amop_publish_resp
 func on_recv_amop_publish_resp(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp, true)
+	on_callback_once(resp)
 }
 
 //export on_recv_resp_callback
 func on_recv_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp, true)
+	on_callback_once(resp)
 }
 
 //export on_recv_event_resp_callback
 func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp, false)
+	chanData := getContext(resp.context, false)
+	if int(resp.error) != 0 {
+		chanData.Handler.(func([]byte, error))(nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc)))
+	} else {
+		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+		chanData.Handler.(func([]byte, error))(data, nil)
+	}
 }
 
-func on_callback(resp *C.struct_bcos_sdk_c_struct_response, delete bool) {
-	chanData := getContext(resp.context, delete)
+func on_callback_once(resp *C.struct_bcos_sdk_c_struct_response) {
+	chanData := getContext(resp.context, true)
 	if chanData == nil {
 		panic("callback channel is nil")
 		return
@@ -392,29 +409,46 @@ func (csdk *CSDK) GetSystemConfigByKey(chanData *CallbackChan, key string) {
 	C.bcos_rpc_get_system_config_by_key(csdk.sdk, csdk.groupID, nil, cKey, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), setContext(chanData))
 }
 
-// amop
-func (csdk *CSDK) SubscribeTopic(chanData *CallbackChan, topic string) {
-	cTopic := C.CString(topic)
-	defer C.free(unsafe.Pointer(cTopic))
-	cLen := C.size_t(len(topic))
-	C.bcos_amop_subscribe_topic(csdk.sdk, &cTopic, cLen)
-}
+// // amop
+// func (csdk *CSDK) SubscribeAmopTopicDefaultHandler(topic []string) {
+// 	cTopic := C.CString(topic)
+// 	defer C.free(unsafe.Pointer(cTopic))
+// 	cLen := C.size_t(len(topic))
+// 	C.bcos_amop_subscribe_topic(csdk.sdk, &cTopic, cLen)
+// }
 
-func (csdk *CSDK) SubscribeTopicWithCb(chanData *CallbackChan, topic string) {
+func (csdk *CSDK) SubscribeAmopTopic(chanData *CallbackChan, topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
 	chanData.sdk = csdk.sdk
-	C.bcos_amop_subscribe_topic_with_cb(csdk.sdk, cTopic, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_subscribe_resp), setContext(chanData))
+	index := setContext(chanData)
+	indexCache.Set(topic, index, cache.NoExpiration)
+	C.bcos_amop_subscribe_topic_with_cb(csdk.sdk, cTopic, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_subscribe_resp), index)
 }
 
-func (csdk *CSDK) UnsubscribeTopicWithCb(chanData *CallbackChan, topic string) {
+func (csdk *CSDK) UnsubscribeAmopTopic(topic string) {
 	cTopic := C.CString(topic)
 	defer C.free(unsafe.Pointer(cTopic))
 	cLen := C.size_t(len(topic))
 	C.bcos_amop_unsubscribe_topic(csdk.sdk, &cTopic, cLen)
+	index, found := indexCache.Get(topic)
+	if found {
+		getContext(index, true)
+	}
 }
 
-func (csdk *CSDK) PublishTopicMsg(chanData *CallbackChan, topic string, data []byte, timeout int) {
+func (csdk *CSDK) SendAmopResponse(peer, seq string, data []byte) {
+	cPeer := C.CString(peer)
+	cSeq := C.CString(seq)
+	cData := C.CBytes(data)
+	cLen := C.size_t(len(data))
+	defer C.free(unsafe.Pointer(cPeer))
+	defer C.free(unsafe.Pointer(cSeq))
+	defer C.free(unsafe.Pointer(cData))
+	C.bcos_amop_send_response(csdk.sdk, cPeer, cSeq, cData, cLen)
+}
+
+func (csdk *CSDK) PublishAmopTopicMsg(chanData *CallbackChan, topic string, data []byte, timeout int) {
 	cTopic := C.CString(topic)
 	cData := C.CBytes(data)
 	cLen := C.size_t(len(data))
@@ -424,7 +458,7 @@ func (csdk *CSDK) PublishTopicMsg(chanData *CallbackChan, topic string, data []b
 	C.bcos_amop_publish(csdk.sdk, cTopic, cData, cLen, cTimeout, C.bcos_sdk_c_struct_response_cb(C.on_recv_amop_publish_resp), setContext(chanData))
 }
 
-func (csdk *CSDK) BroadcastAmopMsg(chanData *CallbackChan, topic string, data []byte) {
+func (csdk *CSDK) BroadcastAmopMsg(topic string, data []byte) {
 	cTopic := C.CString(topic)
 	cData := C.CBytes(data)
 	cLen := C.size_t(len(data))
@@ -438,16 +472,23 @@ func (csdk *CSDK) SubscribeEvent(chanData *CallbackChan, params string) string {
 	cParams := C.CString(params)
 	defer C.free(unsafe.Pointer(cParams))
 	chanData.sdk = csdk.sdk
-	return C.GoString(C.bcos_event_sub_subscribe_event(csdk.sdk, csdk.groupID, cParams, C.bcos_sdk_c_struct_response_cb(C.on_recv_event_resp_callback), setContext(chanData)))
+	index := setContext(chanData)
+	taskID := C.GoString(C.bcos_event_sub_subscribe_event(csdk.sdk, csdk.groupID, cParams, C.bcos_sdk_c_struct_response_cb(C.on_recv_event_resp_callback), index))
+	indexCache.Set(taskID, index, cache.NoExpiration)
+	return taskID
 }
 
-func (csdk *CSDK) UnsubscribeEvent(chanData *CallbackChan, taskId string) {
+func (csdk *CSDK) UnsubscribeEvent(taskId string) { // TODO: CallbackChan task from contextCache
 	cTaskId := C.CString(taskId)
 	defer C.free(unsafe.Pointer(cTaskId))
 	C.bcos_event_sub_unsubscribe_event(csdk.sdk, cTaskId)
+	index, found := indexCache.Get(taskId)
+	if found {
+		getContext(index, true)
+	}
 }
 
-func (csdk *CSDK) RegisterBlockNotifier(chanData *CallbackChan) {
+func (csdk *CSDK) RegisterBlockNotifier(chanData *CallbackChan) { // TODO: implement UnRegisterBlockNotifier
 	C.bcos_sdk_register_block_notifier(csdk.sdk, csdk.groupID, setContext(chanData), C.bcos_sdk_c_struct_response_cb(C.on_recv_notify_resp_callback))
 }
 
