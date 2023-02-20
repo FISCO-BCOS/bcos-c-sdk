@@ -57,7 +57,7 @@ type CallbackChan struct {
 
 //export on_recv_notify_resp_callback
 func on_recv_notify_resp_callback(group *C.char, block C.int64_t, context unsafe.Pointer) {
-	chanData := (*CallbackChan)(unsafe.Pointer(context))
+	chanData := getContext(context, false)
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uint64(block))
 	chanData.Data <- Response{b, nil}
@@ -65,7 +65,7 @@ func on_recv_notify_resp_callback(group *C.char, block C.int64_t, context unsafe
 
 //export on_recv_amop_subscribe_resp
 func on_recv_amop_subscribe_resp(endpoint *C.char, seq *C.char, resp *C.struct_bcos_sdk_c_struct_response) {
-	chanData := getContext(resp.context)
+	chanData := getContext(resp.context, false)
 	if int(resp.error) != 0 {
 		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
 	} else {
@@ -77,23 +77,23 @@ func on_recv_amop_subscribe_resp(endpoint *C.char, seq *C.char, resp *C.struct_b
 
 //export on_recv_amop_publish_resp
 func on_recv_amop_publish_resp(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp)
+	on_callback(resp, true)
 }
 
 //export on_recv_resp_callback
 func on_recv_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp)
+	on_callback(resp, true)
 }
 
 //export on_recv_event_resp_callback
 func on_recv_event_resp_callback(resp *C.struct_bcos_sdk_c_struct_response) {
-	on_callback(resp)
+	on_callback(resp, false)
 }
 
-func on_callback(resp *C.struct_bcos_sdk_c_struct_response) {
-	chanData := getContext(resp.context)
+func on_callback(resp *C.struct_bcos_sdk_c_struct_response, delete bool) {
+	chanData := getContext(resp.context, delete)
 	if chanData == nil {
-		chanData.Data <- Response{nil, fmt.Errorf("callback channel is nil")}
+		panic("callback channel is nil")
 		return
 	}
 	if int(resp.error) != 0 {
@@ -112,14 +112,17 @@ func setContext(context *CallbackChan) unsafe.Pointer {
 	return unsafe.Pointer(&parseI)
 }
 
-func getContext(index unsafe.Pointer) *CallbackChan {
+func getContext(index unsafe.Pointer, delete bool) *CallbackChan {
 	i := *(*int)(index)
 	p := fmt.Sprintf("%#x", i)
 	context, found := contextCache.Get(p)
 	if found {
-		contextCache.Delete(p)
+		if delete {
+			contextCache.Delete(p)
+		}
 		return context.(*CallbackChan)
 	}
+
 	return nil
 }
 
@@ -434,6 +437,7 @@ func (csdk *CSDK) BroadcastAmopMsg(chanData *CallbackChan, topic string, data []
 func (csdk *CSDK) SubscribeEvent(chanData *CallbackChan, params string) string {
 	cParams := C.CString(params)
 	defer C.free(unsafe.Pointer(cParams))
+	chanData.sdk = csdk.sdk
 	return C.GoString(C.bcos_event_sub_subscribe_event(csdk.sdk, csdk.groupID, cParams, C.bcos_sdk_c_struct_response_cb(C.on_recv_event_resp_callback), setContext(chanData)))
 }
 
