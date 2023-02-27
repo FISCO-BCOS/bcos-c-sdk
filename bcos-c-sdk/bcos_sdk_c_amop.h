@@ -104,7 +104,7 @@ void bcos_amop_broadcast(void* sdk, const char* topic, void* data, size_t size);
 void bcos_amop_set_subscribe_topic_cb(void* sdk, bcos_sdk_c_amop_subscribe_cb cb, void* context);
 
 void bcos_amop_send_response(
-    void* sdk, const char* endpoint, const char* peer, void* data, size_t size);
+    void* sdk, const char* peer, const char* seq, void* data, size_t size);
 
 // -------------------------- amop interface end ----------------------------
 #ifdef __cplusplus
