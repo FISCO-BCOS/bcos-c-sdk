@@ -433,7 +433,7 @@ func (csdk *CSDK) UnsubscribeAmopTopic(topic string) {
 	C.bcos_amop_unsubscribe_topic(csdk.sdk, &cTopic, cLen)
 	index, found := indexCache.Get(topic)
 	if found {
-		getContext(index, true)
+		getContext(index.(unsafe.Pointer), true)
 	}
 }
 
@@ -484,7 +484,7 @@ func (csdk *CSDK) UnsubscribeEvent(taskId string) { // TODO: CallbackChan task f
 	C.bcos_event_sub_unsubscribe_event(csdk.sdk, cTaskId)
 	index, found := indexCache.Get(taskId)
 	if found {
-		getContext(index, true)
+		getContext(index.(unsafe.Pointer), true)
 	}
 }
 
