@@ -29,24 +29,6 @@
 using namespace bcos;
 using namespace bcos::boostssl;
 
-#define BCOS_SDK_C_RPC_PARAMS_VERIFICATION(p, ctx, cb)                  \
-    do                                                                  \
-    {                                                                   \
-        if (!p)                                                         \
-        {                                                               \
-            if (cb)                                                     \
-            {                                                           \
-                bcos_sdk_c_struct_response resp;                        \
-                resp.error = -1;                                        \
-                resp.desc = (char*)"illegal parameter, " #p " is NULL"; \
-                resp.ctx = ctx;                                         \
-                cb(&resp);                                              \
-            }                                                           \
-            return;                                                     \
-        }                                                               \
-    } while (0);
-
-
 // ------------------------common send message interface begin----------------
 // send message to rpc server
 void bcos_rpc_generic_method_call(
