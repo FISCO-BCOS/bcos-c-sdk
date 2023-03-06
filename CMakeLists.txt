@@ -19,9 +19,11 @@
 cmake_minimum_required(VERSION 3.14)
 
 set(CMAKE_CXX_STANDARD 20)
+
 if(NOT MSVC)
-set(CMAKE_CXX_FLAGS "-pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
+    set(CMAKE_CXX_FLAGS "-pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
 endif()
+
 set(CMAKE_OSX_DEPLOYMENT_TARGET "12" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
@@ -68,10 +70,12 @@ HunterGate(
 )
 
 # project name
-project(bcos-c-sdk VERSION "3.2.0")
+project(bcos-c-sdk VERSION "3.3.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
-set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 include_directories(${CMAKE_INSTALL_INCLUDEDIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -122,6 +126,14 @@ add_dependencies(${BCOS_C_SDK_TARGET} BuildInfo.h)
 # build sample exec
 if(BUILD_SAMPLE)
     add_subdirectory(sample)
+endif()
+
+# build sample exec
+if(BUILD_JNI)
+    # find JNI
+    find_package(JNI REQUIRED)
+    include_directories(${JNI_INCLUDE_DIRS})
+    add_subdirectory(bindings/java/jni/src/main/c)
 endif()
 
 # ut and binary exe
