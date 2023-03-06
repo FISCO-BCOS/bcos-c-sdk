@@ -52,10 +52,10 @@ jobs:
         run: sudo apt install -y git curl openssl build-essential clang cmake ccache
       - name: configure
         if: runner.os == 'macOS'
-        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
+        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
@@ -104,8 +104,8 @@ jobs:
         run: sudo apt install -y git curl openssl build-essential cmake ccache
       - name: configure
         run: |
-          export GCC='gcc-10'; export CXX='g++-10'
-          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../
+          export CC='gcc-10'; export CXX='g++-10'
+          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: compile
         run: cd build && make -j4
       - name: run test
@@ -202,7 +202,7 @@ jobs:
           uses: microsoft/setup-msbuild@v1.1
         - name: configure
           if: runner.os == 'Windows'
-          run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_STATUS_DEBUG=ON -DTESTS=ON
+          run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_STATUS_DEBUG=ON -DTESTS=ON -DBUILD_JNI=ON
         - name: compile
           run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
         - uses: actions/upload-artifact@v2

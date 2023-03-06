@@ -32,6 +32,8 @@
 *.app
 .cache
 build
+deps
+.gradle
 .vscode/
 .idea/
 .DS_Store
