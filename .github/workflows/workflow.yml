@@ -64,6 +64,10 @@ jobs:
         with:
           name: libbcos-c-sdk.dylib.zip
           path: build/libbcos-c-sdk.dylib
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-sdk-jni.dylib.zip
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
   build_with_gcc:
     name: build_with_gcc
     runs-on: ${{ matrix.os }}
@@ -147,7 +151,7 @@ jobs:
       - name: install CentOS dependencies
         run: |
           yum install -y epel-release centos-release-scl
-          yum install -y git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
+          yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
       - name: configure
         run: |
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -156,10 +160,11 @@ jobs:
           export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/lib64/
           . /opt/rh/llvm-toolset-7.0/enable
           alias cmake='cmake3'
+          java -version
           mkdir -p build && cd build
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
-          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON
+          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON
       - name: compile
         run: |
           export CFLAGS="${CFLAGS} -fPIC"
@@ -170,6 +175,10 @@ jobs:
         with:
           name: libbcos-c-sdk.so.zip
           path: build/libbcos-c-sdk.so
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-sdk-jni.so.zip
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
   build_with_windows:
       name: build_with_windows
       runs-on: ${{ matrix.os }}
@@ -213,3 +222,11 @@ jobs:
           with:
             name: bcos-c-sdk.dll.zip
             path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-sdk-jni.lib.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.lib
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-sdk-jni.dll.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
