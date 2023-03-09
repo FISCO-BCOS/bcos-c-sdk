@@ -37,6 +37,7 @@ int main(int argc, char** argv)
     config.reconnect_period_ms = 20000;
     config.message_timeout_ms = 20000;
     config.thread_pool_size = 4;
+    config.send_rpc_request_to_highest_block_node = 1;
 
     struct bcos_sdk_c_endpoint ep;
     ep.host = host;
