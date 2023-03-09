@@ -1,6 +1,11 @@
 # Prerequisites
 *.d
 
+gpg.gpg
+gradle.properties
+deps
+.gradle
+
 # Compiled Object files
 *.slo
 *.lo
