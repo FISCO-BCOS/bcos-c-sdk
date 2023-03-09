@@ -48,6 +48,8 @@ int main(int argc, char** argv)
     config.peers = &ep;
     config.peers_count = 1;
 
+    config.send_rpc_request_to_highest_block_node = 1;
+
     void* sdk = bcos_sdk_create(&config);
     if (!sdk)
     {

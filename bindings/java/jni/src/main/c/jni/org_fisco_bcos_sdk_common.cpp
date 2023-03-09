@@ -429,6 +429,8 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     config->thread_pool_size = threadPoolSize;
     config->peers_count = listSize;
     config->disable_ssl = disableSsl;
+    // TODO: init send_rpc_request_to_highest_block_node from java-sdk
+    config->send_rpc_request_to_highest_block_node = 1;
     config->is_cert_path = 0;
     config->peers = ep;
     config->ssl_type = strdup(strSslType.c_str());
