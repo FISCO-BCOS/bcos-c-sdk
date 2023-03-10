@@ -264,6 +264,9 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     jfieldID heartbeatPeriodMsFieldID = env->GetFieldID(configClass, "heartbeatPeriodMs", "I");
     int heartbeatPeriodMs = (int)env->GetIntField(jconfig, heartbeatPeriodMsFieldID);
 
+    jfieldID sendRpcRequestToHighestBlockNodeFieldID = env->GetFieldID(configClass, "sendRpcRequestToHighestBlockNode", "Z");
+    bool sendRpcRequestToHighestBlockNode = env->GetBooleanField(jconfig, sendRpcRequestToHighestBlockNodeFieldID);
+
     jfieldID messageTimeoutMsFieldID = env->GetFieldID(configClass, "messageTimeoutMs", "I");
     int messageTimeoutMs = (int)env->GetIntField(jconfig, messageTimeoutMsFieldID);
 
@@ -344,7 +347,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
                 .c_str());
     }
 
-    bool disableSsl = (int)env->GetBooleanField(jconfig, jdisableSsl);
+    bool disableSsl = env->GetBooleanField(jconfig, jdisableSsl);
 
     std::string strSslType;
 
@@ -429,8 +432,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     config->thread_pool_size = threadPoolSize;
     config->peers_count = listSize;
     config->disable_ssl = disableSsl;
-    // TODO: init send_rpc_request_to_highest_block_node from java-sdk
-    config->send_rpc_request_to_highest_block_node = 1;
+    config->send_rpc_request_to_highest_block_node = sendRpcRequestToHighestBlockNode;
     config->is_cert_path = 0;
     config->peers = ep;
     config->ssl_type = strdup(strSslType.c_str());

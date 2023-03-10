@@ -12,6 +12,8 @@ public class JniConfig {
   private int heartbeatPeriodMs = 20000;
   private int messageTimeoutMs = 10000;
 
+  private boolean sendRpcRequestToHighestBlockNode = true;
+
   /** if disable the ssl connection */
   private boolean disableSsl = false;
   /** ssl or sm_ssl */
@@ -211,6 +213,14 @@ public class JniConfig {
     this.peers = peers;
   }
 
+  public boolean isSendRpcRequestToHighestBlockNode() {
+    return sendRpcRequestToHighestBlockNode;
+  }
+
+  public void setSendRpcRequestToHighestBlockNode(boolean sendRpcRequestToHighestBlockNode) {
+    this.sendRpcRequestToHighestBlockNode = sendRpcRequestToHighestBlockNode;
+  }
+
   @Override
   public String toString() {
     return "JniConfig{"
@@ -222,14 +232,19 @@ public class JniConfig {
         + heartbeatPeriodMs
         + ", messageTimeoutMs="
         + messageTimeoutMs
+        + ", sendRpcRequestToHighestBlockNode="
+        + sendRpcRequestToHighestBlockNode
         + ", disableSsl="
         + disableSsl
         + ", sslType='"
         + sslType
         + '\''
-        + ", peers='"
+        + ", certConfig="
+        + certConfig
+        + ", smCertConfig="
+        + smCertConfig
+        + ", peers="
         + peers
-        + '\''
         + '}';
   }
 }

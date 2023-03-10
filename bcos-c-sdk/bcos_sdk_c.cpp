@@ -135,7 +135,7 @@ void* bcos_sdk_create(struct bcos_sdk_c_config* config)
         // construct sdk object
         auto factory = std::make_shared<bcos::cppsdk::SdkFactory>();
         auto wsConfig = initWsConfig(config);
-        auto sdk = factory->buildSdk(wsConfig);
+        auto sdk = factory->buildSdk(wsConfig, config->send_rpc_request_to_highest_block_node);
         auto sdkPointer = sdk.release();
 
         auto version = bcos_sdk_version();
