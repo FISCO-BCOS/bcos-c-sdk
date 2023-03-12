@@ -132,6 +132,9 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcServiceJniObj_sendT
     context->jcallback = env->NewGlobalRef(jcallback);
     context->jvm = jvm;
 
+    const char* respClassName = "org/fisco/bcos/sdk/jni/common/Response";
+    bcos_sdk_c_find_jclass(env, respClassName);
+
     const char* tx_hash = bcos_rpc_service_send_transaction(sdk, keypair, group, node, to, data,
         len, abi, attr, extra_data, on_receive_tars_rpc_response, context);
 
