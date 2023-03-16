@@ -23,10 +23,11 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
         set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
         set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CCACHE_PROGRAM}")
     endif()
+    set(CMAKE_CXX_STANDARD 20)
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "/usr/bin/time")
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "/usr/bin/time")
     # Use ISO C++17 standard language.
-    set(CMAKE_CXX_FLAGS "-std=c++17 -pthread -fPIC -fexceptions")
+    set(CMAKE_CXX_FLAGS "-pthread -fPIC -fexceptions")
     # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     # Enables all the warnings about constructions that some users consider questionable,
     # and that are easy to avoid.  Also enable some extra warning flags that are not
@@ -136,10 +137,10 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
         endif()
     endif ()
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
-    
+
     # Only support visual studio 2017 and visual studio 2019
     set(MSVC_MIN_VERSION "1914") # VS2017 15.7, for full-ish C++17 support
-    
+
     message(STATUS "Compile On Windows, MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
 
     if (MSVC_TOOLSET_VERSION EQUAL 141)
@@ -150,7 +151,15 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
         message(FATAL_ERROR "Unsupported Visual Studio, supported list: [2017, 2019]. Current MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
     endif()
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+    add_definitions(-DUSE_STD_RANGES)
+    add_compile_options(/std:c++latest)
+    add_compile_options(-bigobj)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+    # set(CMAKE_CXX_FLAGS_DEBUG "/MTd /DEBUG")
+    # set(CMAKE_CXX_FLAGS_MINSIZEREL "/MT /Os")
+    # set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+    # set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MT /DEBUG")
+    link_libraries(ws2_32 Crypt32 userenv)
 else ()
     message(WARNING "Your compiler is not tested, if you run into any issues, we'd welcome any patches.")
 endif ()

@@ -35,6 +35,15 @@ extern "C" {
 void* bcos_sdk_create_keypair(int crypto_type);
 
 /**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair(const char* hsm_lib_path);
+
+/**
  * @brief : create key pair used for transaction sign
  *
  * @param crypto_type: crypto type, ECDSA: BCOS_C_SDK_ECDSA_TYPE, SM: BCOS_C_SDK_SM_TYPE
@@ -46,6 +55,18 @@ void* bcos_sdk_create_keypair(int crypto_type);
 void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key, unsigned length);
 
 /**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param private_key: private key in bytes format
+ * @param length     : private key bytes length
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair_by_private_key(
+    void* private_key, unsigned length, const char* hsm_lib_path);
+
+/**
  * @brief : create key pair used for transaction sign
  *
  * @param crypto_type: crypto type, ECDSA: BCOS_C_SDK_ECDSA_TYPE, SM: BCOS_C_SDK_SM_TYPE
@@ -54,6 +75,29 @@ void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key,
  * @return void*: key pair object pointer, return NULL on failure
  */
 void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* private_key);
+
+/**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param private_key: private key in hex string format
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair_by_hex_private_key(
+    const char* private_key, const char* hsm_lib_path);
+
+/**
+ * @brief : use hsm key pair for transaction sign according to the keyindex and password
+ *
+ * @param key_index: key index inside the HSM
+ * @param password: the password for the permission to use HSM
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_use_hsm_keypair_by_keyindex_and_password(
+    unsigned key_index, const char* password, const char* hsm_lib_path);
 
 /**
  * @brief : destroy the keypair object

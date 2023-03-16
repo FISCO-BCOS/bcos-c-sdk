@@ -66,6 +66,32 @@ void* bcos_sdk_create_keypair(int crypto_type)
 }
 
 /**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair(const char* hsm_lib_path)
+{
+    bcos_sdk_clear_last_error();
+    try
+    {
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        std::string hsmLibPath(hsm_lib_path);
+        auto keyPair = keyPairBuilder->genKeyPair(CryptoType::HsmSM2, hsmLibPath);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_hsm_keypair") << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+/**
  * @brief : create key pair used for transaction sign
  *
  * @param crypto_type: crypto type, ECDSA: BCOS_C_SDK_ECDSA_TYPE, SM: BCOS_C_SDK_SM_TYPE
@@ -111,6 +137,42 @@ void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key,
 }
 
 /**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param private_key: private key in bytes format
+ * @param length     : private key bytes length
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair_by_private_key(
+    void* private_key, unsigned length, const char* hsm_lib_path)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (length > 0), "invalid private key length, it must greater than zero", NULL);
+    try
+    {
+        auto priBytes = std::make_shared<bcos::bytes>(
+            (bcos::byte*)private_key, (bcos::byte*)private_key + length);
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->genKeyPair(
+            CryptoType::HsmSM2, bytesConstRef((byte*)private_key, length), hsm_lib_path);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_hsm_keypair_by_private_key")
+                        << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+/**
  * @brief : create key pair used for transaction sign
  *
  * @param crypto_type: crypto type, ECDSA: BCOS_C_SDK_ECDSA_TYPE, SM: BCOS_C_SDK_SM_TYPE
@@ -146,6 +208,71 @@ void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* pr
 
         BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_private_key")
                         << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+/**
+ * @brief : create hsm key pair used for transaction sign
+ *
+ * @param private_key: private key in hex string format
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_create_hsm_keypair_by_hex_private_key(
+    const char* private_key, const char* hsm_lib_path)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    try
+    {
+        auto priBytes = fromHexString(std::string(private_key));
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->genKeyPair(CryptoType::HsmSM2,
+            bytesConstRef((byte*)priBytes->data(), priBytes->size()), hsm_lib_path);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_hsm_keypair_by_hex_private_key")
+                        << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+/**
+ * @brief : use hsm key pair for transaction sign according to the keyindex and password
+ *
+ * @param key_index: key index inside the HSM
+ * @param password: the password for the permission to use HSM
+ * @param hsm_lib_path: the path of hsm library
+ *
+ * @return void*: key pair object pointer, return NULL on failure
+ */
+void* bcos_sdk_use_hsm_keypair_by_keyindex_and_password(
+    unsigned key_index, const char* password, const char* hsm_lib_path)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(password, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (key_index > 0), "invalid key index of HSM, it must greater than zero", NULL);
+    try
+    {
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->useHsmKeyPair(key_index, password, hsm_lib_path);
+        return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_use_hsm_keypair_by_keyindex_and_password")
+                        << LOG_KV("errorMsg", errorMsg);
         return NULL;
     }
 }

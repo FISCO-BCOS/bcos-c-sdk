@@ -48,6 +48,7 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
     config->heartbeat_period_ms = -1;
     config->reconnect_period_ms = -1;
     config->disable_ssl = 0;
+    config->send_rpc_request_to_highest_block_node = 1;
     config->cert_config = NULL;
     config->sm_cert_config = NULL;
     config->peers = NULL;
@@ -86,6 +87,8 @@ struct bcos_sdk_c_config* bcos_sdk_create_config(int sm_ssl, char* host, int por
 
     // do not disable ssl
     config->disable_ssl = 0;
+    //
+    config->send_rpc_request_to_highest_block_node = 1;
 
     // set ssl type
     config->ssl_type = my_strdup(sm_ssl ? "sm_ssl" : "ssl");
