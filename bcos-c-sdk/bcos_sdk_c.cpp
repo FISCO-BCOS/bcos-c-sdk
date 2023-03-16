@@ -135,12 +135,19 @@ void* bcos_sdk_create(struct bcos_sdk_c_config* config)
         // construct sdk object
         auto factory = std::make_shared<bcos::cppsdk::SdkFactory>();
         auto wsConfig = initWsConfig(config);
-        auto sdk = factory->buildSdk(wsConfig);
+        auto sdk = factory->buildSdk(wsConfig, config->send_rpc_request_to_highest_block_node);
         auto sdkPointer = sdk.release();
 
         auto version = bcos_sdk_version();
         BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_create") << LOG_DESC("[NEWOBJ]")
-                       << LOG_KV("sdk", sdkPointer) << LOG_KV("version", version);
+                       << LOG_KV("sdk", sdkPointer) << LOG_KV("version", version)
+                       << LOG_KV("peers_count", config->peers_count)
+                       << LOG_KV("disable_ssl", config->disable_ssl)
+                       << LOG_KV("message_timeout_ms", config->message_timeout_ms)
+                       << LOG_KV("reconnect_period_ms", config->reconnect_period_ms)
+                       << LOG_KV("heartbeat_period_ms", config->heartbeat_period_ms)
+                       << LOG_KV("send_rpc_request_to_highest_block_node",
+                              config->send_rpc_request_to_highest_block_node);
         bcos_sdk_c_free((void*)version);
         return sdkPointer;
     }

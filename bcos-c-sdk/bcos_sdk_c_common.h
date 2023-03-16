@@ -77,6 +77,8 @@ struct bcos_sdk_c_config
     int message_timeout_ms;
     int reconnect_period_ms;
     int heartbeat_period_ms;
+    // enable send rpc request to the highest block number node, default: true
+    int send_rpc_request_to_highest_block_node;
 
     // connected peers
     struct bcos_sdk_c_endpoint* peers;
@@ -95,6 +97,13 @@ struct bcos_sdk_c_config
     struct bcos_sdk_c_sm_cert_config* sm_cert_config;
 };
 
+struct bcos_sdk_c_signature_result
+{
+    uint8_t r[32];
+    uint8_t s[32];
+    uint8_t v[512];
+};
+
 /**
  * @brief create bcos_sdk_c_config in default value
  * @return struct bcos_sdk_c_config*
@@ -102,7 +111,7 @@ struct bcos_sdk_c_config
 struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty();
 
 /**
- * @brief create bcos_sdk_c_config 
+ * @brief create bcos_sdk_c_config
  * @return struct bcos_sdk_c_config*
  */
 struct bcos_sdk_c_config* bcos_sdk_create_config(int sm_ssl, char* host, int port);

@@ -52,10 +52,10 @@ jobs:
         run: sudo apt install -y git curl openssl build-essential clang cmake ccache
       - name: configure
         if: runner.os == 'macOS'
-        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DTESTS=ON
+        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ 
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
@@ -64,6 +64,10 @@ jobs:
         with:
           name: libbcos-c-sdk.dylib.zip
           path: build/libbcos-c-sdk.dylib
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-sdk-jni.dylib.zip
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
   build_with_gcc:
     name: build_with_gcc
     runs-on: ${{ matrix.os }}
@@ -103,7 +107,9 @@ jobs:
       - name: install Ubuntu dependencies
         run: sudo apt install -y git curl openssl build-essential cmake ccache
       - name: configure
-        run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../
+        run: |
+          export CC='gcc-10'; export CXX='g++-10'
+          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
       - name: compile
         run: cd build && make -j4
       - name: run test
@@ -145,14 +151,20 @@ jobs:
       - name: install CentOS dependencies
         run: |
           yum install -y epel-release centos-release-scl
-          yum install -y git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel && source /opt/rh/devtoolset-7/enable
+          yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl cmake3 ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
       - name: configure
         run: |
-          source /opt/rh/devtoolset-7/enable
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          . /opt/rh/devtoolset-11/enable
+          . /opt/rh/rh-perl530/enable
+          export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/lib64/
+          . /opt/rh/llvm-toolset-7.0/enable
+          alias cmake='cmake3'
+          java -version
           mkdir -p build && cd build
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
-          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON
+          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON
       - name: compile
         run: |
           export CFLAGS="${CFLAGS} -fPIC"
@@ -163,6 +175,10 @@ jobs:
         with:
           name: libbcos-c-sdk.so.zip
           path: build/libbcos-c-sdk.so
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-sdk-jni.so.zip
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
   build_with_windows:
       name: build_with_windows
       runs-on: ${{ matrix.os }}
@@ -195,7 +211,7 @@ jobs:
           uses: microsoft/setup-msbuild@v1.1
         - name: configure
           if: runner.os == 'Windows'
-          run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_STATUS_DEBUG=ON -DTESTS=ON
+          run: mkdir -p build && cd build && cmake -G "Visual Studio 16 2019" -A x64 ../ -DHUNTER_CONFIGURATION_TYPES=Release -DHUNTER_STATUS_DEBUG=ON -DTESTS=ON -DBUILD_JNI=ON
         - name: compile
           run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
         - uses: actions/upload-artifact@v2
@@ -206,3 +222,11 @@ jobs:
           with:
             name: bcos-c-sdk.dll.zip
             path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-sdk-jni.lib.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.lib
+        - uses: actions/upload-artifact@v2
+          with:
+            name: bcos-sdk-jni.dll.zip
+            path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
