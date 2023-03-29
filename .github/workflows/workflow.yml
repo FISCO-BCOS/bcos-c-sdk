@@ -161,16 +161,11 @@ jobs:
           . /opt/rh/llvm-toolset-7.0/enable
           alias cmake='cmake3'
           java -version
+          export CFLAGS="${CFLAGS} -fPIC"
+          export CXXFLAGS="${CXXFLAGS} -fPIC"
           mkdir -p build && cd build
-          export CFLAGS="${CFLAGS} -fPIC"
-          export CXXFLAGS="${CXXFLAGS} -fPIC"
           cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON
-      - name: compile
-        run: |
-          export CFLAGS="${CFLAGS} -fPIC"
-          export CXXFLAGS="${CXXFLAGS} -fPIC"
-          cd build && make -j4
-          # CTEST_OUTPUT_ON_FAILURE=TRUE make test
+          make -j4
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
