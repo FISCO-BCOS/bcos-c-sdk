@@ -1,10 +1,25 @@
 ### 3.3.0
 
-(2023-03-17)
+(2023-04-18)
+
+#### bcos-sdk-jni
+**新增**
+- 新增密码机支持：配置keyindex使用内置密钥、签名验签
+- 添加 `sendTransaction` 接口，支持同时编码/签名/发送交易功能
 
 **更新**
+- 更新 `bcos-boostssl` 以支持域名
+- 更新 `jackson-databind` 到 `2.14.2` 版本
 
-- 合并bcos-sdk-jni
+#### bcos-c-sdk
+
+**新增**
+- 新增密码机支持：配置keyindex使用内置密钥、签名验签
+- 添加 `sendTransaction` 接口，支持同时编码/签名/发送交易功能
+
+**更新**
+- 更新 `jackson-databind` 到 `2.14.2` 版本
+- 合并 `bcos-sdk-jni`
 - 添加发送RPC请求时是否根据块高发送的开关
 
 ### 3.2.0
