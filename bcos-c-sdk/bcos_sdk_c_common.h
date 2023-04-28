@@ -97,18 +97,17 @@ struct bcos_sdk_c_config
     struct bcos_sdk_c_sm_cert_config* sm_cert_config;
 };
 
-struct bcos_sdk_c_signature_result
-{
-    uint8_t r[32];
-    uint8_t s[32];
-    uint8_t v[512];
-};
-
 /**
  * @brief create bcos_sdk_c_config in default value
  * @return struct bcos_sdk_c_config*
  */
 struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty();
+
+/**
+ * @brief duplicate string
+ * @return char*
+ */
+char* my_strdup(const char* s);
 
 /**
  * @brief create bcos_sdk_c_config
@@ -173,6 +172,59 @@ void bcos_sdk_c_handle_response(
 void bcos_sdk_c_free(void* p);
 
 //--------------- callback end------------
+
+
+//--------------- transaction begin---------------------------------
+
+/**
+ * @brief: signature result
+ *
+ */
+struct bcos_sdk_c_signature_result
+{
+    uint8_t r[32];
+    uint8_t s[32];
+    uint8_t v[512];
+};
+
+struct bcos_sdk_c_bytes
+{
+    uint8_t* buffer;
+    uint32_t length;
+};
+
+/**
+ * @brief: transaction data
+ *
+ */
+struct bcos_sdk_c_transaction_data
+{
+    int32_t version;
+    int64_t block_limit;
+    char* chain_ID;
+    char* group_ID;
+    char* nonce;
+    char* to;
+    char* abi;
+    struct bcos_sdk_c_bytes* input;
+};
+
+/**
+ * @brief: transaction
+ *
+ */
+struct bcos_sdk_c_transaction
+{
+    struct bcos_sdk_c_transaction_data transaction_data;
+    struct bcos_sdk_c_bytes data_hash;
+    struct bcos_sdk_c_bytes signature;
+    struct bcos_sdk_c_bytes sender;
+    int64_t import_time;
+    int32_t attribute;
+    char* extraData;
+};
+
+//--------------- transaction end---------------------------------
 
 #ifdef __cplusplus
 }
