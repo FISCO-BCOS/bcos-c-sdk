@@ -201,8 +201,8 @@ struct bcos_sdk_c_transaction_data
 {
     int32_t version;
     int64_t block_limit;
-    char* chain_ID;
-    char* group_ID;
+    char* chain_id;
+    char* group_id;
     char* nonce;
     char* to;
     char* abi;
@@ -215,13 +215,13 @@ struct bcos_sdk_c_transaction_data
  */
 struct bcos_sdk_c_transaction
 {
-    struct bcos_sdk_c_transaction_data transaction_data;
-    struct bcos_sdk_c_bytes data_hash;
-    struct bcos_sdk_c_bytes signature;
-    struct bcos_sdk_c_bytes sender;
+    struct bcos_sdk_c_transaction_data* transaction_data;
+    struct bcos_sdk_c_bytes* data_hash;
+    struct bcos_sdk_c_bytes* signature;
+    struct bcos_sdk_c_bytes* sender;
     int64_t import_time;
     int32_t attribute;
-    char* extraData;
+    char* extra_data;
 };
 
 //--------------- transaction end---------------------------------

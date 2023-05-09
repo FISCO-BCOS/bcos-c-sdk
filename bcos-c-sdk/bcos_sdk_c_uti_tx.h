@@ -42,21 +42,6 @@ void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_i
     const char* data, const char* abi, int64_t block_limit);
 
 /**
- * @brief
- *
- * @param group_id
- * @param chain_id
- * @param to
- * @param data
- * @param abi
- * @param block_limit
- * @return bcos_sdk_c_transaction_data*: transaction data struct pointer, return unassigned struct
- * on failure according to the function called bcos_sdk_get_last_error(if create failed, return -1)
- */
-struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(const char* group_id,
-    const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit);
-
-/**
  * @param json
  *              version:number
  *              groupID:string
@@ -71,34 +56,11 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(cons
 void* bcos_sdk_create_transaction_data_with_json(const char* json);
 
 /**
- * @param json
- *              version:number
- *              groupID:string
- *              chainID:string
- *              to:string
- *              data:hex string
- *              abi:string
- *              blockLimit:number
- *              nonce:string
- * @return struct bcos_sdk_c_transaction*
- */
-struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with_json(
-    const char* json);
-
-/**
  * @brief
  *
  * @param transaction_data
  */
 void bcos_sdk_destroy_transaction_data(void* transaction_data);
-
-
-/**
- * @brief
- *
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- */
-void bcos_sdk_destroy_transaction_data_struct(struct bcos_sdk_c_transaction_data* transaction_data);
 
 /**
  * @brief
@@ -107,23 +69,6 @@ void bcos_sdk_destroy_transaction_data_struct(struct bcos_sdk_c_transaction_data
  * @return const char*
  */
 const char* bcos_sdk_encode_transaction_data(void* transaction_data);
-
-/**
- * @brief encode transaction data into hex format
- *
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- * @return const char*
- */
-const char* bcos_sdk_encode_transaction_data_to_hex(
-    struct bcos_sdk_c_transaction_data* transaction_data);
-
-/**
- * @brief convert transaction data into json format
- *
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- * @return const char*
- */
-const char* bcos_sdk_transaction_data_to_json(struct bcos_sdk_c_transaction_data* transaction_data);
 
 /**
  * @brief
@@ -141,16 +86,6 @@ const char* bcos_sdk_decode_transaction_data(const char* transaction_bytes);
  * @return const char*
  */
 const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transaction_data);
-
-/**
- * @brief
- *
- * @param crypto_type: int
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- * @return const char*
- */
-const char* bcos_sdk_calc_transaction_data_struct_hash(
-    int crypto_type, struct bcos_sdk_c_transaction_data* transaction_data);
 
 /**
  * @brief
@@ -191,25 +126,6 @@ void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, co
  * @param abi
  * @param block_limit
  * @param attribute
- * @param tx_hash
- * @param signed_tx
- * @return struct bcos_sdk_c_transaction*
- */
-struct bcos_sdk_c_transaction* bcos_sdk_create_signed_transaction_struct(void* key_pair,
-    const char* group_id, const char* chain_id, const char* to, const char* data, const char* abi,
-    int64_t block_limit, int32_t attribute, char** tx_hash, char** signed_tx);
-
-/**
- * @brief
- *
- * @param key_pair
- * @param group_id
- * @param chain_id
- * @param to
- * @param data
- * @param abi
- * @param block_limit
- * @param attribute
  * @param extra_data
  * @param tx_hash
  * @param signed_tx
@@ -222,100 +138,28 @@ void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const cha
 /**
  * @brief
  *
- * @param key_pair
- * @param group_id
- * @param chain_id
- * @param to
- * @param data
- * @param abi
- * @param block_limit
- * @param attribute
- * @param extra_data
- * @param tx_hash
- * @param signed_tx
- * @return struct bcos_sdk_c_transaction*
- */
-struct bcos_sdk_c_transaction* bcos_sdk_create_signed_transaction_struct_ver_extra_data(
-    void* key_pair, const char* group_id, const char* chain_id, const char* to, const char* data,
-    const char* abi, int64_t block_limit, int32_t attribute, const char* extra_data, char** tx_hash,
-    char** signed_tx);
-
-/**
- * @brief
- *
  * @param transaction_data: void*
- * @param signed_transaction_data
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
-    const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute);
-
-/**
- * @brief
- *
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- * @param signed_transaction_data
- * @param transaction_data_hash
- * @param attribute
- * @return const char*
- */
-const char* bcos_sdk_create_signed_transaction_with_struct_and_signed_data(
-    struct bcos_sdk_c_transaction_data* transaction_data, const char* signed_transaction_data,
-    const char* transaction_data_hash, int32_t attribute);
+    const char* signature, const char* transaction_data_hash, int32_t attribute);
 
 /**
  * @brief
  *
  * @param transaction_data: void*
- * @param signed_transaction_data
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @param extra_data
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
-    void* transaction_data, const char* signed_transaction_data, const char* transaction_data_hash,
+    void* transaction_data, const char* signature, const char* transaction_data_hash,
     int32_t attribute, const char* extra_data);
-
-/**
- * @brief
- *
- * @param transaction_data: struct bcos_sdk_c_transaction_data*
- * @param signed_transaction_data
- * @param transaction_data_hash
- * @param attribute
- * @param extra_data
- * @return const char*
- */
-const char* bcos_sdk_create_signed_transaction_with_struct_and_signed_data_ver_extra_data(
-    struct bcos_sdk_c_transaction_data* transaction_data, const char* signed_transaction_data,
-    const char* transaction_data_hash, int32_t attribute, const char* extra_data);
-
-/**
- * @brief encode transaction into hex format
- *
- * @param transaction: struct bcos_sdk_c_transaction*
- * @return const char*
- */
-const char* bcos_sdk_encode_transaction_to_hex(struct bcos_sdk_c_transaction* transaction);
-
-/**
- * @brief
- *
- * @param transaction_hex_str
- * @return const char*
- */
-const char* bcos_sdk_decode_transaction_by_hex(const char* transaction_hex_str);
-
-/**
- * @brief convert transaction into json format
- *
- * @param transaction: struct bcos_sdk_c_transaction*
- * @return const char*
- */
-const char* bcos_sdk_transaction_to_json(struct bcos_sdk_c_transaction* transaction);
 
 /**
  * @brief

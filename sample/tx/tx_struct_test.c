@@ -23,6 +23,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include <bcos-c-sdk/bcos_sdk_c.h>
 #include <bcos-c-sdk/bcos_sdk_c_uti_tx.h>
+#include <bcos-c-sdk/bcos_sdk_c_uti_tx_struct.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -174,6 +175,30 @@ void on_deploy_resp_callback(struct bcos_sdk_c_struct_response* resp)
     printf(" [TxStructTest] transaction receipt ===>>>>: %s\n", (char*)resp->data);
 }
 
+/* resp->data 的数据结构
+{
+    "id" : 2,
+    "jsonrpc" : "2.0",
+    "result" : 
+    {
+        "blockNumber" : 113,
+        "checksumContractAddress" : "",
+        "contractAddress" : "",
+        "extraData" : "ExtraData",
+        "from" : "0x69df04bec1c36551be6298f7e4c2f867592a4b37",
+        "gasUsed" : "13063",
+        "hash" : "0x7d816bbde4aef3bd4c084b0887982f2c50cb9a50975a4d07328ec5fd5dd4e6e6",
+        "input" : "0x3590b49f0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001748656c6c6f20464953434f2d42434f5320332e30212121000000000000000000",
+        "logEntries" : [],
+        "message" : "",
+        "output" : "0x",
+        "status" : 0,
+        "to" : "0xcd6787f79a8da1b4a607dd59c79c7c08209230c1",
+        "transactionHash" : "0x05424cb9f92e1f1cd9b7ebe7a7e86d628d71c67edc6cf9cadac1967d279f8017",
+        "version" : 0
+    }
+}
+*/
 void on_send_tx_resp_callback(struct bcos_sdk_c_struct_response* resp)
 {
     if (resp->error != BCOS_SDK_C_SUCCESS)
@@ -310,15 +335,15 @@ int main(int argc, char** argv)
             group_id, chain_id, contract_address, set_data, g_hw_abi, block_limit);
 
         // 9.2.1.1 encode tx data to hex
-        const char* hex_tx_data = bcos_sdk_encode_transaction_data_to_hex(transaction_data);
-        // 9.2.1.2 decode hex tx
-        const char* tx_data = bcos_sdk_decode_transaction_data(hex_tx_data);
-        printf(" [TxStructTest] tx_data: %s\n", tx_data);
+        const char* hex_tx_data = bcos_sdk_encode_transaction_data_struct(transaction_data);
+        printf(" [TxStructTest] tx_data_hex: %s\n", hex_tx_data);
+        // 9.2.1.2 decode hex tx data
+        struct bcos_sdk_c_transaction_data* decode_tx_data = bcos_sdk_decode_transaction_data_struct(hex_tx_data);
         // 9.2.1.3 encode tx data to json
-        const char* tx_data_json = bcos_sdk_transaction_data_to_json(transaction_data);
-        printf(" [TxStructTest] tx_data_json: %s\n", tx_data_json);
-        // 9.2.1.4 decode tx data json to tx data struct
-        struct bcos_sdk_c_transaction_data* decode_tx_data = bcos_sdk_create_transaction_data_struct_with_json(tx_data_json);
+        const char* json_tx_data = bcos_sdk_encode_transaction_data_struct_to_json(transaction_data);
+        printf(" [TxStructTest] tx_data_json: %s\n", json_tx_data);
+        // 9.2.1.4 decode json to tx data struct
+        decode_tx_data = bcos_sdk_decode_transaction_data_struct_with_json(json_tx_data);
 
         // 9.2.2 calc transaction data hash
         const char* transaction_data_hash =
@@ -327,10 +352,25 @@ int main(int argc, char** argv)
         // 9.2.3 sign transaction hash
         const char* signed_hash =
             bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
+        
         // 9.2.4 create signed transaction
-        const char* signed_tx = bcos_sdk_create_signed_transaction_with_struct_and_signed_data_ver_extra_data(
-            transaction_data, signed_hash, transaction_data_hash, 0, extra_data);
-
+        const char* signed_tx = bcos_sdk_create_transaction(
+            decode_tx_data, signed_hash, transaction_data_hash, 0, extra_data);
+       
+        // 9.2.4.1 create transaction struct
+        struct bcos_sdk_c_transaction* transaction = bcos_sdk_create_transaction_struct(decode_tx_data, 
+        signed_hash, transaction_data_hash, 0, extra_data);
+        // 9.2.4.2 encode tx to hex
+        const char* hex_tx = bcos_sdk_encode_transaction_struct(transaction);
+        printf(" [TxStructTest] tx_hex: %s\n", hex_tx);
+        // 9.2.4.3 decode hex to tx
+        struct bcos_sdk_c_transaction* decode_tx = bcos_sdk_decode_transaction_struct(hex_tx);
+        // 9.2.4.4 encode tx to json
+        const char* json_tx = bcos_sdk_encode_transaction_struct_to_json(transaction);
+        printf(" [TxStructTest] tx_json: %s\n", json_tx);
+        // 9.2.4.5 decode json to tx
+        decode_tx = bcos_sdk_decode_transaction_struct_with_json(json_tx);
+        
         // 9.3 call rpc interface, sendTransaction
         bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
 
@@ -338,11 +378,17 @@ int main(int argc, char** argv)
         sleep(3);
 
         bcos_sdk_destroy_transaction_data_struct(transaction_data);
+        bcos_sdk_destroy_transaction_data_struct(decode_tx_data);
+        bcos_sdk_destroy_transaction_struct(transaction);
+        bcos_sdk_destroy_transaction_struct(decode_tx);
         bcos_sdk_c_free((void*)transaction_data_hash);
         bcos_sdk_c_free((void*)signed_hash);
         bcos_sdk_c_free((void*)signed_tx);
+        bcos_sdk_c_free((void*)hex_tx_data);
+        bcos_sdk_c_free((void*)json_tx_data);
+        bcos_sdk_c_free((void*)hex_tx);
+        bcos_sdk_c_free((void*)json_tx);
     }
-
 
     // wait for async operation done, just for sample
     sleep(3);
