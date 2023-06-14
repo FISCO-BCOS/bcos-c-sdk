@@ -20,6 +20,7 @@
 
 #include "bcos_sdk_c_uti_tx.h"
 #include "bcos_sdk_c_error.h"
+#include <bcos-c-sdk/bcos_sdk_c_common.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
@@ -32,6 +33,7 @@
 using namespace bcos;
 using namespace bcos::cppsdk;
 using namespace bcos::cppsdk::utilities;
+
 
 /**
  * @brief
@@ -92,8 +94,9 @@ void* bcos_sdk_create_transaction_data_with_json(const char* json)
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data") << LOG_DESC("exception")
-                          << LOG_KV("json", json) << LOG_KV("error", errorMsg);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_with_json")
+                          << LOG_DESC("exception") << LOG_KV("json", json)
+                          << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
 
@@ -316,44 +319,44 @@ void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const cha
  * @brief
  *
  * @param transaction_data
- * @param signed_transaction_data
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
-    const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute)
+    const char* signature, const char* transaction_data_hash, int32_t attribute)
 {
     return bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
-        transaction_data, signed_transaction_data, transaction_data_hash, attribute, NULL);
+        transaction_data, signature, transaction_data_hash, attribute, NULL);
 }
 
 /**
  * @brief
  *
  * @param transaction_data
- * @param signed_transaction_data
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @param extra_data
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
-    void* transaction_data, const char* signed_transaction_data, const char* transaction_data_hash,
+    void* transaction_data, const char* signature, const char* transaction_data_hash,
     int32_t attribute, const char* extra_data)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
-    BCOS_SDK_C_PARAMS_VERIFICATION(signed_transaction_data, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(signature, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data_hash, NULL);
 
     try
     {
         auto builder = std::make_shared<TransactionBuilder>();
-        auto signedBytes = builder->createSignedTransaction(
-            *(bcostars::TransactionData*)transaction_data, *fromHexString(signed_transaction_data),
-            bcos::crypto::HashType(transaction_data_hash), attribute,
-            extra_data ? std::string(extra_data) : std::string());
+        auto signedBytes =
+            builder->createSignedTransaction(*(bcostars::TransactionData*)transaction_data,
+                *fromHexString(signature), bcos::crypto::HashType(transaction_data_hash), attribute,
+                extra_data ? std::string(extra_data) : std::string());
         return strdup(bcos::toHexStringWithPrefix(*signedBytes).c_str());
     }
     catch (const std::exception& e)
@@ -361,7 +364,7 @@ const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING)
             << LOG_BADGE("bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data")
-            << LOG_DESC("exception") << LOG_KV("signed_transaction_data", signed_transaction_data)
+            << LOG_DESC("exception") << LOG_KV("signature", signature)
             << LOG_KV("transaction_data_hash", transaction_data_hash)
             << LOG_KV("attribute", attribute) << LOG_KV("extra_data", extra_data)
             << LOG_KV("error", errorMsg);
