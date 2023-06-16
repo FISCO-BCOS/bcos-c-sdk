@@ -65,4 +65,3 @@ public class Tx {
         this.extraData = extraData;
     }
 }
-

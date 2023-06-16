@@ -6,7 +6,13 @@
 
 struct bcos_sdk_c_bytes* convert_to_bytes_struct(JNIEnv* env, jobject bytesObj)
 {
-    struct bcos_sdk_c_bytes* bytes = (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+    if (bytesObj == NULL)
+    {
+        return NULL;
+    }
+
+    struct bcos_sdk_c_bytes* bytes =
+        (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
     jclass bytesClass = env->GetObjectClass(bytesObj);
     jfieldID bufferField = env->GetFieldID(bytesClass, "buffer", "[B");
     jfieldID lengthField = env->GetFieldID(bytesClass, "length", "I");
@@ -25,14 +31,21 @@ struct bcos_sdk_c_bytes* convert_to_bytes_struct(JNIEnv* env, jobject bytesObj)
 
 jobject convert_to_bytes_jobject(JNIEnv* env, const struct bcos_sdk_c_bytes* bytes_struct)
 {
+    if (bytes_struct == NULL)
+    {
+        return NULL;
+    }
+
     jclass txBytesClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TxBytes");
-    if (txBytesClass == NULL) {
+    if (txBytesClass == NULL)
+    {
         env->FatalError(
             "No such class, className: "
             "org/fisco/bcos/sdk/jni/utilities/tx/TxBytes");
     }
     jmethodID txBytesMtd = env->GetMethodID(txBytesClass, "<init>", "()V");
-    if (txBytesMtd == NULL) {
+    if (txBytesMtd == NULL)
+    {
         env->FatalError("No such constructor in TxBytes, constructor()");
     }
     jfieldID bufferField = env->GetFieldID(txBytesClass, "buffer", "[B");
@@ -41,7 +54,8 @@ jobject convert_to_bytes_jobject(JNIEnv* env, const struct bcos_sdk_c_bytes* byt
     jobject jTxBytesObj = env->NewObject(txBytesClass, txBytesMtd);
     // buffer
     jbyteArray bufferArray = env->NewByteArray(bytes_struct->length);
-    env->SetByteArrayRegion(bufferArray, 0, bytes_struct->length, reinterpret_cast<jbyte*>(bytes_struct->buffer));
+    env->SetByteArrayRegion(
+        bufferArray, 0, bytes_struct->length, reinterpret_cast<jbyte*>(bytes_struct->buffer));
     env->SetObjectField(jTxBytesObj, bufferField, bufferArray);
     // length
     env->SetIntField(jTxBytesObj, lengthField, bytes_struct->length);
@@ -51,9 +65,11 @@ jobject convert_to_bytes_jobject(JNIEnv* env, const struct bcos_sdk_c_bytes* byt
     return jTxBytesObj;
 }
 
-struct bcos_sdk_c_transaction_data* convert_to_tx_data_struct(JNIEnv* env, jobject transactionObject)
+struct bcos_sdk_c_transaction_data* convert_to_tx_data_struct(
+    JNIEnv* env, jobject transactionObject)
 {
-    bcos_sdk_c_transaction_data* tx_data_struct = (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
+    bcos_sdk_c_transaction_data* tx_data_struct =
+        (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
     jclass txDataClass = env->GetObjectClass(transactionObject);
 
     // version
@@ -95,7 +111,8 @@ struct bcos_sdk_c_transaction_data* convert_to_tx_data_struct(JNIEnv* env, jobje
     tx_data_struct->abi = strdup(abiValue);
 
     // input
-    jfieldID inputField = env->GetFieldID(txDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID inputField =
+        env->GetFieldID(txDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
     jobject inputObject = env->GetObjectField(transactionObject, inputField);
     tx_data_struct->input = convert_to_bytes_struct(env, inputObject);
 
@@ -109,16 +126,19 @@ struct bcos_sdk_c_transaction_data* convert_to_tx_data_struct(JNIEnv* env, jobje
     return tx_data_struct;
 }
 
-jobject convert_to_tx_data_jobject(JNIEnv* env, const struct bcos_sdk_c_transaction_data* transactionData)
+jobject convert_to_tx_data_jobject(
+    JNIEnv* env, const struct bcos_sdk_c_transaction_data* transactionData)
 {
     jclass txDataClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TxData");
-    if (txDataClass == NULL) {
+    if (txDataClass == NULL)
+    {
         env->FatalError(
             "No such class, className: "
             "org/fisco/bcos/sdk/jni/utilities/tx/TxData");
     }
     jmethodID txDataMtd = env->GetMethodID(txDataClass, "<init>", "()V");
-    if (txDataMtd == NULL) {
+    if (txDataMtd == NULL)
+    {
         env->FatalError("No such constructor in TxData, constructor()");
     }
     jobject jTxDataObj = env->NewObject(txDataClass, txDataMtd);
@@ -147,7 +167,8 @@ jobject convert_to_tx_data_jobject(JNIEnv* env, const struct bcos_sdk_c_transact
 
     // input
     jobject jInput = convert_to_bytes_jobject(env, transactionData->input);
-    jfieldID inputField = env->GetFieldID(txDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID inputField =
+        env->GetFieldID(txDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
     env->SetObjectField(jTxDataObj, inputField, jInput);
 
     // release
@@ -159,19 +180,25 @@ jobject convert_to_tx_data_jobject(JNIEnv* env, const struct bcos_sdk_c_transact
 jobject convert_to_tx_jobject(JNIEnv* env, const struct bcos_sdk_c_transaction* tx_struct)
 {
     jclass txClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/Tx");
-    if (txClass == NULL) {
+    if (txClass == NULL)
+    {
         env->FatalError(
             "No such class, className: "
             "org/fisco/bcos/sdk/jni/utilities/tx/Tx");
     }
     jmethodID txMtd = env->GetMethodID(txClass, "<init>", "()V");
-    if (txMtd == NULL) {
+    if (txMtd == NULL)
+    {
         env->FatalError("No such constructor in Tx, constructor()");
     }
-    jfieldID txDataField = env->GetFieldID(txClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;");
-    jfieldID dataHashField = env->GetFieldID(txClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
-    jfieldID signatureField = env->GetFieldID(txClass, "signature", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
-    jfieldID senderField = env->GetFieldID(txClass, "sender", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID txDataField =
+        env->GetFieldID(txClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;");
+    jfieldID dataHashField =
+        env->GetFieldID(txClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID signatureField =
+        env->GetFieldID(txClass, "signature", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID senderField =
+        env->GetFieldID(txClass, "sender", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
     jfieldID importTimeField = env->GetFieldID(txClass, "importTime", "J");
     jfieldID attributeField = env->GetFieldID(txClass, "attribute", "I");
     jfieldID extraDataField = env->GetFieldID(txClass, "extraData", "Ljava/lang/String;");
@@ -203,18 +230,24 @@ jobject convert_to_tx_jobject(JNIEnv* env, const struct bcos_sdk_c_transaction* 
 struct bcos_sdk_c_transaction* convert_to_tx_struct(JNIEnv* env, jobject jTxObj)
 {
     jclass javaTxClass = env->GetObjectClass(jTxObj);
-    jfieldID transactionDataField = env->GetFieldID(javaTxClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;");
-    jfieldID dataHashField = env->GetFieldID(javaTxClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
-    jfieldID signatureField = env->GetFieldID(javaTxClass, "signature", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
-    jfieldID senderField = env->GetFieldID(javaTxClass, "sender", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID transactionDataField = env->GetFieldID(
+        javaTxClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;");
+    jfieldID dataHashField =
+        env->GetFieldID(javaTxClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID signatureField =
+        env->GetFieldID(javaTxClass, "signature", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID senderField =
+        env->GetFieldID(javaTxClass, "sender", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
     jfieldID importTimeField = env->GetFieldID(javaTxClass, "importTime", "J");
     jfieldID attributeField = env->GetFieldID(javaTxClass, "attribute", "I");
     jfieldID extraDataField = env->GetFieldID(javaTxClass, "extraData", "Ljava/lang/String;");
 
-    struct bcos_sdk_c_transaction* txStruct = (struct bcos_sdk_c_transaction*)malloc(sizeof(struct bcos_sdk_c_transaction));
+    struct bcos_sdk_c_transaction* txStruct =
+        (struct bcos_sdk_c_transaction*)malloc(sizeof(struct bcos_sdk_c_transaction));
     // TransactionData
     jobject javaTxDataObj = env->GetObjectField(jTxObj, transactionDataField);
-    struct bcos_sdk_c_transaction_data* txDataStruct = convert_to_tx_data_struct(env, javaTxDataObj);
+    struct bcos_sdk_c_transaction_data* txDataStruct =
+        convert_to_tx_data_struct(env, javaTxDataObj);
     txStruct->transaction_data = txDataStruct;
     // DataHash
     jobject javaDataHashObj = env->GetObjectField(jTxObj, dataHashField);
@@ -246,20 +279,28 @@ struct bcos_sdk_c_transaction* convert_to_tx_struct(JNIEnv* env, jobject jTxObj)
 
 void destroy_bytes_jobject(JNIEnv* env, jobject jTxBytes)
 {
+    if (jTxBytes == NULL)
+    {
+        return;
+    }
+
     jclass jTxBytesClass = env->GetObjectClass(jTxBytes);
     jfieldID jBufferFieldID = env->GetFieldID(jTxBytesClass, "buffer", "[B");
-
     jbyteArray jBufferArray = (jbyteArray)env->GetObjectField(jTxBytes, jBufferFieldID);
+
     env->DeleteLocalRef(jBufferArray);
 }
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    createTransactionDataStruct
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
+ * Signature:
+ * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStruct
-  (JNIEnv* env, jclass, jstring jGroupId, jstring jChainId, jstring jTo, jstring jData, jstring jAbi, jlong jBlockLimit)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStruct(
+    JNIEnv* env, jclass, jstring jGroupId, jstring jChainId, jstring jTo, jstring jData,
+    jstring jAbi, jlong jBlockLimit)
 {
     const char* group_id = env->GetStringUTFChars(jGroupId, NULL);
     const char* chain_id = env->GetStringUTFChars(jChainId, NULL);
@@ -268,7 +309,8 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
     const char* abi = env->GetStringUTFChars(jAbi, NULL);
     int64_t block_limit = (int64_t)jBlockLimit;
 
-    struct bcos_sdk_c_transaction_data* tx_data_struct = bcos_sdk_create_transaction_data_struct(group_id, chain_id, to, data, abi, block_limit);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        bcos_sdk_create_transaction_data_struct(group_id, chain_id, to, data, abi, block_limit);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -295,18 +337,27 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    destroyTransactionDataStruct
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionDataStruct
-  (JNIEnv* env, jclass, jobject jTransactionData)
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionDataStruct(
+    JNIEnv* env, jclass, jobject jTransactionData)
 {
+    if (jTransactionData == NULL)
+    {
+        return;
+    }
+
     jclass transactionDataClass = env->GetObjectClass(jTransactionData);
 
     // get field id
-    jfieldID chainIdFieldID = env->GetFieldID(transactionDataClass, "chain_id", "Ljava/lang/String;");
-    jfieldID groupIdFieldID = env->GetFieldID(transactionDataClass, "group_id", "Ljava/lang/String;");
+    jfieldID chainIdFieldID =
+        env->GetFieldID(transactionDataClass, "chainId", "Ljava/lang/String;");
+    jfieldID groupIdFieldID =
+        env->GetFieldID(transactionDataClass, "groupId", "Ljava/lang/String;");
     jfieldID nonceFieldID = env->GetFieldID(transactionDataClass, "nonce", "Ljava/lang/String;");
     jfieldID toFieldID = env->GetFieldID(transactionDataClass, "to", "Ljava/lang/String;");
     jfieldID abiFieldID = env->GetFieldID(transactionDataClass, "abi", "Ljava/lang/String;");
-    jfieldID inputFieldID = env->GetFieldID(transactionDataClass, "input", "Lcom/example/Bytes;");
+    jfieldID inputFieldID = env->GetFieldID(
+        transactionDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
 
     // get field value
     jstring chainId = (jstring)env->GetObjectField(jTransactionData, chainIdFieldID);
@@ -325,8 +376,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStruc
 
     // release input object
     destroy_bytes_jobject(env, inputObj);
-
     env->DeleteLocalRef(inputObj);
+
     env->DeleteLocalRef(jTransactionData);
 }
 
@@ -335,10 +386,12 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStruc
  * Method:    encodeTransactionDataStruct
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStruct
-  (JNIEnv* env, jclass, jobject jTransactionDataObj)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStruct(
+    JNIEnv* env, jclass, jobject jTransactionDataObj)
 {
-    struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTransactionDataObj);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        convert_to_tx_data_struct(env, jTransactionDataObj);
     const char* tx_data_hex = bcos_sdk_encode_transaction_data_struct(tx_data_struct);
     if (!bcos_sdk_is_last_opr_success())
     {
@@ -365,10 +418,12 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    encodeTransactionDataStructToJson
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStructToJson
-  (JNIEnv* env, jclass, jobject jTransactionDataObj)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStructToJson(
+    JNIEnv* env, jclass, jobject jTransactionDataObj)
 {
-    struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTransactionDataObj);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        convert_to_tx_data_struct(env, jTransactionDataObj);
     const char* tx_data_json = bcos_sdk_encode_transaction_data_struct_to_json(tx_data_struct);
     if (!bcos_sdk_is_last_opr_success())
     {
@@ -395,11 +450,13 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    decodeTransactionDataStruct
  * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStruct
-  (JNIEnv* env, jclass, jstring jTxDataHexStr)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStruct(
+    JNIEnv* env, jclass, jstring jTxDataHexStr)
 {
     const char* tx_data_hex_str = env->GetStringUTFChars(jTxDataHexStr, nullptr);
-    struct bcos_sdk_c_transaction_data* tx_data_struct = bcos_sdk_decode_transaction_data_struct(tx_data_hex_str);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        bcos_sdk_decode_transaction_data_struct(tx_data_hex_str);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -422,11 +479,13 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    decodeTransactionDataStructWithJson
  * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStructWithJson
-  (JNIEnv* env, jclass, jstring jTxDataJsonStr)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStructWithJson(
+    JNIEnv* env, jclass, jstring jTxDataJsonStr)
 {
     const char* tx_data_json_str = env->GetStringUTFChars(jTxDataJsonStr, nullptr);
-    struct bcos_sdk_c_transaction_data* tx_data_struct = bcos_sdk_decode_transaction_data_struct_with_json(tx_data_json_str);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        bcos_sdk_decode_transaction_data_struct_with_json(tx_data_json_str);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -449,12 +508,15 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    calcTransactionDataStructHash
  * Signature: (ILorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTransactionDataStructHash
-  (JNIEnv* env, jclass, jint jCrytpTyte, jobject jTransactionDataObj)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTransactionDataStructHash(
+    JNIEnv* env, jclass, jint jCrytpTyte, jobject jTransactionDataObj)
 {
-    struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTransactionDataObj);
+    struct bcos_sdk_c_transaction_data* tx_data_struct =
+        convert_to_tx_data_struct(env, jTransactionDataObj);
     int crypto_type = jCrytpTyte;
-    const char* tx_data_hash = bcos_sdk_calc_transaction_data_struct_hash(crypto_type, tx_data_struct);
+    const char* tx_data_hash =
+        bcos_sdk_calc_transaction_data_struct_hash(crypto_type, tx_data_struct);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -479,10 +541,13 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    createTransactionStruct
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionStruct
-  (JNIEnv* env, jclass, jobject jTxDataObj, jstring jSignature, jstring jTxDataHash, jint jAttribute, jstring jExtraData)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionStruct(
+    JNIEnv* env, jclass, jobject jTxDataObj, jstring jSignature, jstring jTxDataHash,
+    jint jAttribute, jstring jExtraData)
 {
     struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTxDataObj);
     const char* signature = env->GetStringUTFChars(jSignature, NULL);
@@ -490,7 +555,8 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
     int attribute = jAttribute;
     const char* extra_data = env->GetStringUTFChars(jExtraData, NULL);
 
-    struct bcos_sdk_c_transaction* tx_struct = bcos_sdk_create_transaction_struct(tx_data_struct, signature, tx_data_hash, attribute, extra_data);
+    struct bcos_sdk_c_transaction* tx_struct = bcos_sdk_create_transaction_struct(
+        tx_data_struct, signature, tx_data_hash, attribute, extra_data);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -502,6 +568,7 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
     env->ReleaseStringUTFChars(jSignature, signature);
     env->ReleaseStringUTFChars(jTxDataHash, tx_data_hash);
     env->ReleaseStringUTFChars(jExtraData, extra_data);
+
     if (tx_data_struct)
     {
         bcos_sdk_destroy_transaction_data_struct(tx_data_struct);
@@ -519,26 +586,39 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    destroyTransactionStruct
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionStruct
-  (JNIEnv* env, jclass, jobject jTxObj)
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionStruct(
+    JNIEnv* env, jclass, jobject jTxObj)
 {
+    if (jTxObj == NULL)
+    {
+        return;
+    }
+
     jclass jTxClass = env->GetObjectClass(jTxObj);
-    jfieldID jTransactionDataFieldID = env->GetFieldID(jTxClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/structures/TxData;");
-    jfieldID jDataHashFieldID = env->GetFieldID(jTxClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/structures/TxBytes;");
-    jfieldID jSignatureFieldID = env->GetFieldID(jTxClass, "signature", "Lorg/fisco/bcos/sdk/jni/structures/TxBytes;");
-    jfieldID jSenderFieldID = env->GetFieldID(jTxClass, "sender", "Lorg/fisco/bcos/sdk/jni/structures/TxBytes;");
+    jfieldID jTransactionDataFieldID = env->GetFieldID(
+        jTxClass, "transactionData", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;");
+    jfieldID jDataHashFieldID =
+        env->GetFieldID(jTxClass, "dataHash", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID jSignatureFieldID =
+        env->GetFieldID(jTxClass, "signature", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
+    jfieldID jSenderFieldID =
+        env->GetFieldID(jTxClass, "sender", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
     jfieldID jExtraDataFieldID = env->GetFieldID(jTxClass, "extraData", "Ljava/lang/String;");
 
     // release TxData
     jobject jTransactionDataObj = env->GetObjectField(jTxObj, jTransactionDataFieldID);
     jclass jTransactionDataClass = env->GetObjectClass(jTransactionDataObj);
 
-    jfieldID jChainIdFieldID = env->GetFieldID(jTransactionDataClass, "chainId", "Ljava/lang/String;");
-    jfieldID jGroupIdFieldID = env->GetFieldID(jTransactionDataClass, "groupId", "Ljava/lang/String;");
+    jfieldID jChainIdFieldID =
+        env->GetFieldID(jTransactionDataClass, "chainId", "Ljava/lang/String;");
+    jfieldID jGroupIdFieldID =
+        env->GetFieldID(jTransactionDataClass, "groupId", "Ljava/lang/String;");
     jfieldID jNonceFieldID = env->GetFieldID(jTransactionDataClass, "nonce", "Ljava/lang/String;");
     jfieldID jToFieldID = env->GetFieldID(jTransactionDataClass, "to", "Ljava/lang/String;");
     jfieldID jAbiFieldID = env->GetFieldID(jTransactionDataClass, "abi", "Ljava/lang/String;");
-    jfieldID jInputFieldID = env->GetFieldID(jTransactionDataClass, "input", "Lorg/fisco/bcos/sdk/jni/structures/TxBytes;");
+    jfieldID jInputFieldID = env->GetFieldID(
+        jTransactionDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TxBytes;");
 
     jstring jChainId = (jstring)env->GetObjectField(jTransactionDataObj, jChainIdFieldID);
     jstring jGroupId = (jstring)env->GetObjectField(jTransactionDataObj, jGroupIdFieldID);
@@ -557,9 +637,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStruc
     env->DeleteLocalRef(jTransactionDataObj);
 
     // release dataHash/signature/sender
-    jobject jDataHash = env->GetObjectField(jTransactionDataObj, jDataHashFieldID);
-    jobject jSignature = env->GetObjectField(jTransactionDataObj, jSignatureFieldID);
-    jobject jSender = env->GetObjectField(jTransactionDataObj, jSenderFieldID);
+    jobject jDataHash = env->GetObjectField(jTxObj, jDataHashFieldID);
+    jobject jSignature = env->GetObjectField(jTxObj, jSignatureFieldID);
+    jobject jSender = env->GetObjectField(jTxObj, jSenderFieldID);
 
     destroy_bytes_jobject(env, jDataHash);
     destroy_bytes_jobject(env, jSignature);
@@ -569,7 +649,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStruc
     env->DeleteLocalRef(jSender);
 
     // release extraData
-    jstring jExtraData = (jstring)env->GetObjectField(jTransactionDataObj, jExtraDataFieldID);
+    jstring jExtraData = (jstring)env->GetObjectField(jTxObj, jExtraDataFieldID);
     env->DeleteLocalRef(jExtraData);
 
     // release Tx jobject
@@ -579,10 +659,13 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStruc
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    createTransaction
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransaction
-  (JNIEnv* env, jclass, jobject jTxDataObj, jstring jSignature, jstring jTxDataHash, jint jAttribute, jstring jExtraData)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransaction(
+    JNIEnv* env, jclass, jobject jTxDataObj, jstring jSignature, jstring jTxDataHash,
+    jint jAttribute, jstring jExtraData)
 {
     struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTxDataObj);
     const char* signature = env->GetStringUTFChars(jSignature, NULL);
@@ -590,7 +673,8 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
     int attribute = jAttribute;
     const char* extra_data = env->GetStringUTFChars(jExtraData, NULL);
 
-    const char* tx_str = bcos_sdk_create_transaction(tx_data_struct, signature, tx_data_hash, attribute, extra_data);
+    const char* tx_str =
+        bcos_sdk_create_transaction(tx_data_struct, signature, tx_data_hash, attribute, extra_data);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -620,8 +704,9 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    encodeTransactionStruct
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStruct
-  (JNIEnv* env, jclass, jobject jTransactionObj)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStruct(
+    JNIEnv* env, jclass, jobject jTransactionObj)
 {
     struct bcos_sdk_c_transaction* tx_struct = convert_to_tx_struct(env, jTransactionObj);
     const char* tx_hex = bcos_sdk_encode_transaction_struct(tx_struct);
@@ -651,8 +736,9 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    encodeTransactionStructToJson
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStructToJson
-  (JNIEnv* env, jclass, jobject jTransactionObj)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStructToJson(
+    JNIEnv* env, jclass, jobject jTransactionObj)
 {
     struct bcos_sdk_c_transaction* tx_struct = convert_to_tx_struct(env, jTransactionObj);
     const char* tx_json = bcos_sdk_encode_transaction_struct_to_json(tx_struct);
@@ -681,8 +767,9 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    decodeTransactionStruct
  * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStruct
-  (JNIEnv* env, jclass, jstring jTxHexStr)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStruct(
+    JNIEnv* env, jclass, jstring jTxHexStr)
 {
     const char* tx_hex_str = env->GetStringUTFChars(jTxHexStr, nullptr);
     struct bcos_sdk_c_transaction* tx_struct = bcos_sdk_decode_transaction_struct(tx_hex_str);
@@ -708,11 +795,13 @@ JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionSt
  * Method:    decodeTransactionStructWithJson
  * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
  */
-JNIEXPORT jobject JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStructWithJson
-  (JNIEnv* env, jclass, jstring jTxJsonStr)
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStructWithJson(
+    JNIEnv* env, jclass, jstring jTxJsonStr)
 {
     const char* tx_json_str = env->GetStringUTFChars(jTxJsonStr, nullptr);
-    struct bcos_sdk_c_transaction* tx_struct = bcos_sdk_decode_transaction_struct_with_json(tx_json_str);
+    struct bcos_sdk_c_transaction* tx_struct =
+        bcos_sdk_decode_transaction_struct_with_json(tx_json_str);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());

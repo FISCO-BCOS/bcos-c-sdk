@@ -1,7 +1,5 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
 
-import sun.jvm.hotspot.runtime.Bytes;
-
 public class TxBytes {
     private byte[] buffer;
     private int length;
