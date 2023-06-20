@@ -10,35 +10,6 @@ extern "C" {
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    createTransactionDataStructWithHexInput
- * Signature:
- * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
- */
-JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStructWithHexInput(
-    JNIEnv*, jclass, jstring, jstring, jstring, jstring, jstring, jlong);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    createTransactionDataStructWithBytes
- * Signature:
- * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[B;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
- */
-JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStructWithBytes(
-    JNIEnv*, jclass, jstring, jstring, jstring, jbyteArray, jstring, jlong);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    destroyTransactionDataStruct
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)V
- */
-JNIEXPORT void JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionDataStruct(
-    JNIEnv*, jclass, jobject);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    encodeTransactionDataStruct
  * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
  */
@@ -66,40 +37,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTr
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    decodeTransactionDataStructWithJson
- * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
- */
-JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStructWithJson(
-    JNIEnv*, jclass, jstring);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    calcTransactionDataStructHash
  * Signature: (ILorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTransactionDataStructHash(
     JNIEnv*, jclass, jint, jobject);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    createTransactionStruct
- * Signature:
- * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
- */
-JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionStruct(
-    JNIEnv*, jclass, jobject, jstring, jstring, jint, jstring);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    destroyTransactionStruct
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)V
- */
-JNIEXPORT void JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyTransactionStruct(
-    JNIEnv*, jclass, jobject);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
@@ -136,15 +79,6 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStruct(
-    JNIEnv*, jclass, jstring);
-
-/*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    decodeTransactionStructWithJson
- * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
- */
-JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStructWithJson(
     JNIEnv*, jclass, jstring);
 
 #ifdef __cplusplus

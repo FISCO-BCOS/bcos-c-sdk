@@ -116,18 +116,6 @@ public class TestTxStruct {
         String data = getBinary(smCrypto);
         System.out.printf(" [test Tx Struct] new account, address: %s\n", jniKeyPairAddress);
 
-//        // create TxData with hex input
-//        TransactionData transactionDataStructHexInput = TransactionStructBuilderJniObj.createTransactionDataStructWithHexInput(groupID, chainID, "", data, "", blockLimit);
-//        // create TxData with bytes
-//        byte[] bytesInput = fromHex(data);
-//        TransactionData transactionDataStructBytes = TransactionStructBuilderJniObj.createTransactionDataStructWithBytes(groupID, chainID, "", bytesInput, "", blockLimit);
-//        // assert
-//        Assert.assertEquals(transactionDataStructHexInput.getChainId(), transactionDataStructBytes.getChainId());
-//        Assert.assertEquals(transactionDataStructHexInput.getGroupId(), transactionDataStructBytes.getGroupId());
-////        Assert.assertEquals(transactionDataStructHexInput.getInput(), transactionDataStructBytes.getInput());
-//        Assert.assertEquals(transactionDataStructHexInput.getAbi(), transactionDataStructBytes.getAbi());
-//        Assert.assertEquals(transactionDataStructHexInput.getBlockLimit(), transactionDataStructBytes.getBlockLimit());
-
         // construct TransactionData
         TransactionData transactionDataStruct = new TransactionData();
         transactionDataStruct.setGroupId(groupID);
@@ -146,7 +134,6 @@ public class TestTxStruct {
 
         // encode TxData to hex tx data
         String txDataHex = TransactionStructBuilderJniObj.encodeTransactionDataStruct(transactionDataStruct);
-//        System.out.printf(" [test Tx Struct] txDataHex: %s\n", txDataHex);
         // decode hex tx data to TxData
         TransactionData decodeTransactionDataStructHex = TransactionStructBuilderJniObj.decodeTransactionDataStruct(txDataHex);
         // assert
@@ -158,13 +145,6 @@ public class TestTxStruct {
         // encode TxData to json tx data
         String txDataJson = TransactionStructBuilderJniObj.encodeTransactionDataStructToJson(transactionDataStruct);
         System.out.printf(" [test Tx Struct] txDataJson: %s\n", txDataJson);
-        // decode json tx data to TxData
-        TransactionData decodeTransactionDataStructJson = TransactionStructBuilderJniObj.decodeTransactionDataStructWithJson(txDataJson);
-        // assert
-        Assert.assertEquals(transactionDataStruct.getChainId(), decodeTransactionDataStructJson.getChainId());
-        Assert.assertEquals(transactionDataStruct.getGroupId(), decodeTransactionDataStructJson.getGroupId());
-        Assert.assertEquals(transactionDataStruct.getAbi(), decodeTransactionDataStructJson.getAbi());
-        Assert.assertEquals(transactionDataStruct.getBlockLimit(), decodeTransactionDataStructJson.getBlockLimit());
 
         // calc tx data hash
         String txDataHash = TransactionStructBuilderJniObj.calcTransactionDataStructHash(smCrypto ? 1 : 0, decodeTransactionDataStructHex);
@@ -174,7 +154,6 @@ public class TestTxStruct {
         System.out.printf(" [test Tx Struct] signature: %s\n", signature);
 
         // construct tx
-//        Transaction transactionStruct = TransactionStructBuilderJniObj.createTransactionStruct(decodeTransactionDataStructHex, signature, txDataHash, 0, "");
         Transaction transactionStruct = new Transaction();
         TransactionBytes dataHashBytes = new TransactionBytes();
         dataHashBytes.setBuffer(txDataHash.getBytes());
@@ -182,7 +161,6 @@ public class TestTxStruct {
         TransactionBytes signatureBytes = new TransactionBytes();
         signatureBytes.setBuffer(signature.getBytes());
         signatureBytes.setLength(signature.getBytes().length);
-        TransactionBytes senderBytes = new TransactionBytes();
         transactionStruct.setTransactionData(decodeTransactionDataStructHex);
         transactionStruct.setDataHash(dataHashBytes);
         transactionStruct.setSignature(signatureBytes);
@@ -200,7 +178,6 @@ public class TestTxStruct {
 
         // encode Tx to hex tx
         String txHex = TransactionStructBuilderJniObj.encodeTransactionStruct(transactionStruct);
-//        System.out.printf(" [test Tx Struct] txHex: %s\n", txHex);
         // decode hex tx to Tx
         Transaction decodeTransactionStructHex = TransactionStructBuilderJniObj.decodeTransactionStruct(txHex);
         // assert
@@ -214,20 +191,11 @@ public class TestTxStruct {
         // encode Tx to json tx
         String txJson = TransactionStructBuilderJniObj.encodeTransactionStructToJson(transactionStruct);
         System.out.printf(" [test Tx Struct] txJson: %s\n", txJson);
-        // decode json tx to Tx
-        Transaction decodeTransactionStructJson = TransactionStructBuilderJniObj.decodeTransactionStructWithJson(txJson);
-        // assert
-        Assert.assertEquals(transactionStruct.getTransactionData().getBlockLimit(), decodeTransactionStructJson.getTransactionData().getBlockLimit());
-        Assert.assertEquals(transactionStruct.getTransactionData().getGroupId(), decodeTransactionStructJson.getTransactionData().getGroupId());
-        Assert.assertEquals(transactionStruct.getTransactionData().getChainId(), decodeTransactionStructJson.getTransactionData().getChainId());
-        Assert.assertEquals(transactionStruct.getTransactionData().getAbi(), decodeTransactionStructJson.getTransactionData().getAbi());
-        Assert.assertArrayEquals(transactionStruct.getDataHash().getBuffer(), decodeTransactionStructJson.getDataHash().getBuffer());
-        Assert.assertArrayEquals(transactionStruct.getSignature().getBuffer(), decodeTransactionStructJson.getSignature().getBuffer());
-
         // create tx string
         String txString = TransactionStructBuilderJniObj.createEncodedTransaction(decodeTransactionDataStructHex, signature, txDataHash, 0, "");
-        System.out.printf(" [test Tx Struct] txString: %s\n", txString);
+//        System.out.printf(" [test Tx Struct] txString: %s\n", txString);
 
+        // rpc send tx
         rpcJniObj.sendTransaction(group, node, txString, false, new RpcCallback() {
             @Override
             public void onResponse(Response response) {
