@@ -10,13 +10,23 @@ extern "C" {
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    createTransactionDataStruct
+ * Method:    createTransactionDataStructWithHexInput
  * Signature:
  * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
  */
 JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStruct(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStructWithHexInput(
     JNIEnv*, jclass, jstring, jstring, jstring, jstring, jstring, jlong);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
+ * Method:    createTransactionDataStructWithBytes
+ * Signature:
+ * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[B;Ljava/lang/String;J)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransactionDataStructWithBytes(
+    JNIEnv*, jclass, jstring, jstring, jstring, jbyteArray, jstring, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
@@ -93,12 +103,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_destroyT
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
- * Method:    createTransaction
+ * Method:    createEncodedTransaction
  * Signature:
  * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createTransaction(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createEncodedTransaction(
     JNIEnv*, jclass, jobject, jstring, jstring, jint, jstring);
 
 /*

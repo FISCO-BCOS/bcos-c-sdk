@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #ifdef _WIN32
 #include <Windows.h>
 #else
@@ -135,6 +136,46 @@ void usage()
     printf("Example:\n");
     printf("    ./tx_struct_test ./config_sample.ini group0\n");
     exit(0);
+}
+
+int convertCharToHexNumber(char hexChar) {
+    if (hexChar >= '0' && hexChar <= '9')
+        return hexChar - '0';
+    if (hexChar >= 'a' && hexChar <= 'f')
+        return hexChar - 'a' + 10;
+    if (hexChar >= 'A' && hexChar <= 'F')
+        return hexChar - 'A' + 10;
+    return -1;
+}
+
+struct bcos_sdk_c_bytes* fromHexString(const char* hexedString) {
+    unsigned startIndex = (strlen(hexedString) >= 2 && hexedString[0] == '0' && hexedString[1] == 'x') ? 2 : 0;
+    struct bcos_sdk_c_bytes* bytesData = (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+    bytesData->buffer = (uint8_t*)malloc((strlen(hexedString) - startIndex + 1) / 2);
+    bytesData->length = 0;
+
+    if (strlen(hexedString) % 2) {
+        int h = convertCharToHexNumber(hexedString[startIndex++]);
+        if (h == -1) {
+            // Handle error
+            free(bytesData->buffer);
+            free(bytesData);
+            return NULL;
+        }
+        bytesData->buffer[bytesData->length++] = (uint8_t)h;
+    }
+    for (unsigned i = startIndex; i < strlen(hexedString); i += 2) {
+        int highValue = convertCharToHexNumber(hexedString[i]);
+        int lowValue = convertCharToHexNumber(hexedString[i + 1]);
+        if (highValue == -1 || lowValue == -1) {
+            // Handle error
+            free(bytesData->buffer);
+            free(bytesData);
+            return NULL;
+        }
+        bytesData->buffer[bytesData->length++] = (uint8_t)((highValue << 4) + lowValue);
+    }
+    return bytesData;
 }
 
 // contract address
@@ -330,9 +371,13 @@ int main(int argc, char** argv)
         bcos_sdk_abi_encode_method(g_hw_abi, "set", "[\"Hello FISCO-BCOS 3.0!!!\"]", sm_crypto);
     // 9.2 create signed transaction
     {
-        // 9.2.1 create transaction data
-        struct bcos_sdk_c_transaction_data* transaction_data = bcos_sdk_create_transaction_data_struct(
+        // 9.2.1 create transaction data with hex input
+        struct bcos_sdk_c_transaction_data* transaction_data = bcos_sdk_create_transaction_data_struct_with_hex_input(
             group_id, chain_id, contract_address, set_data, g_hw_abi, block_limit);
+        // create transaction data with bytes input
+        struct bcos_sdk_c_bytes* input_bytes = fromHexString(set_data);
+        transaction_data = bcos_sdk_create_transaction_data_struct_with_bytes(
+            group_id, chain_id, contract_address, input_bytes->buffer, input_bytes->length, g_hw_abi, block_limit);
 
         // 9.2.1.1 encode tx data to hex
         const char* hex_tx_data = bcos_sdk_encode_transaction_data_struct(transaction_data);
@@ -354,7 +399,7 @@ int main(int argc, char** argv)
             bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
         
         // 9.2.4 create signed transaction
-        const char* signed_tx = bcos_sdk_create_transaction(
+        const char* signed_tx = bcos_sdk_create_encoded_transaction(
             decode_tx_data, signed_hash, transaction_data_hash, 0, extra_data);
        
         // 9.2.4.1 create transaction struct
@@ -377,6 +422,11 @@ int main(int argc, char** argv)
         // wait for async operation done, just for sample
         sleep(3);
 
+        // free
+        if (input_bytes && input_bytes->buffer)
+        {
+            bcos_sdk_c_free(input_bytes->buffer);
+        }
         bcos_sdk_destroy_transaction_data_struct(transaction_data);
         bcos_sdk_destroy_transaction_data_struct(decode_tx_data);
         bcos_sdk_destroy_transaction_struct(transaction);

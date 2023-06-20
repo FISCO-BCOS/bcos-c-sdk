@@ -33,14 +33,32 @@ extern "C" {
  * @param group_id
  * @param chain_id
  * @param to
- * @param data
+ * @param input
  * @param abi
  * @param block_limit
  * @return bcos_sdk_c_transaction_data*: transaction data struct pointer, return unassigned struct
  * on failure according to the function called bcos_sdk_get_last_error(if create failed, return -1)
  */
-struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(const char* group_id,
-    const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit);
+struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with_hex_input(
+    const char* group_id, const char* chain_id, const char* to, const char* input, const char* abi,
+    int64_t block_limit);
+
+/**
+ * @brief
+ *
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param bytes_input
+ * @param bytes_input_length
+ * @param abi
+ * @param block_limit
+ * @return bcos_sdk_c_transaction_data*: transaction data struct pointer, return unassigned struct
+ * on failure according to the function called bcos_sdk_get_last_error(if create failed, return -1)
+ */
+struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with_bytes(
+    const char* group_id, const char* chain_id, const char* to, const unsigned char* bytes_input,
+    uint32_t bytes_input_length, const char* abi, int64_t block_limit);
 
 /**
  * @brief
@@ -128,9 +146,9 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
  * @param attribute
  * @return const char*
  */
-const char* bcos_sdk_create_transaction(struct bcos_sdk_c_transaction_data* transaction_data,
-    const char* signature, const char* transaction_data_hash, int32_t attribute,
-    const char* extra_data);
+const char* bcos_sdk_create_encoded_transaction(
+    struct bcos_sdk_c_transaction_data* transaction_data, const char* signature,
+    const char* transaction_data_hash, int32_t attribute, const char* extra_data);
 
 /**
  * @brief encode transaction into hex format

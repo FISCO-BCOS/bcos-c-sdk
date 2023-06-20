@@ -1,6 +1,6 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
 
-public class TxData {
+public class TransactionData {
     private int version;
     private long blockLimit;
     private String chainId;
@@ -8,7 +8,7 @@ public class TxData {
     private String nonce;
     private String to;
     private String abi;
-    private TxBytes input;
+    private TransactionBytes input;
 
     public int getVersion() {
         return version;
@@ -66,11 +66,11 @@ public class TxData {
         this.abi = abi;
     }
 
-    public TxBytes getInput() {
+    public TransactionBytes getInput() {
         return input;
     }
 
-    public void setInput(TxBytes input) {
+    public void setInput(TransactionBytes input) {
         this.input = input;
     }
 }

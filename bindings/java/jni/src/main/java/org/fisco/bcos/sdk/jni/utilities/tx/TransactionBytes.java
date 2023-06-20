@@ -1,6 +1,6 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
 
-public class TxBytes {
+public class TransactionBytes {
     private byte[] buffer;
     private int length;
 

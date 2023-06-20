@@ -13,47 +13,60 @@ public class TransactionStructBuilderJniObj {
      * @param groupID    group id
      * @param chainID    chain id
      * @param to         contract address, which calling to
-     * @param data       tx input data
+     * @param input      tx hex input
      * @param abi        ABI json string, should add it when deploy
      * @param blockLimit block limit
      * @return Transaction Data struct
      */
-    public static native TxData createTransactionDataStruct(
-            String groupID, String chainID, String to, String data, String abi, long blockLimit)
+    public static native TransactionData createTransactionDataStructWithHexInput(
+            String groupID, String chainID, String to, String input, String abi, long blockLimit)
+            throws JniException;
+
+    /**
+     * @param groupID    group id
+     * @param chainID    chain id
+     * @param to         contract address, which calling to
+     * @param bytesInput tx bytes input
+     * @param abi        ABI json string, should add it when deploy
+     * @param blockLimit block limit
+     * @return Transaction Data struct
+     */
+    public static native TransactionData createTransactionDataStructWithBytes(
+            String groupID, String chainID, String to, byte[] bytesInput, String abi, long blockLimit)
             throws JniException;
 
     /**
      * @param transactionData Transaction Data struct
      */
-    public static native void destroyTransactionDataStruct(TxData transactionData)
+    public static native void destroyTransactionDataStruct(TransactionData transactionData)
             throws JniException;
 
     /**
      * @param transactionData Transaction Data struct
      * @return Hexed Transaction Data
      */
-    public static native String encodeTransactionDataStruct(TxData transactionData)
+    public static native String encodeTransactionDataStruct(TransactionData transactionData)
             throws JniException;
 
     /**
      * @param transactionData Transaction Data struct
      * @return Json Transaction Data
      */
-    public static native String encodeTransactionDataStructToJson(TxData transactionData)
+    public static native String encodeTransactionDataStructToJson(TransactionData transactionData)
             throws JniException;
 
     /**
      * @param transactionDataHex transactionData hex string
      * @return TxData
      */
-    public static native TxData decodeTransactionDataStruct(String transactionDataHex)
+    public static native TransactionData decodeTransactionDataStruct(String transactionDataHex)
             throws JniException;
 
     /**
      * @param transactionDataJson transactionData json string
      * @return TxData
      */
-    public static native TxData decodeTransactionDataStructWithJson(String transactionDataJson)
+    public static native TransactionData decodeTransactionDataStructWithJson(String transactionDataJson)
             throws JniException;
 
     /**
@@ -61,7 +74,7 @@ public class TransactionStructBuilderJniObj {
      * @param transactionData Transaction Data struct
      * @return Hash hex string
      */
-    public static native String calcTransactionDataStructHash(int cryptoType, TxData transactionData)
+    public static native String calcTransactionDataStructHash(int cryptoType, TransactionData transactionData)
             throws JniException;
 
     /**
@@ -72,8 +85,8 @@ public class TransactionStructBuilderJniObj {
      * @param extraData
      * @return Transaction Struct
      */
-    public static native Tx createTransactionStruct(
-            TxData transactionData,
+    public static native Transaction createTransactionStruct(
+            TransactionData transactionData,
             String signature,
             String transactionDataHash,
             int attribute,
@@ -83,7 +96,7 @@ public class TransactionStructBuilderJniObj {
     /**
      * @param transaction Transaction struct
      */
-    public static native void destroyTransactionStruct(Tx transaction) throws JniException;
+    public static native void destroyTransactionStruct(Transaction transaction) throws JniException;
 
     /**
      * @param transactionData
@@ -93,8 +106,8 @@ public class TransactionStructBuilderJniObj {
      * @param extraData
      * @return signedTransaction string
      */
-    public static native String createTransaction(
-            TxData transactionData,
+    public static native String createEncodedTransaction(
+            TransactionData transactionData,
             String signature,
             String transactionDataHash,
             int attribute,
@@ -105,24 +118,24 @@ public class TransactionStructBuilderJniObj {
      * @param transaction Transaction struct
      * @return Hexed Transaction
      */
-    public static native String encodeTransactionStruct(Tx transaction) throws JniException;
+    public static native String encodeTransactionStruct(Transaction transaction) throws JniException;
 
     /**
      * @param transaction Transaction struct
      * @return Json Transaction
      */
-    public static native String encodeTransactionStructToJson(Tx transaction) throws JniException;
+    public static native String encodeTransactionStructToJson(Transaction transaction) throws JniException;
 
     /**
      * @param transactionHex transaction hex string
      * @return Tx
      */
-    public static native Tx decodeTransactionStruct(String transactionHex) throws JniException;
+    public static native Transaction decodeTransactionStruct(String transactionHex) throws JniException;
 
     /**
      * @param transactionJson transaction json string
      * @return Tx
      */
-    public static native Tx decodeTransactionStructWithJson(String transactionJson)
+    public static native Transaction decodeTransactionStructWithJson(String transactionJson)
             throws JniException;
 }
