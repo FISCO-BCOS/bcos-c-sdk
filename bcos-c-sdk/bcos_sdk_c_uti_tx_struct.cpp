@@ -308,20 +308,21 @@ struct bcos_sdk_c_transaction* convert_tars_transaction_to_struct(
  * @param group_id
  * @param chain_id
  * @param to
- * @param data
+ * @param input
  * @param abi
  * @param block_limit
  * @return bcos_sdk_c_transaction_data*: transaction data struct pointer, return unassigned struct
  * on failure according to the function called bcos_sdk_get_last_error(if create failed, return -1)
  */
-struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(const char* group_id,
-    const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit)
+struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with_hex_input(
+    const char* group_id, const char* chain_id, const char* to, const char* input, const char* abi,
+    int64_t block_limit)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL);
     // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
-    BCOS_SDK_C_PARAMS_VERIFICATION(data, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL);
     // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", NULL);
 
@@ -329,7 +330,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(cons
     {
         struct bcos_sdk_c_transaction_data* transaction_data_struct =
             (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
-        auto bytesData = fromHexString(data);
+        auto bytesInput = fromHexString(input);
         std::string toStr = to ? to : "";
         std::string abiStr = abi ? abi : "";
         TransactionBuilder builder;
@@ -343,7 +344,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(cons
         transaction_data_struct->abi = my_strdup(abiStr.data());
         transaction_data_struct->nonce = my_strdup(nonceStr.data());
         transaction_data_struct->input =
-            create_bytes_struct(bytesData->size(), reinterpret_cast<char*>(bytesData->data()));
+            create_bytes_struct(bytesInput->size(), reinterpret_cast<char*>(bytesInput->data()));
 
         return transaction_data_struct;
     }
@@ -353,7 +354,69 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct(cons
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct")
                           << LOG_DESC("exception") << LOG_KV("group_id", group_id)
                           << LOG_KV("chain_id", chain_id) << LOG_KV("to", std::string(to ? to : ""))
-                          << LOG_KV("data", data) << LOG_KV("abi", std::string(abi ? abi : ""))
+                          << LOG_KV("input", input) << LOG_KV("abi", std::string(abi ? abi : ""))
+                          << LOG_KV("block_limit", block_limit) << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief
+ *
+ * @param group_id
+ * @param chain_id
+ * @param to
+ * @param bytes_input
+ * @param abi
+ * @param block_limit
+ * @return bcos_sdk_c_transaction_data*: transaction data struct pointer, return unassigned struct
+ * on failure according to the function called bcos_sdk_get_last_error(if create failed, return -1)
+ */
+struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with_bytes(
+    const char* group_id, const char* chain_id, const char* to, const unsigned char* bytes_input,
+    uint32_t bytes_input_length, const char* abi, int64_t block_limit)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL);
+    // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(bytes_input, NULL);
+    // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (bytes_input_length > 0), "bytes input length must >= 0", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", NULL);
+
+    try
+    {
+        struct bcos_sdk_c_transaction_data* transaction_data_struct =
+            (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
+        std::string toStr = to ? to : "";
+        std::string abiStr = abi ? abi : "";
+        TransactionBuilder builder;
+        std::string nonceStr = builder.generateRandomStr();
+
+        transaction_data_struct->version = 0;
+        transaction_data_struct->block_limit = block_limit;
+        transaction_data_struct->group_id = my_strdup(group_id);
+        transaction_data_struct->chain_id = my_strdup(chain_id);
+        transaction_data_struct->to = my_strdup(toStr.data());
+        transaction_data_struct->abi = my_strdup(abiStr.data());
+        transaction_data_struct->nonce = my_strdup(nonceStr.data());
+        transaction_data_struct->input = create_bytes_struct(
+            bytes_input_length, const_cast<char*>(reinterpret_cast<const char*>(bytes_input)));
+
+        return transaction_data_struct;
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct")
+                          << LOG_DESC("exception") << LOG_KV("group_id", group_id)
+                          << LOG_KV("chain_id", chain_id) << LOG_KV("to", std::string(to ? to : ""))
+                          << LOG_KV("bytes_input", bytes_input)
+                          << LOG_KV("abi", std::string(abi ? abi : ""))
                           << LOG_KV("block_limit", block_limit) << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
@@ -684,9 +747,9 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
  * @param attribute
  * @return const char*
  */
-const char* bcos_sdk_create_transaction(struct bcos_sdk_c_transaction_data* transaction_data,
-    const char* signature, const char* transaction_data_hash, int32_t attribute,
-    const char* extra_data)
+const char* bcos_sdk_create_encoded_transaction(
+    struct bcos_sdk_c_transaction_data* transaction_data, const char* signature,
+    const char* transaction_data_hash, int32_t attribute, const char* extra_data)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
@@ -705,8 +768,8 @@ const char* bcos_sdk_create_transaction(struct bcos_sdk_c_transaction_data* tran
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction") << LOG_DESC("exception")
-                          << LOG_KV("signature", signature)
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_encoded_transaction")
+                          << LOG_DESC("exception") << LOG_KV("signature", signature)
                           << LOG_KV("transaction_data_hash", transaction_data_hash)
                           << LOG_KV("attribute", attribute) << LOG_KV("extra_data", extra_data)
                           << LOG_KV("error", errorMsg);
