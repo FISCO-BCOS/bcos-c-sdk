@@ -120,6 +120,16 @@ const char* bcos_sdk_calc_transaction_data_struct_hash(
 /**
  * @brief
  *
+ * @param crypto_type: int
+ * @param transaction_data_hex: const char*
+ * @return const char*
+ */
+const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex(
+    int crypto_type, const char* transaction_data_hex);
+
+/**
+ * @brief
+ *
  * @param transaction_data: struct bcos_sdk_c_transaction_data*
  * @param signature
  * @param transaction_data_hash

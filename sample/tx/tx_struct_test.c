@@ -394,6 +394,9 @@ int main(int argc, char** argv)
         const char* transaction_data_hash =
             bcos_sdk_calc_transaction_data_struct_hash(sm_crypto, decode_tx_data);
         printf(" [TxStructTest] set tx hash: %s\n", transaction_data_hash);
+        transaction_data_hash = bcos_sdk_calc_transaction_data_struct_hash_with_hex(sm_crypto, hex_tx_data);
+        printf(" [TxStructTest] set tx hash with tx_data_hex: %s\n", transaction_data_hash);
+
         // 9.2.3 sign transaction hash
         const char* signed_hash =
             bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
