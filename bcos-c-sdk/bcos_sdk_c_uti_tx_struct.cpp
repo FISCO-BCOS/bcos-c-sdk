@@ -219,31 +219,27 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars(
         auto TransactionDataUniquePtr =
             convert_transaction_data_to_tars(transaction->transaction_data);
         tars_transaction->data = *TransactionDataUniquePtr;
-        std::vector<tars::Char> data_hash_vec, signature_vec, sender_vec;
         if (transaction->data_hash)
         {
             for (size_t i = 0; i < transaction->data_hash->length; ++i)
             {
-                data_hash_vec.push_back(transaction->data_hash->buffer[i]);
+                tars_transaction->dataHash.push_back(transaction->data_hash->buffer[i]);
             }
         }
         if (transaction->signature)
         {
             for (size_t i = 0; i < transaction->signature->length; ++i)
             {
-                signature_vec.push_back(transaction->signature->buffer[i]);
+                tars_transaction->signature.push_back(transaction->signature->buffer[i]);
             }
         }
         if (transaction->sender)
         {
             for (size_t i = 0; i < transaction->sender->length; ++i)
             {
-                sender_vec.push_back(transaction->sender->buffer[i]);
+                tars_transaction->sender.push_back(transaction->sender->buffer[i]);
             }
         }
-        tars_transaction->dataHash = data_hash_vec;
-        tars_transaction->signature = signature_vec;
-        tars_transaction->sender = sender_vec;
         tars_transaction->importTime = (tars::Int32)transaction->import_time;
         tars_transaction->attribute = (tars::Int64)transaction->attribute;
         tars_transaction->extraData = std::string(transaction->extra_data);
@@ -705,13 +701,26 @@ struct bcos_sdk_c_transaction* bcos_sdk_create_transaction_struct(
         struct bcos_sdk_c_transaction* transaction_struct =
             (struct bcos_sdk_c_transaction*)malloc(sizeof(struct bcos_sdk_c_transaction));
         transaction_struct->transaction_data = transaction_data_copy(transaction_data);
-        transaction_struct->data_hash =
-            create_bytes_struct(std::strlen(transaction_data_hash), transaction_data_hash);
-        transaction_struct->signature = create_bytes_struct(std::strlen(signature), signature);
         transaction_struct->sender = NULL;
         transaction_struct->import_time = 0;
         transaction_struct->attribute = attribute;
         transaction_struct->extra_data = my_strdup(extra_data);
+        // signature
+        auto signatureWithoutHex = fromHexString(signature);
+        struct bcos_sdk_c_bytes* signature_bytes =
+            (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+        signature_bytes->length = signatureWithoutHex->size();
+        signature_bytes->buffer = (uint8_t*)malloc(signatureWithoutHex->size());
+        memcpy(signature_bytes->buffer, signatureWithoutHex->data(), signatureWithoutHex->size());
+        transaction_struct->signature = signature_bytes;
+        // data_hash
+        auto dataHashArray = bcos::crypto::HashType(transaction_data_hash);
+        struct bcos_sdk_c_bytes* data_hash_bytes =
+            (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+        data_hash_bytes->length = dataHashArray.size();
+        data_hash_bytes->buffer = (uint8_t*)malloc(dataHashArray.size());
+        memcpy(data_hash_bytes->buffer, dataHashArray.data(), dataHashArray.size());
+        transaction_struct->data_hash = data_hash_bytes;
 
         return transaction_struct;
     }
@@ -837,8 +846,8 @@ const char* bcos_sdk_encode_transaction_struct(struct bcos_sdk_c_transaction* tr
         auto tars_transaction = convert_transaction_to_tars(transaction);
         TransactionBuilder builder;
         auto transaction = builder.encodeTransaction(*tars_transaction);
-        auto hex_tx_str = toHexString(*transaction);
-        return strdup(hex_tx_str->c_str());
+        auto hex_tx_str = toHexStringWithPrefix(*transaction);
+        return strdup(hex_tx_str.c_str());
     }
     catch (const std::exception& e)
     {

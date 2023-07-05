@@ -418,9 +418,12 @@ int main(int argc, char** argv)
         printf(" [TxStructTest] tx_json: %s\n", json_tx);
         // 9.2.4.5 decode json to tx
         decode_tx = bcos_sdk_decode_transaction_struct_with_json(json_tx);
-        
+
+        printf(" [TxStructTest] signed_tx: %s\n", signed_tx);
+        printf(" [TxStructTest] hex_tx: %s\n", hex_tx);
+
         // 9.3 call rpc interface, sendTransaction
-        bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
+        bcos_rpc_send_transaction(sdk, group_id, "", hex_tx, 0, on_send_tx_resp_callback, NULL);
 
         // wait for async operation done, just for sample
         sleep(3);
