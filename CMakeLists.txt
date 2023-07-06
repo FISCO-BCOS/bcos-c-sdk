@@ -24,7 +24,7 @@ if(NOT MSVC)
     set(CMAKE_CXX_FLAGS "-pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "12" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "13" CACHE STRING "Minimum OS X deployment version")
 
 # export windows dll symbol
 if(WIN32)
@@ -137,11 +137,11 @@ if(BUILD_JNI)
 endif()
 
 # ut and binary exe
-# if (TESTS)
-# enable_testing()
-# set(CTEST_OUTPUT_ON_FAILURE TRUE)
-# add_subdirectory(test)
-# endif()
+if (TESTS)
+    enable_testing()
+    set(CTEST_OUTPUT_ON_FAILURE TRUE)
+    add_subdirectory(test)
+endif()
 
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
