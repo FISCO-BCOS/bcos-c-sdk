@@ -191,7 +191,6 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars(
         tars_transaction_data->nonce = std::string(transaction_data->nonce);
         tars_transaction_data->to = std::string(transaction_data->to);
         tars_transaction_data->abi = std::string(transaction_data->abi);
-        tars_transaction_data->groupID = std::string(transaction_data->group_id);
 
         return tars_transaction_data;
     }
@@ -347,7 +346,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct_with_hex_input")
                           << LOG_DESC("exception") << LOG_KV("group_id", group_id)
                           << LOG_KV("chain_id", chain_id) << LOG_KV("to", std::string(to ? to : ""))
                           << LOG_KV("input", input) << LOG_KV("abi", std::string(abi ? abi : ""))
@@ -408,7 +407,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data_struct_with_bytes")
                           << LOG_DESC("exception") << LOG_KV("group_id", group_id)
                           << LOG_KV("chain_id", chain_id) << LOG_KV("to", std::string(to ? to : ""))
                           << LOG_KV("bytes_input", bytes_input)
@@ -485,8 +484,8 @@ const char* bcos_sdk_encode_transaction_data_struct(
     {
         auto tars_transaction_data = convert_transaction_data_to_tars(transaction_data);
         TransactionBuilder builder;
-        auto transactionData = builder.encodeTransactionData(*tars_transaction_data);
-        auto hex_tx_data_str = toHexString(*transactionData);
+        auto encodedTransactionData = builder.encodeTransactionData(*tars_transaction_data);
+        auto hex_tx_data_str = toHexString(*encodedTransactionData);
         return strdup(hex_tx_data_str->c_str());
     }
     catch (const std::exception& e)
@@ -845,8 +844,8 @@ const char* bcos_sdk_encode_transaction_struct(struct bcos_sdk_c_transaction* tr
     {
         auto tars_transaction = convert_transaction_to_tars(transaction);
         TransactionBuilder builder;
-        auto transaction = builder.encodeTransaction(*tars_transaction);
-        auto hex_tx_str = toHexStringWithPrefix(*transaction);
+        auto encodedTransaction = builder.encodeTransaction(*tars_transaction);
+        auto hex_tx_str = toHexStringWithPrefix(*encodedTransaction);
         return strdup(hex_tx_str.c_str());
     }
     catch (const std::exception& e)
