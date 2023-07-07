@@ -59,7 +59,7 @@ jobs:
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
-        run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.dylib.zip
@@ -113,7 +113,7 @@ jobs:
       - name: compile
         run: cd build && make -j4
       - name: run test
-        run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
   build_with_centos:
     name: build_with_centos
     runs-on: ubuntu-latest
@@ -164,8 +164,10 @@ jobs:
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
           mkdir -p build && cd build
-          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON
+          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
           make -j4
+      - name: run test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip

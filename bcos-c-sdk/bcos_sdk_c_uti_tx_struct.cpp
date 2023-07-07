@@ -174,16 +174,17 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars(
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->group_id, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->chain_id, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->input, NULL);
 
     try
     {
         auto tars_transaction_data = std::make_unique<bcostars::TransactionData>();
-        std::vector<tars::Char> input;
         for (size_t i = 0; i < transaction_data->input->length; ++i)
         {
-            input.push_back(transaction_data->input->buffer[i]);
+            tars_transaction_data->input.push_back(transaction_data->input->buffer[i]);
         }
-        tars_transaction_data->input = std::move(input);
         tars_transaction_data->version = (tars::Int32)transaction_data->version;
         tars_transaction_data->blockLimit = (tars::Int64)transaction_data->block_limit;
         tars_transaction_data->chainID = std::string(transaction_data->chain_id);
@@ -211,6 +212,8 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars(
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction->data_hash, NULL);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction->signature, NULL);
 
     try
     {
@@ -218,19 +221,13 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars(
         auto TransactionDataUniquePtr =
             convert_transaction_data_to_tars(transaction->transaction_data);
         tars_transaction->data = *TransactionDataUniquePtr;
-        if (transaction->data_hash)
+        for (size_t i = 0; i < transaction->data_hash->length; ++i)
         {
-            for (size_t i = 0; i < transaction->data_hash->length; ++i)
-            {
-                tars_transaction->dataHash.push_back(transaction->data_hash->buffer[i]);
-            }
+            tars_transaction->dataHash.push_back(transaction->data_hash->buffer[i]);
         }
-        if (transaction->signature)
+        for (size_t i = 0; i < transaction->signature->length; ++i)
         {
-            for (size_t i = 0; i < transaction->signature->length; ++i)
-            {
-                tars_transaction->signature.push_back(transaction->signature->buffer[i]);
-            }
+            tars_transaction->signature.push_back(transaction->signature->buffer[i]);
         }
         if (transaction->sender)
         {
@@ -319,15 +316,16 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL);
     // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((input[0] != '\0'), "input can not be empty string", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
 
     try
     {
         struct bcos_sdk_c_transaction_data* transaction_data_struct =
             (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
-        auto bytesInput = fromHexString(input);
         std::string toStr = to ? to : "";
         std::string abiStr = abi ? abi : "";
+        auto bytesInput = fromHexString(input);
         TransactionBuilder builder;
         std::string nonceStr = builder.generateRandomStr();
 
@@ -380,8 +378,8 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     BCOS_SDK_C_PARAMS_VERIFICATION(bytes_input, NULL);
     // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (bytes_input_length > 0), "bytes input length must >= 0", NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", NULL);
+        (bytes_input_length > 0), "bytes input length must > 0", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
 
     try
     {
@@ -485,7 +483,7 @@ const char* bcos_sdk_encode_transaction_data_struct(
         auto tars_transaction_data = convert_transaction_data_to_tars(transaction_data);
         TransactionBuilder builder;
         auto encodedTransactionData = builder.encodeTransactionData(*tars_transaction_data);
-        auto hex_tx_data_str = toHexString(*encodedTransactionData);
+        auto hex_tx_data_str = bcos::toHexString(*encodedTransactionData);
         return strdup(hex_tx_data_str->c_str());
     }
     catch (const std::exception& e)
@@ -537,7 +535,13 @@ const char* bcos_sdk_encode_transaction_data_struct_to_json(
 struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct(
     const char* transaction_data_hex_str)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data_hex_str, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((transaction_data_hex_str[0] != '\0'),
+        "transaction_data_hex_str can not be empty string", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((strlen(transaction_data_hex_str) % 2 != 1),
+        "the length of transaction_data_hex_str must be an even number", NULL);
+
     try
     {
         TransactionBuilder builder;
@@ -573,6 +577,8 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_with
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data_json_str, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((transaction_data_json_str[0] != '\0'),
+        "transaction_data_json_str can not be empty string", NULL);
 
     try
     {
@@ -652,6 +658,8 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex(
         "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
         "BCOS_C_SDK_SM_TYPE(sm crypto type)",
         NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (transaction_data_hex[0] != '\0'), "transaction_data_hex can not be empty string", NULL);
 
     try
     {
@@ -694,6 +702,10 @@ struct bcos_sdk_c_transaction* bcos_sdk_create_transaction_struct(
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(signature, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data_hash, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (signature[0] != '\0'), "signature can not be empty string", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (transaction_data_hash[0] != '\0'), "transaction_data_hash can not be empty string", NULL);
 
     try
     {
@@ -805,6 +817,10 @@ const char* bcos_sdk_create_encoded_transaction(
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(signature, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data_hash, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (signature[0] != '\0'), "signature can not be empty string", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (transaction_data_hash[0] != '\0'), "transaction_data_hash can not be empty string", NULL);
 
     try
     {
@@ -897,7 +913,12 @@ const char* bcos_sdk_encode_transaction_struct_to_json(struct bcos_sdk_c_transac
  */
 struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct(const char* transaction_hex_str)
 {
+    bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_hex_str, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (transaction_hex_str[0] != '\0'), "transaction_hex_str can not be empty string", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((strlen(transaction_hex_str) % 2 != 1),
+        "the length of transaction_hex_str must be an even number", NULL);
 
     try
     {
@@ -930,6 +951,8 @@ struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_with_json(
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_json_str, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (transaction_json_str[0] != '\0'), "transaction_json_str can not be empty string", NULL);
 
     try
     {

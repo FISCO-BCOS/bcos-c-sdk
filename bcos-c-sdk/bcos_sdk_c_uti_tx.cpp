@@ -55,7 +55,7 @@ void* bcos_sdk_create_transaction_data(const char* group_id, const char* chain_i
     // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(data, NULL);
     // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
 
     try
     {
