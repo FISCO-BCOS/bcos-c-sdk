@@ -190,6 +190,12 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 		return nil, fmt.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
 	}
 	C.bcos_sdk_start(sdk)
+	if C.bcos_sdk_get_last_error() != 0 {
+		message := C.bcos_sdk_get_last_error_msg()
+		//defer C.free(unsafe.Pointer(message))
+		return nil, fmt.Errorf("bcos_sdk_start failed with error: %s", C.GoString(message))
+	}
+
 	var wasm, smCrypto C.int
 	group := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, group, &wasm, &smCrypto)
@@ -222,8 +228,7 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey []byte) (*
 	}
 
 	C.bcos_sdk_start(sdk)
-	error := C.bcos_sdk_get_last_error()
-	if error != 0 {
+	if C.bcos_sdk_get_last_error() != 0 {
 		message := C.bcos_sdk_get_last_error_msg()
 		//defer C.free(unsafe.Pointer(message))
 		return nil, fmt.Errorf("bcos sdk start failed with error: %s", C.GoString(message))
