@@ -4,6 +4,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_rpc.h"
 #include "jni/org_fisco_bcos_sdk_common.h"
+#include "jni/org_fisco_bcos_sdk_jni_thread_attacher.h"
 #include "org_fisco_bcos_sdk_class_cache.h"
 #include "org_fisco_bcos_sdk_exception.h"
 #include <stdint.h>
@@ -12,6 +13,16 @@
 #include <cstdio>
 #include <memory>
 #include <string>
+
+static JNIThreadAttacher* getThreadAttacher(JavaVM* jvm)
+{
+    static thread_local std::unique_ptr<JNIThreadAttacher> threadAttacher;
+    if (!threadAttacher)
+    {
+        threadAttacher = std::make_unique<JNIThreadAttacher>(jvm);
+    }
+    return threadAttacher.get();
+}
 
 // receive rpc response and call the cb
 static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
@@ -23,8 +34,8 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     // Note: delete cb_context
     delete context;
 
-    JNIEnv* env;
-    jvm->AttachCurrentThread((void**)&env, NULL);
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    JNIEnv* env = attacher->getEnv();
 
     std::string className = "org/fisco/bcos/sdk/jni/common/Response";
     std::string onRespSig = "(Lorg/fisco/bcos/sdk/jni/common/Response;)V";
@@ -34,8 +45,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     jmethodID onRespMethodID = env->GetMethodID(cbClass, "onResponse", onRespSig.c_str());
     if (onRespMethodID == NULL)
     {
-        env->ExceptionDescribe();
-        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such method in the class, className: " + className + " ,method: onResponse")
                 .c_str());
@@ -49,8 +58,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     jmethodID mid = env->GetMethodID(responseClass, "<init>", "()V");
     if (mid == NULL)
     {
-        env->ExceptionDescribe();
-        env->DeleteGlobalRef(jcallback);
         env->FatalError(("No constructor in the class, className: " + className).c_str());
     }
 
@@ -60,8 +67,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     jfieldID errorCodeFieldID = env->GetFieldID(responseClass, "errorCode", "I");
     if (errorCodeFieldID == NULL)
     {
-        env->ExceptionDescribe();
-        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: errorCode")
                 .c_str());
@@ -71,8 +76,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     jfieldID errorMsgFieldID = env->GetFieldID(responseClass, "errorMessage", "Ljava/lang/String;");
     if (errorMsgFieldID == NULL)
     {
-        env->ExceptionDescribe();
-        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: errorMessage")
                 .c_str());
@@ -82,8 +85,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     jfieldID dataFieldID = env->GetFieldID(responseClass, "data", "[B");
     if (errorMsgFieldID == NULL)
     {
-        env->ExceptionDescribe();
-        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: data").c_str());
     }
@@ -108,9 +109,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
 
     // release callback global reference
     env->DeleteGlobalRef(jcallback);
-
-    // detach current thread when job finished
-    jvm->DetachCurrentThread();
 }
 
 /*
@@ -143,7 +141,6 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_stop(JNIEnv* en
     }
 }
 
-
 /*
  * Class:     org_fisco_bcos_sdk_jni_rpc_RpcJniObj
  * Method:    genericMethod
@@ -161,6 +158,9 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Lorg
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -193,6 +193,9 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljav
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -230,6 +233,9 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljav
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -279,6 +285,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_call(JNIEnv* en
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -319,6 +328,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_sendTransaction
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -361,6 +373,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransaction(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -401,6 +416,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransactionR
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -446,6 +464,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByHash(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -489,6 +510,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByNumbe
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -523,6 +547,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockHashByN
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -579,6 +606,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockNumber(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -616,6 +646,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getCode(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -651,6 +684,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSealerList(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -685,6 +721,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getObserverList
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -717,6 +756,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPbftView(
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -752,6 +794,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPendingTxSiz
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -785,6 +830,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSyncStatus(
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -822,6 +870,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSystemConfig
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -857,6 +908,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTotalTransac
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -889,6 +943,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupPeers(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -918,6 +975,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPeers(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -944,6 +1004,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupList(
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -974,6 +1037,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfo(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
+
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
     context->jvm = jvm;
@@ -1002,6 +1068,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfoLis
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -1033,6 +1102,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupNodeInf
     // pointer obtained from one thread, and use that pointer in another thread.
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
+
+    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
