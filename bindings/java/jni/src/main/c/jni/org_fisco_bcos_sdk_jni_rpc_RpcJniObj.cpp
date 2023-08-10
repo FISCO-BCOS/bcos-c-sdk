@@ -159,8 +159,8 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Lorg
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -194,8 +194,8 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljav
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -234,8 +234,8 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljav
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
@@ -285,8 +285,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_call(JNIEnv* en
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -329,8 +329,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_sendTransaction
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -373,8 +373,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransaction(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -417,8 +417,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransactionR
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -464,8 +464,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByHash(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -510,8 +510,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByNumbe
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -548,8 +548,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockHashByN
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -606,8 +606,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockNumber(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -646,8 +646,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getCode(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -684,8 +684,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSealerList(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -721,8 +721,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getObserverList
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -757,8 +757,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPbftView(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -794,8 +794,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPendingTxSiz
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -831,8 +831,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSyncStatus(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -870,8 +870,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSystemConfig
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -908,8 +908,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTotalTransac
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -943,8 +943,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupPeers(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -975,8 +975,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPeers(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -1005,8 +1005,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupList(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -1037,8 +1037,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfo(
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -1069,8 +1069,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfoLis
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
@@ -1103,8 +1103,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupNodeInf
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    JNIThreadAttacher* attacher = getThreadAttacher(jvm);
-    env = attacher->getEnv();
+    // JNIThreadAttacher* attacher = getThreadAttacher(jvm);
+    // env = attacher->getEnv();
 
     cb_context* context = new cb_context();
     context->jcallback = env->NewGlobalRef(callback);
