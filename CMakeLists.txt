@@ -143,6 +143,12 @@ if (TESTS)
     add_subdirectory(test)
 endif()
 
+# for code coverage
+if (COVERAGE)
+    include(Coverage)
+    config_coverage("cov" "'/usr*' '${CMAKE_CURRENT_SOURCE_DIR}/bcos-cmake-scripts*' '${CMAKE_CURRENT_SOURCE_DIR}/test/Main*'")
+endif ()
+
 # SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 install(
     TARGETS ${BCOS_C_SDK_TARGET}
