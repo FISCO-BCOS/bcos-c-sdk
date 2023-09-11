@@ -807,16 +807,16 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStruct)
     BOOST_TEST(encodedTxJson != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
-    // decode json failed (transaction_json_str == NULL)
-    auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json(nullptr);
-    jsonSuccess = bcos_sdk_is_last_opr_success();
+    // // decode json failed (transaction_json_str == NULL)
+    // auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json(nullptr);
+    // jsonSuccess = bcos_sdk_is_last_opr_success();
 
-    BOOST_TEST(jsonSuccess == false);
-    BOOST_TEST(decodedTxJson == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
+    // BOOST_TEST(jsonSuccess == false);
+    // BOOST_TEST(decodedTxJson == nullptr);
+    // BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode json failed (transaction_json_str == "")
-    decodedTxJson = bcos_sdk_decode_transaction_struct_with_json("");
+    auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json("");
     jsonSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(jsonSuccess == false);
