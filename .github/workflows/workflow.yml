@@ -118,6 +118,16 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: run coverage
         run: cd build && make cov
+      - name: upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./build/coverage.info
+          version: "v0.1.15"
+          flags: unittests
+          name: c sdk coverage
+          fail_ci_if_error: false
+          verbose: true
   build_with_centos:
     name: build_with_centos
     runs-on: ubuntu-latest
