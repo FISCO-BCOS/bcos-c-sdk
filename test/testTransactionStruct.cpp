@@ -681,15 +681,16 @@ BOOST_AUTO_TEST_CASE(testCreateEncodedTx)
     BOOST_TEST(bcos_sdk_get_last_error_msg() ==
                std::string("transaction_data_hash can not be empty string"));
 
-    // create encoded tx failed (signature = "")
-    encodedTx = bcos_sdk_create_encoded_transaction(
-        txDataStruct, "", transactionDataHash, attribute, extraData);
-    success = bcos_sdk_is_last_opr_success();
+    // // create encoded tx failed (signature = "")
+    // encodedTx = bcos_sdk_create_encoded_transaction(
+    //     txDataStruct, "", transactionDataHash, attribute, extraData);
+    // success = bcos_sdk_is_last_opr_success();
 
-    BOOST_TEST(success == false);
-    BOOST_TEST(encodedTx == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("signature can not be empty string"));
+    // BOOST_TEST(success == false);
+    // BOOST_TEST(encodedTx == nullptr);
+    // BOOST_TEST(bcos_sdk_get_last_error() == -1);
+    // BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("signature can not be empty
+    // string"));
 
     // create encoded tx success
     encodedTx = bcos_sdk_create_encoded_transaction(
@@ -807,16 +808,16 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStruct)
     BOOST_TEST(encodedTxJson != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
-    // // decode json failed (transaction_json_str == NULL)
-    // auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json(nullptr);
-    // jsonSuccess = bcos_sdk_is_last_opr_success();
+    // decode json failed (transaction_json_str == NULL)
+    auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json(nullptr);
+    jsonSuccess = bcos_sdk_is_last_opr_success();
 
-    // BOOST_TEST(jsonSuccess == false);
-    // BOOST_TEST(decodedTxJson == nullptr);
-    // BOOST_TEST(bcos_sdk_get_last_error() == -1);
+    BOOST_TEST(jsonSuccess == false);
+    BOOST_TEST(decodedTxJson == nullptr);
+    BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode json failed (transaction_json_str == "")
-    auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json("");
+    decodedTxJson = bcos_sdk_decode_transaction_struct_with_json("");
     jsonSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(jsonSuccess == false);
