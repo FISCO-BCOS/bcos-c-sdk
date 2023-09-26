@@ -24,7 +24,7 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
     delete context;
 
     JNIEnv* env;
-    jvm->AttachCurrentThread((void**)&env, NULL);
+    jvm->AttachCurrentThreadAsDaemon((void**)&env, NULL);
 
     std::string className = "org/fisco/bcos/sdk/jni/common/Response";
     std::string onRespSig = "(Lorg/fisco/bcos/sdk/jni/common/Response;)V";
@@ -108,9 +108,6 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
 
     // release callback global reference
     env->DeleteGlobalRef(jcallback);
-
-    // detach current thread when job finished
-    jvm->DetachCurrentThread();
 }
 
 /*
