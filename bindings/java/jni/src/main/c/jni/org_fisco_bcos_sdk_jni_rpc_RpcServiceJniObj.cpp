@@ -25,7 +25,7 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     delete context;
 
     JNIEnv* env;
-    jvm->AttachCurrentThread((void**)&env, NULL);
+    jvm->AttachCurrentThreadAsDaemon((void**)&env, NULL);
 
     std::string className = "org/fisco/bcos/sdk/jni/common/Response";
     std::string onRespSig = "(Lorg/fisco/bcos/sdk/jni/common/Response;)V";
@@ -35,6 +35,8 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     jmethodID onRespMethodID = env->GetMethodID(cbClass, "onResponse", onRespSig.c_str());
     if (onRespMethodID == NULL)
     {
+        env->ExceptionDescribe();
+        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such method in the class, className: " + className + " ,method: onResponse")
                 .c_str());
@@ -48,6 +50,8 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     jmethodID mid = env->GetMethodID(responseClass, "<init>", "()V");
     if (mid == NULL)
     {
+        env->ExceptionDescribe();
+        env->DeleteGlobalRef(jcallback);
         env->FatalError(("No constructor in the class, className: " + className).c_str());
     }
 
@@ -57,6 +61,8 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     jfieldID errorCodeFieldID = env->GetFieldID(responseClass, "errorCode", "I");
     if (errorCodeFieldID == NULL)
     {
+        env->ExceptionDescribe();
+        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: errorCode")
                 .c_str());
@@ -66,6 +72,8 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     jfieldID errorMsgFieldID = env->GetFieldID(responseClass, "errorMessage", "Ljava/lang/String;");
     if (errorMsgFieldID == NULL)
     {
+        env->ExceptionDescribe();
+        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: errorMessage")
                 .c_str());
@@ -75,6 +83,8 @@ static void on_receive_tars_rpc_response(struct bcos_sdk_c_struct_response* resp
     jfieldID dataFieldID = env->GetFieldID(responseClass, "data", "[B");
     if (errorMsgFieldID == NULL)
     {
+        env->ExceptionDescribe();
+        env->DeleteGlobalRef(jcallback);
         env->FatalError(
             ("No such field in the class, className: " + className + " ,fieldName: data").c_str());
     }

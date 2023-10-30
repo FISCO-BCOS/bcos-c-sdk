@@ -1,10 +1,10 @@
 package csdk
 
-// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/ -lbcos-c-sdk-aarch64
-// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/ -lbcos-c-sdk
-// #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/ -lbcos-c-sdk
-// #cgo linux,arm64 LDFLAGS: -L/usr/local/lib/ -lbcos-c-sdk-aarch64
-// #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs/win -lbcos-c-sdk
+// #cgo darwin,arm64 LDFLAGS: -L/usr/local/lib/ -L${SRCDIR}/libs -lbcos-c-sdk-aarch64
+// #cgo darwin,amd64 LDFLAGS: -L/usr/local/lib/ -L${SRCDIR}/libs -lbcos-c-sdk
+// #cgo linux,amd64 LDFLAGS: -L/usr/local/lib/ -L${SRCDIR}/libs -lbcos-c-sdk
+// #cgo linux,arm64 LDFLAGS: -L/usr/local/lib/ -L${SRCDIR}/libs -lbcos-c-sdk-aarch64
+// #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
 // #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c.h"
@@ -143,7 +143,7 @@ func getContext(index unsafe.Pointer, delete bool) *CallbackChan {
 	return nil
 }
 
-func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
+func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
 	cHost := C.CString(host)
 	cPort := C.int(port)
 	cIsSmSsl := C.int(0)
@@ -156,28 +156,31 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 	cTlsCaPath := C.CString(tlsCaPath)
 	cTlsKeyPath := C.CString(tlsKeyPath)
 	cTlsCertPath := C.CString(tlsCertPath)
+	if !disableSsl {
+		if isSmSsl {
+			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.ca_cert))
+			config.sm_cert_config.ca_cert = cTlsCaPath
+			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_key))
+			config.sm_cert_config.node_key = cTlsKeyPath
+			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_cert))
+			config.sm_cert_config.node_cert = cTlsCertPath
 
-	if isSmSsl {
-		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.ca_cert))
-		config.sm_cert_config.ca_cert = cTlsCaPath
-		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_key))
-		config.sm_cert_config.node_key = cTlsKeyPath
-		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_cert))
-		config.sm_cert_config.node_cert = cTlsCertPath
-
-		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_key))
-		cTlsSmEnKey := C.CString(tlsSmEnKey)
-		config.sm_cert_config.en_node_key = cTlsSmEnKey
-		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_cert))
-		cTlsSmEnCert := C.CString(tlsSEnCert)
-		config.sm_cert_config.en_node_cert = cTlsSmEnCert
+			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_key))
+			cTlsSmEnKey := C.CString(tlsSmEnKey)
+			config.sm_cert_config.en_node_key = cTlsSmEnKey
+			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_cert))
+			cTlsSmEnCert := C.CString(tlsSEnCert)
+			config.sm_cert_config.en_node_cert = cTlsSmEnCert
+		} else {
+			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.ca_cert))
+			config.cert_config.ca_cert = cTlsCaPath
+			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_key))
+			config.cert_config.node_key = cTlsKeyPath
+			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_cert))
+			config.cert_config.node_cert = cTlsCertPath
+		}
 	} else {
-		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.ca_cert))
-		config.cert_config.ca_cert = cTlsCaPath
-		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_key))
-		config.cert_config.node_key = cTlsKeyPath
-		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_cert))
-		config.cert_config.node_cert = cTlsCertPath
+		config.disable_ssl = C.int(1)
 	}
 
 	sdk := C.bcos_sdk_create(config)
@@ -187,6 +190,12 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 		return nil, fmt.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
 	}
 	C.bcos_sdk_start(sdk)
+	if C.bcos_sdk_get_last_error() != 0 {
+		message := C.bcos_sdk_get_last_error_msg()
+		//defer C.free(unsafe.Pointer(message))
+		return nil, fmt.Errorf("bcos_sdk_start failed with error: %s", C.GoString(message))
+	}
+
 	var wasm, smCrypto C.int
 	group := C.CString(groupID)
 	C.bcos_sdk_get_group_wasm_and_crypto(sdk, group, &wasm, &smCrypto)
@@ -219,8 +228,7 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey []byte) (*
 	}
 
 	C.bcos_sdk_start(sdk)
-	error := C.bcos_sdk_get_last_error()
-	if error != 0 {
+	if C.bcos_sdk_get_last_error() != 0 {
 		message := C.bcos_sdk_get_last_error_msg()
 		//defer C.free(unsafe.Pointer(message))
 		return nil, fmt.Errorf("bcos sdk start failed with error: %s", C.GoString(message))
@@ -492,17 +500,19 @@ func (csdk *CSDK) RegisterBlockNotifier(chanData *CallbackChan) { // TODO: imple
 	C.bcos_sdk_register_block_notifier(csdk.sdk, csdk.groupID, setContext(chanData), C.bcos_sdk_c_struct_response_cb(C.on_recv_notify_resp_callback))
 }
 
-func (csdk *CSDK) SendTransaction(chanData *CallbackChan, to string, data string, withProof bool) ([]byte, error) {
+func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, data, extraData string, withProof bool) ([]byte, error) {
 	cTo := C.CString(to)
 	cProof := C.int(0)
 	if withProof {
 		cProof = C.int(1)
 	}
 	cData := C.CString(data)
+	cExtraData := C.CString(extraData)
 	var tx_hash *C.char
 	var signed_tx *C.char
 	defer C.free(unsafe.Pointer(cTo))
 	defer C.free(unsafe.Pointer(cData))
+	defer C.free(unsafe.Pointer(cExtraData))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
 	txHashHex := strings.TrimPrefix(C.GoString(tx_hash), "0x")
@@ -515,7 +525,7 @@ func (csdk *CSDK) SendTransaction(chanData *CallbackChan, to string, data string
 		return txHash, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
 
-	C.bcos_sdk_create_signed_transaction(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, nil, block_limit, 0, &tx_hash, &signed_tx)
+	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, nil, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
 
 	if C.bcos_sdk_is_last_opr_success() == 0 {
 		return txHash, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))

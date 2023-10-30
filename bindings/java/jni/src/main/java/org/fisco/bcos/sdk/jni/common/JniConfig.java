@@ -57,17 +57,7 @@ public class JniConfig {
 
     @Override
     public String toString() {
-      return "CertConfig{"
-          + "caCert='"
-          + caCert
-          + '\''
-          + ", nodeKey='"
-          + nodeKey
-          + '\''
-          + ", nodeCert='"
-          + nodeCert
-          + '\''
-          + '}';
+      return "CertConfig{}";
     }
   }
 
@@ -121,23 +111,7 @@ public class JniConfig {
 
     @Override
     public String toString() {
-      return "SMCertConfig{"
-          + "caCert='"
-          + caCert
-          + '\''
-          + ", nodeCert='"
-          + nodeCert
-          + '\''
-          + ", nodeKey='"
-          + nodeKey
-          + '\''
-          + ", enNodeCert='"
-          + enNodeCert
-          + '\''
-          + ", enNodeKey='"
-          + enNodeKey
-          + '\''
-          + '}';
+      return "SMCertConfig{}";
     }
   };
 

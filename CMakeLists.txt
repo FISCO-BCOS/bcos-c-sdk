@@ -70,7 +70,7 @@ HunterGate(
 )
 
 # project name
-project(bcos-c-sdk VERSION "3.3.0")
+project(bcos-c-sdk VERSION "3.4.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 if(NOT CMAKE_BUILD_TYPE)
