@@ -2,6 +2,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "org_fisco_bcos_sdk_exception.h"
+#include "org_fisco_bcos_sdk_common.h"
 #include <tuple>
 
 /*
@@ -32,6 +33,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I(
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair__Ljava_lang_String_2
   (JNIEnv* env, jclass, jstring jhsm_lib_path)
  {
+    checkJString(env, jhsm_lib_path);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     void* keypair = bcos_sdk_create_hsm_keypair(hsm_lib_path);
 
@@ -75,6 +77,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair___3BLjava_lang_String_2
   (JNIEnv* env, jclass, jbyteArray jdata, jstring jhsm_lib_path)
 {
+    checkJString(env, jhsm_lib_path);
     jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     jsize len = env->GetArrayLength(jdata);
@@ -98,6 +101,8 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJni
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_useHsmKeyPair
   (JNIEnv* env, jclass, jint jkey_index, jstring jpass_word, jstring jhsm_lib_path)
 {
+    checkJString(env, jpass_word);
+    checkJString(env, jhsm_lib_path);
     const char* password = env->GetStringUTFChars(jpass_word, NULL);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     void* keypair = bcos_sdk_use_hsm_keypair_by_keyindex_and_password((unsigned int)jkey_index, password, hsm_lib_path);

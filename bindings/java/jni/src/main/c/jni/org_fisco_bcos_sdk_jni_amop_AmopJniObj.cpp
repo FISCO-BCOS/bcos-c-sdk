@@ -181,6 +181,8 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_amop_AmopRequestCallback_2(
     JNIEnv* env, jobject self, jstring jtopic, jobject jcallback)
 {
+    checkJString(env, jtopic);
+
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -261,6 +263,7 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_amop_AmopJniObjRequestCallback_2(
     JNIEnv* env, jobject self, jstring jtopic, jobject jcallback)
 {
+    checkJString(env, jtopic);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -363,6 +366,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_setCallback(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendAmopMsg(
     JNIEnv* env, jobject self, jstring jtopic, jbyteArray jdata, jint jtimeout, jobject jcallback)
 {
+    checkJString(env, jtopic);
+    checkJByteArray(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     // Note: The JNIEnv pointer, passed as the first argument to every native method, can only be
@@ -399,6 +404,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendAmopMsg(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_broadcastAmopMsg(
     JNIEnv* env, jobject self, jstring jtopic, jbyteArray jdata)
 {
+    checkJString(env, jtopic);
+    checkJByteArray(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -419,6 +426,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_broadcastAmop
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendResponse(
     JNIEnv* env, jobject self, jstring jendpoint, jstring jseq, jbyteArray jdata)
 {
+    checkJString(env, jendpoint);
+    checkJString(env, jseq);
+    checkJByteArray(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* endpoint = env->GetStringUTFChars(jendpoint, 0);
