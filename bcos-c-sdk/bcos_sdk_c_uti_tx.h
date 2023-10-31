@@ -81,8 +81,8 @@ const char* bcos_sdk_decode_transaction_data(const char* transaction_bytes);
 /**
  * @brief
  *
- * @param crypto_type
- * @param transaction_data
+ * @param crypto_type: int
+ * @param transaction_data: void*
  * @return const char*
  */
 const char* bcos_sdk_calc_transaction_data_hash(int crypto_type, void* transaction_data);
@@ -109,6 +109,7 @@ const char* bcos_sdk_sign_transaction_data_hash(void* keypair, const char* trans
  * @param attribute
  * @param tx_hash
  * @param signed_tx
+ * @return void*
  */
 void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, const char* chain_id,
     const char* to, const char* data, const char* abi, int64_t block_limit, int32_t attribute,
@@ -128,6 +129,7 @@ void bcos_sdk_create_signed_transaction(void* key_pair, const char* group_id, co
  * @param extra_data
  * @param tx_hash
  * @param signed_tx
+ * @return void
  */
 void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const char* group_id,
     const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit,
@@ -136,27 +138,27 @@ void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const cha
 /**
  * @brief
  *
- * @param transaction_data
- * @param signed_transaction_data
+ * @param transaction_data: void*
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data(void* transaction_data,
-    const char* signed_transaction_data, const char* transaction_data_hash, int32_t attribute);
+    const char* signature, const char* transaction_data_hash, int32_t attribute);
 
 /**
  * @brief
  *
- * @param transaction_data
- * @param signed_transaction_data
+ * @param transaction_data: void*
+ * @param signature
  * @param transaction_data_hash
  * @param attribute
  * @param extra_data
  * @return const char*
  */
 const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
-    void* transaction_data, const char* signed_transaction_data, const char* transaction_data_hash,
+    void* transaction_data, const char* signature, const char* transaction_data_hash,
     int32_t attribute, const char* extra_data);
 
 /**

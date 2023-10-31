@@ -46,20 +46,22 @@ jobs:
             hunter-clang-v3-notest-${{ runner.temp }}-
       - name: install macOS dependencies
         if: runner.os == 'macOS'
-        run: brew install ccache
+        run: brew install ccache lcov
       - name: install Ubuntu dependencies
         if: runner.os == 'Linux'
-        run: sudo apt install -y git curl openssl build-essential clang cmake ccache
+        run: sudo apt install -y git curl openssl build-essential clang cmake ccache lcov
       - name: configure
         if: runner.os == 'macOS'
-        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
+        run: export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON
       - name: configure
         if: runner.os == 'Linux'
-        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
+        run: CC=/usr/bin/clang CXX=/usr/bin/clang++ mkdir build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
-        run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
+      - name: run coverage
+        run: cd build && make cov
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.dylib.zip
@@ -105,15 +107,27 @@ jobs:
             cache-gcc-v2-notest-${{ runner.temp }}-${{ github.base_ref }}-
             cache-gcc-v2-notest-${{ runner.temp }}-
       - name: install Ubuntu dependencies
-        run: sudo apt install -y git curl openssl build-essential cmake ccache
+        run: sudo apt install -y git curl openssl build-essential cmake ccache lcov
       - name: configure
         run: |
           export CC='gcc-10'; export CXX='g++-10'
-          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
+          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; mkdir -p build && cd build && cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON
       - name: compile
         run: cd build && make -j4
       - name: run test
-        run: CTEST_OUTPUT_ON_FAILURE=TRUE make test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
+      - name: run coverage
+        run: cd build && make cov
+      - name: upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./build/coverage.info
+          version: "v0.1.15"
+          flags: unittests
+          name: c sdk coverage
+          fail_ci_if_error: true
+          verbose: true
   build_with_centos:
     name: build_with_centos
     runs-on: ubuntu-latest
@@ -164,8 +178,10 @@ jobs:
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
           mkdir -p build && cd build
-          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON
+          cmake3 ../ -DHUNTER_STATUS_DEBUG=ON -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON
           make -j4
+      - name: run test
+        run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
