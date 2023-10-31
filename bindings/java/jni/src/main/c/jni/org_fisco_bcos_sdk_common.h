@@ -21,6 +21,23 @@ jclass bcos_sdk_c_find_jclass(JNIEnv* env, const char* className);
 
 struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconfig);
 
+// check jstring not null
+inline void checkJString(JNIEnv* env, jstring jstr)
+{
+    if (jstr == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "illegal NULL string parameter");
+    }
+}
+// check jByteArray not null
+inline void checkJByteArray(JNIEnv* env, jbyteArray jbyte_array)
+{
+    if (jbyte_array == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "illegal NULL byteArray parameter");
+    }
+}
+
 #ifdef __cplusplus
 }
 #endif
