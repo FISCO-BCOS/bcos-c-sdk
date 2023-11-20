@@ -1,0 +1,16 @@
+{
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/FISCO-BCOS/registry",
+      "baseline": "38007689d8085c2659c42a2b9919abc78de68ffd",
+      "packages": [
+        "openssl",
+        "hsm-crypto",
+        "fisco-bcos-cpp-sdk",
+        "wedprcrypto",
+        "secp256k1"
+      ]
+    }
+  ]
+}

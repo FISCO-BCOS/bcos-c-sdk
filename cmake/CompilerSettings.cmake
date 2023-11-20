@@ -16,6 +16,15 @@
 # File: CompilerSettings.cmake
 # Function: Common cmake file for setting compilation environment variables
 # ------------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 20)
+set(Boost_NO_WARN_NEW_VERSIONS ON)
+message(STATUS "COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+
+# export windows dll symbol
+if(WIN32)
+    message(STATUS "Compile on Windows")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
+endif()
 
 if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang"))
     find_program(CCACHE_PROGRAM ccache)
@@ -27,6 +36,7 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "/usr/bin/time")
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "/usr/bin/time")
     # Use ISO C++17 standard language.
+    set(CMAKE_CXX_FLAGS "-pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
     set(CMAKE_CXX_FLAGS "-pthread -fPIC -fexceptions")
     # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     # Enables all the warnings about constructions that some users consider questionable,
@@ -37,13 +47,21 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
     add_compile_options(-Wall)
     add_compile_options(-pedantic)
     add_compile_options(-Wextra)
-    # add_compile_options(-Wno-unused-variable)
-    # add_compile_options(-Wno-unused-parameter)
-    # add_compile_options(-Wno-unused-function)
-    # add_compile_options(-Wno-missing-field-initializers)
-    # Disable warnings about unknown pragmas (which is enabled by -Wall).
-    add_compile_options(-Wno-unknown-pragmas)
+
+    # Ignore warnings
+    add_compile_options(-Wno-unused-parameter)
+    add_compile_options(-Wno-unused-variable)
+    add_compile_options(-Wno-error=unknown-pragmas)
+    add_compile_options(-Wno-error=deprecated-declarations)
     add_compile_options(-fno-omit-frame-pointer)
+    add_compile_options(-Wno-error=strict-aliasing)
+
+    if(NOT APPLE)
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+        add_compile_options(-fvisibility=hidden)
+        add_compile_options(-fvisibility-inlines-hidden)
+    endif()
+
     # for boost json spirit
     add_compile_options(-DBOOST_SPIRIT_THREADSAFE)
     # for tbb, TODO: https://software.intel.com/sites/default/files/managed/b2/d2/TBBRevamp.pdf
@@ -89,8 +107,8 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
 
     # Additional GCC-specific compiler settings.
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-        # Check that we've got GCC 7.0 or newer.
-        set(GCC_MIN_VERSION "7.0")
+        # Check that we've got GCC 10.0 or newer.
+        set(GCC_MIN_VERSION "10.0")
         execute_process(
             COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
         if (NOT (GCC_VERSION VERSION_GREATER ${GCC_MIN_VERSION} OR GCC_VERSION VERSION_EQUAL ${GCC_MIN_VERSION}))
@@ -137,6 +155,7 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
         endif()
     endif ()
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+    add_compile_definitions(NOMINMAX)
 
     # Only support visual studio 2017 and visual studio 2019
     set(MSVC_MIN_VERSION "1914") # VS2017 15.7, for full-ish C++17 support
@@ -177,4 +196,6 @@ if(APPLE)
 else()
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ldl")
 endif()
+message("CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
+message("CMAKE_SHARED_LINKER_FLAGS: ${CMAKE_SHARED_LINKER_FLAGS}")
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY ON)

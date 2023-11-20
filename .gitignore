@@ -42,3 +42,4 @@ deps
 .vscode/
 .idea/
 .DS_Store
+vcpkg_installed**

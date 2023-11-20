@@ -16,11 +16,6 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
-
-# list(APPEND CMAKE_MODULE_PATH ${BCOS_CMAKE_SCRIPTS_DIR})
-list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
-
 # Debug, Release, RelWithDebInfo, MinSizeRel
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -53,10 +48,10 @@ else()
 endif()
 
 add_library(${FISCO_BCOS_JNI_TARGET} SHARED ${SOURCES})
-target_link_libraries(${FISCO_BCOS_JNI_TARGET} PUBLIC wedpr-crypto::crypto wedpr-crypto::extend-crypto bcos-cpp-sdk::bcos-cpp-sdk ${BCOS_C_SDK_STATIC_TARGET})
+target_link_libraries(${FISCO_BCOS_JNI_TARGET} PUBLIC wedprcrypto::crypto wedprcrypto::zkp fiscobcos::bcos-cpp-sdk ${BCOS_C_SDK_STATIC_TARGET})
 
 add_library(${FISCO_BCOS_JNI_STATIC_TARGET} ${SOURCES})
-target_link_libraries(${FISCO_BCOS_JNI_STATIC_TARGET} PUBLIC wedpr-crypto::crypto wedpr-crypto::extend-crypto bcos-cpp-sdk::bcos-cpp-sdk ${BCOS_C_SDK_STATIC_TARGET})
+target_link_libraries(${FISCO_BCOS_JNI_STATIC_TARGET} PUBLIC wedprcrypto::crypto wedprcrypto::zkp fiscobcos::bcos-cpp-sdk ${BCOS_C_SDK_STATIC_TARGET})
 
 if(BUILD_EXEC_TEST)
     add_subdirectory(test/exe)
