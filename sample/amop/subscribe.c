@@ -29,7 +29,7 @@
 #include <unistd.h>
 
 //------------------------------------------------------------------------------
-void usage()
+void usage(void)
 {
     printf("Desc: subscribe amop topic by command params\n");
     printf("Usage: subscribe <config> <topic>\n");

@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-void usage()
+void usage(void)
 {
     printf("Desc: subscribe contract events by command params\n");
     printf("Usage: eventsub <config> <group_id> <from> <to> <address>[Optional]\n");

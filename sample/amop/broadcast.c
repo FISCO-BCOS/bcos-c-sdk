@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-void usage()
+void usage(void)
 {
     printf("Desc: broadcast amop message by command params\n");
     printf("Usage: broadcast <config> <topic> <message>\n");

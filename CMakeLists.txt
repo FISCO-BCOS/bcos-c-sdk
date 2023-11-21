@@ -104,11 +104,11 @@ endif ()
 
 add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
 target_include_directories(${BCOS_C_SDK_STATIC_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC fiscobcos::bcos-cpp-sdk)
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC Boost::log fiscobcos::bcos-cpp-sdk)
 
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
-target_include_directories(${BCOS_C_SDK_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/bcos-cpp-sdk>)
-target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC fiscobcos::bcos-cpp-sdk)
+target_include_directories(${BCOS_C_SDK_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC Boost::log fiscobcos::bcos-cpp-sdk)
 
 add_dependencies(${BCOS_C_SDK_STATIC_TARGET} BuildInfo.h)
 add_dependencies(${BCOS_C_SDK_TARGET} BuildInfo.h)

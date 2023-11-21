@@ -37,7 +37,7 @@ extern "C" {
  *
  * @return const char*
  */
-const char* bcos_sdk_version();
+const char* bcos_sdk_version(void);
 
 /**
  * @brief: create bcos sdk object by config object

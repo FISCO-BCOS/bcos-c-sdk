@@ -101,14 +101,6 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: run coverage
         run: cd build && make cov
-      - uses: actions/upload-artifact@v2
-        with:
-          name: libbcos-c-sdk.so.zip
-          path: build/libbcos-c-sdk.so
-      - uses: actions/upload-artifact@v2
-        with:
-          name: libbcos-sdk-jni.so.zip
-          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - name: upload coverage report
         uses: codecov/codecov-action@v3
         with:
@@ -149,6 +141,7 @@ jobs:
       - name: install CentOS dependencies
         run: |
           yum install -y epel-release centos-release-scl
+          yum install -y https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
           yum install -y java-11-openjdk-devel wget git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
       - name: reinstall cmake
         run: |
@@ -174,14 +167,14 @@ jobs:
           make -j4
       - name: run test
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          name: libbcos-c-sdk.so.zip
-#          path: build/libbcos-c-sdk.so
-#      - uses: actions/upload-artifact@v2
-#        with:
-#          name: libbcos-sdk-jni.so.zip
-#          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-c-sdk.so.zip
+          path: build/libbcos-c-sdk.so
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-sdk-jni.so.zip
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
   build_with_windows:
     name: build_with_windows
     runs-on: ${{ matrix.os }}
@@ -211,7 +204,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir -p build && cd build 
-          cmake  -G "Visual Studio 16 2019" -A x64 ../ -DTESTS=ON -DBUILD_JNI=ON -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\config-x64-windows-out.log && cat C:\vcpkg\buildtrees\hsm-crypto\install-*
+          cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
       - uses: actions/upload-artifact@v2

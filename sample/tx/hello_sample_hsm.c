@@ -128,7 +128,7 @@ const char* g_hw_abi =
 }
 */
 
-void usage()
+void usage(void)
 {
     printf("Desc: HelloWorld contract sample with hsm key pair\n");
     printf(

@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-void usage()
+void usage(void)
 {
     printf("Desc: publish amop message by command params\n");
     printf("Usage: publish <config> <topic> <message>\n");

@@ -101,7 +101,7 @@ struct bcos_sdk_c_config
  * @brief create bcos_sdk_c_config in default value
  * @return struct bcos_sdk_c_config*
  */
-struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty();
+struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty(void);
 
 /**
  * @brief duplicate string
