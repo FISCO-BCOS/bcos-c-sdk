@@ -36,7 +36,6 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "/usr/bin/time")
     # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "/usr/bin/time")
     # Use ISO C++17 standard language.
-    set(CMAKE_CXX_FLAGS "-pthread -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -fexceptions")
     set(CMAKE_CXX_FLAGS "-pthread -fPIC -fexceptions")
     # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     # Enables all the warnings about constructions that some users consider questionable,
@@ -55,12 +54,6 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
     add_compile_options(-Wno-error=deprecated-declarations)
     add_compile_options(-fno-omit-frame-pointer)
     add_compile_options(-Wno-error=strict-aliasing)
-
-    if(NOT APPLE)
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        add_compile_options(-fvisibility=hidden)
-        add_compile_options(-fvisibility-inlines-hidden)
-    endif()
 
     # for boost json spirit
     add_compile_options(-DBOOST_SPIRIT_THREADSAFE)

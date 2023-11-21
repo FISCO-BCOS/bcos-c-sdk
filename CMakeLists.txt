@@ -35,7 +35,6 @@ set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The c
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${JAVA_SDK_JNI_CMAKE_DIR})
 
-# include hunter
 include(Options)
 set(ARCH_NATIVE OFF)
 
@@ -70,7 +69,7 @@ include(InstallInclude)
 include(IncludeDirectories)
 include(GNUInstallDirs)
 
-find_package(Boost COMPONENTS log serialization)
+find_package(Boost COMPONENTS log serialization unit_test_framework)
 find_package(OpenSSL REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt REQUIRED)

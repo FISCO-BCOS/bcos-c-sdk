@@ -76,13 +76,11 @@ int main(int argc, char** argv)
 
     printf(" [AMOP][Broadcast] start sdk ... \n");
 
-    int i = 0;
     while (1)
     {
         printf("[AMOP][Broadcast] broadcast message, topic: %s, msg: %s\n", topic, msg);
         bcos_amop_broadcast(sdk, topic, (void*)msg, strlen(msg));
         sleep(10);
-        i++;
     }
 
     return EXIT_SUCCESS;

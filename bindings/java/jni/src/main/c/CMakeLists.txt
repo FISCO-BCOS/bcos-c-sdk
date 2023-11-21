@@ -53,10 +53,6 @@ target_link_libraries(${FISCO_BCOS_JNI_TARGET} PUBLIC wedprcrypto::crypto wedprc
 add_library(${FISCO_BCOS_JNI_STATIC_TARGET} ${SOURCES})
 target_link_libraries(${FISCO_BCOS_JNI_STATIC_TARGET} PUBLIC wedprcrypto::crypto wedprcrypto::zkp fiscobcos::bcos-cpp-sdk ${BCOS_C_SDK_STATIC_TARGET})
 
-if(BUILD_EXEC_TEST)
-    add_subdirectory(test/exe)
-endif()
-
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../resources/META-INF/native/)
 
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR => ${CMAKE_INSTALL_INCLUDEDIR}")

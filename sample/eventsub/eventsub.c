@@ -124,12 +124,10 @@ int main(int argc, char** argv)
 
     bcos_event_sub_subscribe_event(sdk, group, params, on_event_sub_callback, sdk);
 
-    int i = 0;
     while (1)
     {
         printf(" Main thread running ");
         sleep(10);
-        i++;
     }
 
     return EXIT_SUCCESS;
