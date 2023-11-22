@@ -23,10 +23,14 @@ set(CMAKE_CXX_STANDARD 20)
 #set(CMAKE_OSX_DEPLOYMENT_TARGET "13" CACHE STRING "Minimum OS X deployment version")
 
 # URL_BASE download domain name
-include(FetchContent)
-
 if (NOT DEFINED URL_BASE)
     set(URL_BASE "github.com")
+endif ()
+
+if (WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0601)
+    add_definitions(-DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
 endif ()
 
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
@@ -69,7 +73,7 @@ include(InstallInclude)
 include(IncludeDirectories)
 include(GNUInstallDirs)
 
-find_package(Boost COMPONENTS log serialization unit_test_framework)
+find_package(Boost COMPONENTS log_setup log serialization chrono system filesystem thread iostreams unit_test_framework)
 find_package(OpenSSL REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(fmt REQUIRED)
@@ -104,11 +108,11 @@ endif ()
 
 add_library(${BCOS_C_SDK_STATIC_TARGET} ${SOURCES})
 target_include_directories(${BCOS_C_SDK_STATIC_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC Boost::log fiscobcos::bcos-cpp-sdk)
+target_link_libraries(${BCOS_C_SDK_STATIC_TARGET} PUBLIC fiscobcos::bcos-cpp-sdk)
 
 add_library(${BCOS_C_SDK_TARGET} SHARED ${SOURCES})
 target_include_directories(${BCOS_C_SDK_TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC Boost::log fiscobcos::bcos-cpp-sdk)
+target_link_libraries(${BCOS_C_SDK_TARGET} PUBLIC fiscobcos::bcos-cpp-sdk)
 
 add_dependencies(${BCOS_C_SDK_STATIC_TARGET} BuildInfo.h)
 add_dependencies(${BCOS_C_SDK_TARGET} BuildInfo.h)
