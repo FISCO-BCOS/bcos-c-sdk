@@ -1,0 +1,24 @@
+.gradle/
+.idea/
+log/
+build/
+dist/
+.vscode/
+.settings/**
+java-sdk.iml
+
+## eclipse ##
+.classpath
+.project
+*/.settings/**
+out/
+*/dist/**
+*/build/**
+conf/
+
+## integration test files
+gradle.properties
+gpg.gpg
+
+## macOS
+.DS_Store

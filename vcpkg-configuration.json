@@ -1,0 +1,16 @@
+{
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/kyonRay/registry",
+      "baseline": "8d37c1d05935bc5d5796c6e73da7b15d19da2e3f",
+      "packages": [
+        "openssl",
+        "hsm-crypto",
+        "fisco-bcos-cpp-sdk",
+        "wedprcrypto",
+        "secp256k1"
+      ]
+    }
+  ]
+}

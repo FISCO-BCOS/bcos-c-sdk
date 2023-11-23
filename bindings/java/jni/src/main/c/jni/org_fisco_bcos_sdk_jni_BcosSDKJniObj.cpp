@@ -136,6 +136,8 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNotifier(
     JNIEnv* env, jobject self, jstring jgroup, jobject jcallback)
 {
+    checkJString(env, jgroup);
+
     void* sdk = bcos_sdk_get_native_pointer(env, self);
     if (!sdk)
     {

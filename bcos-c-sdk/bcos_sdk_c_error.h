@@ -53,7 +53,7 @@ extern "C" {
  *
  * @return int
  */
-extern int bcos_sdk_is_last_opr_success();
+extern int bcos_sdk_is_last_opr_success(void);
 
 /**
  * @brief gets status of the recent sync operation
@@ -61,7 +61,7 @@ extern int bcos_sdk_is_last_opr_success();
  *
  * @return int
  */
-extern int bcos_sdk_get_last_error();
+extern int bcos_sdk_get_last_error(void);
 
 /**
  * @brief gets error message of the recent sync operation, effect if bcos_sdk_get_last_error,
@@ -70,12 +70,12 @@ extern int bcos_sdk_get_last_error();
  *
  * @return const char*
  */
-extern const char* bcos_sdk_get_last_error_msg();
+extern const char* bcos_sdk_get_last_error_msg(void);
 
 /**
  * @brief clear the last error
  */
-extern void bcos_sdk_clear_last_error();
+extern void bcos_sdk_clear_last_error(void);
 
 /**
  * @brief set the last error and error message

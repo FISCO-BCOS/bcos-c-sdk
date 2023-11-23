@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-void usage()
+void usage(void)
 {
     printf("Desc: publish amop message by command params\n");
     printf("Usage: publish <config> <topic> <message>\n");
@@ -87,7 +87,6 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    int i = 0;
     while (1)
     {
         printf("[AMOP][Publish] publish message, topic: %s, msg size: %lu\n", topic, strlen(msg));
@@ -95,7 +94,6 @@ int main(int argc, char** argv)
         bcos_amop_publish(sdk, topic, (void*)msg, strlen(msg), 0, on_recv_amop_publish_resp, sdk);
 
         sleep(10);
-        i++;
     }
 
     return EXIT_SUCCESS;

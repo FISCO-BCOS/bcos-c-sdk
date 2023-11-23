@@ -129,7 +129,7 @@ const char* g_hw_abi =
 }
 */
 
-void usage()
+void usage(void)
 {
     printf("Desc: tx struct test sample\n");
     printf("Usage: tx_struct_test <config> <group_id>\n");
