@@ -207,10 +207,10 @@ const char* bcos_sdk_encode_transaction_data_struct_v2(struct bcos_sdk_c_transac
 
 const char* bcos_sdk_encode_transaction_data_struct_to_json_v2(struct bcos_sdk_c_transaction_data_v2* transaction_data);
 
-struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_v2(
+struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_v2(
     const char* transaction_data_hex_str);
 
-struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_with_json_v2(
+struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_with_json_v2(
     const char* transaction_data_json_str);
 
 const char* bcos_sdk_calc_transaction_data_struct_hash_v2(
@@ -219,7 +219,7 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_v2(
 const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex_v2(
     int crypto_type, const char* transaction_data_hex);
 
-struct bcos_sdk_c_transaction* bcos_sdk_create_transaction_struct_v2(
+struct bcos_sdk_c_transaction_v2* bcos_sdk_create_transaction_struct_v2(
     struct bcos_sdk_c_transaction_data_v2* transaction_data, const char* signature,
     const char* transaction_data_hash, int32_t attribute, const char* extra_data);
 
@@ -233,9 +233,10 @@ const char* bcos_sdk_encode_transaction_struct_v2(struct bcos_sdk_c_transaction_
 
 const char* bcos_sdk_encode_transaction_struct_to_json_v2(struct bcos_sdk_c_transaction_v2* transaction);
 
-struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_v2(const char* transaction_hex_str);
+struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_v2(
+    const char* transaction_hex_str);
 
-struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_with_json_v2(
+struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_with_json_v2(
     const char* transaction_json_str);
 
 #ifdef __cplusplus

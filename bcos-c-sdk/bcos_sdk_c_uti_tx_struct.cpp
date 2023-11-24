@@ -24,6 +24,7 @@
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
+#include <bcos-cpp-sdk/utilities/tx/TransactionBuilderV2.h>
 #include <cstring>
 #include <exception>
 #include <memory>
@@ -311,7 +312,7 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars_v2(
         auto tars_transaction_data_v2 = std::make_unique<bcostars::TransactionData>();
         for (size_t i = 0; i < transaction_data->input->length; ++i)
         {
-            tars_transaction_data->input.push_back(transaction_data->input->buffer[i]);
+            tars_transaction_data_v2->input.push_back(transaction_data->input->buffer[i]);
         }
         tars_transaction_data_v2->version = (tars::Int32)transaction_data->version;
         tars_transaction_data_v2->blockLimit = (tars::Int64)transaction_data->block_limit;
@@ -321,10 +322,10 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars_v2(
         tars_transaction_data_v2->to = std::string(transaction_data->to);
         tars_transaction_data_v2->abi = std::string(transaction_data->abi);
         tars_transaction_data_v2->value = std::string(transaction_data->value);
-        tars_transaction_data_v2->gas_price = std::string(transaction_data->gas_price);
-        tars_transaction_data_v2->gas_limit = (tars::Int64)transaction_data->gas_limit;
-        tars_transaction_data_v2->max_fee_per_gas = std::string(transaction_data->max_fee_per_gas);
-        tars_transaction_data_v2->max_priority_fee_per_gas =
+        tars_transaction_data_v2->gasPrice = std::string(transaction_data->gas_price);
+        tars_transaction_data_v2->gasLimit = (tars::Int64)transaction_data->gas_limit;
+        tars_transaction_data_v2->maxFeePerGas = std::string(transaction_data->max_fee_per_gas);
+        tars_transaction_data_v2->maxPriorityFeePerGas =
             std::string(transaction_data->max_priority_fee_per_gas);
 
         return tars_transaction_data_v2;
@@ -1583,7 +1584,7 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex_v2(
     return NULL;
 }
 
-struct bcos_sdk_c_transaction* bcos_sdk_create_transaction_struct_v2(
+struct bcos_sdk_c_transaction_v2* bcos_sdk_create_transaction_struct_v2(
     struct bcos_sdk_c_transaction_data_v2* transaction_data, const char* signature,
     const char* transaction_data_hash, int32_t attribute, const char* extra_data)
 {
