@@ -1413,11 +1413,10 @@ const char* bcos_sdk_encode_transaction_data_struct_v2(
 
     try
     {
-        auto tars_transaction_data_v2 = convert_transaction_data_to_tars_v2(transaction_data);
-        TransactionBuilderV2 builderV2;
-        auto encodedTransactionDataV2 =
-            builderV2.encodeTransactionDataV2(*tars_transaction_data_v2);
-        auto hex_tx_data_str = bcos::toHexString(*encodedTransactionDataV2);
+        auto tars_transaction_data = convert_transaction_data_to_tars_v2(transaction_data);
+        TransactionBuilder builder;
+        auto encodedTransactionData = builder.encodeTransactionData(*tars_transaction_data);
+        auto hex_tx_data_str = bcos::toHexString(*encodedTransactionData);
         return strdup(hex_tx_data_str->c_str());
     }
     catch (const std::exception& e)
@@ -1468,9 +1467,9 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_v
 
     try
     {
-        TransactionBuilderV2 builderV2;
+        TransactionBuilder builder;
         auto tx_data_bytes = fromHexString(transaction_data_hex_str);
-        auto tars_tx_data_v2 = builderV2.decodeTransactionDataV2(*tx_data_bytes);
+        auto tars_tx_data_v2 = builder.decodeTransactionData(*tx_data_bytes);
         return convert_tars_transaction_data_to_struct_v2(std::move(tars_tx_data_v2));
     }
     catch (const std::exception& e)
@@ -1494,11 +1493,11 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_w
 
     try
     {
-        TransactionBuilderV2 builderV2;
-        auto transactionDataV2 =
-            builderV2.createTransactionDataWithJsonV2(std::string(transaction_data_json_str));
+        TransactionBuilder builder;
+        auto transactionData =
+            builder.createTransactionDataWithJson(std::string(transaction_data_json_str));
 
-        return convert_tars_transaction_data_to_struct_v2(std::move(transactionDataV2));
+        return convert_tars_transaction_data_to_struct_v2(std::move(transactionData));
     }
     catch (const std::exception& e)
     {
@@ -1527,8 +1526,8 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_v2(
     try
     {
         auto tars_transaction_data_v2 = convert_transaction_data_to_tars_v2(transaction_data);
-        TransactionBuilderV2 builderV2;
-        auto transactionDataHash = builderV2.calculateTransactionDataHash(
+        TransactionBuilder builder;
+        auto transactionDataHash = builder.calculateTransactionDataHash(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             *tars_transaction_data_v2);
         return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
@@ -1565,8 +1564,8 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex_v2(
             bcos_sdk_decode_transaction_data_struct_v2(transaction_data_hex);
         auto tars_transaction_data_v2 =
             convert_transaction_data_to_tars_v2(transaction_data_struct_v2);
-        TransactionBuilderV2 builderV2;
-        auto transactionDataHash = builderV2.calculateTransactionDataHash(
+        TransactionBuilder builder;
+        auto transactionDataHash = builder.calculateTransactionDataHash(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             *tars_transaction_data_v2);
         return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
@@ -1729,8 +1728,8 @@ const char* bcos_sdk_encode_transaction_struct_v2(struct bcos_sdk_c_transaction_
     try
     {
         auto tars_transaction_v2 = convert_transaction_to_tars_v2(transaction);
-        TransactionBuilderV2 builderV2;
-        auto encodedTransaction = builderV2.encodeTransactionV2(*tars_transaction_v2);
+        TransactionBuilder builder;
+        auto encodedTransaction = builder.encodeTransaction(*tars_transaction_v2);
         auto hex_tx_str = toHexStringWithPrefix(*encodedTransaction);
         return strdup(hex_tx_str.c_str());
     }
@@ -1782,9 +1781,9 @@ struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_v2(
 
     try
     {
-        TransactionBuilderV2 builderV2;
+        TransactionBuilder builder;
         auto tx_bytes = fromHexString(transaction_hex_str);
-        auto tars_tx = builderV2.decodeTransactionV2(*tx_bytes);
+        auto tars_tx = builder.decodeTransaction(*tx_bytes);
         return convert_tars_transaction_to_struct_v2(std::move(tars_tx));
     }
     catch (const std::exception& e)
@@ -1810,11 +1809,10 @@ struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_with_json_v
 
     try
     {
-        TransactionBuilderV2 builderV2;
-        auto transactionV2 =
-            builderV2.createTransactionWithJsonV2(std::string(transaction_json_str));
+        TransactionBuilder builder;
+        auto transaction = builder.createTransactionWithJson(std::string(transaction_json_str));
 
-        return convert_tars_transaction_to_struct_v2(std::move(transactionV2));
+        return convert_tars_transaction_to_struct_v2(std::move(transaction));
     }
     catch (const std::exception& e)
     {
