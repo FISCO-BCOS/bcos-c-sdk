@@ -54,6 +54,8 @@ jobs:
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
+      - name: print link.txt
+        run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.dylib.zip
@@ -97,6 +99,8 @@ jobs:
         run: cd build && make -j4
       - name: run test
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
+      - name: print link.txt
+        run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - name: run coverage
         run: cd build && make cov
       - name: upload coverage report
@@ -107,7 +111,7 @@ jobs:
           version: "v0.1.15"
           flags: unittests
           name: c sdk coverage
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
   build_with_centos:
     name: build_with_centos
@@ -165,6 +169,8 @@ jobs:
           make -j4
       - name: run test
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
+      - name: print link.txt
+        run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
@@ -202,7 +208,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           mkdir -p build && cd build 
-          cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+          cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
       - uses: actions/upload-artifact@v2

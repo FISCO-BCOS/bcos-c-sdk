@@ -28,6 +28,8 @@ if (NOT DEFINED URL_BASE)
 endif ()
 
 if (WIN32)
+    set(VCPKG_C_FLAGS -D_WIN32_WINNT=0x0601 -DWINVER=0x0601)
+    set(VCPKG_CXX_FLAGS -D_WIN32_WINNT=0x0601 -DWINVER=0x0601)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
@@ -46,6 +48,7 @@ if ("${ARCHITECTURE}" MATCHES "aarch64")
     set(ARCH_NATIVE ON)
 endif ()
 
+set(VCPKG_BUILD_TYPE "Release")
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     find_package(Git REQUIRED)
     execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- vcpkg WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -58,7 +61,7 @@ project(bcos-c-sdk VERSION "3.6.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE MinSizeRel)
 endif ()
 
 # basic settings
