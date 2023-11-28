@@ -209,8 +209,16 @@ struct bcos_sdk_c_transaction_data
     struct bcos_sdk_c_bytes* input;
 };
 
-struct bcos_sdk_c_transaction_data_v2 : public bcos_sdk_c_transaction_data
+struct bcos_sdk_c_transaction_data_v2
 {
+    int32_t version;
+    int64_t block_limit;
+    char* chain_id;
+    char* group_id;
+    char* nonce;
+    char* to;
+    char* abi;
+    struct bcos_sdk_c_bytes* input;
     char* value;
     char* gas_price;
     int64_t gas_limit;

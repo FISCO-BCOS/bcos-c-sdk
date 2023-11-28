@@ -24,7 +24,6 @@
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
-#include <bcos-cpp-sdk/utilities/tx/TransactionBuilderV2.h>
 #include <cstring>
 #include <exception>
 #include <memory>
@@ -1700,9 +1699,9 @@ const char* bcos_sdk_create_encoded_transaction_v2(
 
     try
     {
-        TransactionBuilderV2 builderV2;
+        TransactionBuilder builder;
         auto tars_tx_data_v2 = convert_transaction_data_to_tars_v2(transaction_data);
-        auto signedBytes = builderV2.createSignedTransaction(*tars_tx_data_v2,
+        auto signedBytes = builder.createSignedTransaction(*tars_tx_data_v2,
             *fromHexString(signature), bcos::crypto::HashType(transaction_data_hash), attribute,
             extra_data ? std::string(extra_data) : std::string());
         return strdup(bcos::toHexStringWithPrefix(*signedBytes).c_str());
