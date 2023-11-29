@@ -51,4 +51,7 @@ public class ReceiptBuilderJniObj {
    */
   public static native String calcReceiptDataHash(int cryptoType, long ReceiptData)
       throws JniException;
+
+  public static native String calcReceiptDataHashWithJson(int cryptoType, String json)
+      throws JniException;
 }
