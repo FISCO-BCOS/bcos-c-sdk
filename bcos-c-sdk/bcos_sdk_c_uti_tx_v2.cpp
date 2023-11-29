@@ -42,7 +42,7 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL)
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL)
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL)
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", NULL)
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL)
 
     try
     {
@@ -79,7 +79,7 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL)
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL)
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL)
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", NULL)
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL)
 
     try
     {
@@ -122,7 +122,7 @@ const char* bcos_sdk_calc_transaction_data_hash_with_full_fields(int crypto_type
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL)
     BCOS_SDK_C_PARAMS_VERIFICATION(nonce, NULL)
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL)
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", NULL)
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL)
 
     try
     {
@@ -194,7 +194,7 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const char* signat
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL)
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL)
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL)
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", NULL)
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL)
 
     try
     {
@@ -245,7 +245,7 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, )
     BCOS_SDK_C_PARAMS_VERIFICATION(input, )
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", )
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", )
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", )
     BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, )
     BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, )
 
@@ -258,7 +258,7 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
             block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit, "", "",
             extra_data ? extra_data : "");
         *tx_hash = strdup(result.first.c_str());
-        *signed_tx = strdup(bcos::toHexStringWithPrefix(result.second).c_str());
+        *signed_tx = strdup(result.second.c_str());
     }
     catch (const std::exception& e)
     {
@@ -289,7 +289,7 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, )
     BCOS_SDK_C_PARAMS_VERIFICATION(input, )
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", )
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit > 0), "gas limit must > 0", )
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", )
     BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, )
     BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, )
 
@@ -302,7 +302,7 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
             block_limit, value ? value : "", "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "", extra_data ? extra_data : "");
         *tx_hash = strdup(result.first.c_str());
-        *signed_tx = strdup(bcos::toHexStringWithPrefix(result.second).c_str());
+        *signed_tx = strdup(result.second.c_str());
     }
     catch (const std::exception& e)
     {
