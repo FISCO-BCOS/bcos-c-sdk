@@ -3,7 +3,7 @@
     {
       "kind": "git",
       "repository": "https://github.com/FISCO-BCOS/registry",
-      "baseline": "717d8236aae1c032cfdd9469fd8248c8e49da6d3",
+      "baseline": "c15466a352b8daede8d2c447670a761ad736c132",
       "packages": [
         "openssl",
         "hsm-crypto",
