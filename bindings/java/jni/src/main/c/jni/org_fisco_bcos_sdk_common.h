@@ -9,6 +9,11 @@
 extern "C" {
 #endif
 
+#define GET_J_STRING_CONTENT(env, jstr) \
+    (env)->GetStringUTFChars((jstr), NULL)
+#define GET_J_STRING_CONTENT_DEF(env, jstr, def) \
+    ((jstr) == NULL ? (def) : GET_J_STRING_CONTENT((env), (jstr)))
+
 struct cb_context
 {
     JavaVM* jvm;

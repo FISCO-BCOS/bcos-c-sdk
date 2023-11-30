@@ -7,11 +7,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    encodeTransactionDataStruct
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStruct(
@@ -20,7 +19,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    encodeTransactionDataStructToJson
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionDataStructToJson(
@@ -29,7 +28,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    decodeTransactionDataStruct
- * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;
+ * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStruct(
@@ -38,7 +37,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    calcTransactionDataStructHash
- * Signature: (ILorg/fisco/bcos/sdk/jni/utilities/tx/TxData;)Ljava/lang/String;
+ * Signature: (ILorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTransactionDataStructHash(
@@ -48,7 +47,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTran
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    createEncodedTransaction
  * Signature:
- * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TxData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
+ * (Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createEncodedTransaction(
@@ -57,7 +56,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createEn
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    encodeTransactionStruct
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)Ljava/lang/String;
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Transaction;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStruct(
@@ -66,7 +65,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    encodeTransactionStructToJson
- * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;)Ljava/lang/String;
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/tx/Transaction;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTransactionStructToJson(
@@ -75,7 +74,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    decodeTransactionStruct
- * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Tx;
+ * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Transaction;
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStruct(

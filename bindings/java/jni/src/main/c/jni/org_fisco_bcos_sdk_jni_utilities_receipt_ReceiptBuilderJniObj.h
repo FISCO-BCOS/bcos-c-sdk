@@ -55,6 +55,14 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptB
 JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHash
   (JNIEnv *, jclass, jint, jlong);
 
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
+ * Method:    calcReceiptDataHashWithJson
+ * Signature: (ILjava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHashWithJson
+  (JNIEnv *, jclass, jint, jstring);
+
 #ifdef __cplusplus
 }
 #endif

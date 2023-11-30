@@ -74,6 +74,10 @@ public class BcosSDKJniObj {
 
   public native void destroy();
 
+  public native int localProtocolInfo();
+
+  public native int negotiatedProtocolInfo();
+
   // -------------------------native method end-------------------------------------------
 
   // ------------------------ block notifier begin----------------------------------------

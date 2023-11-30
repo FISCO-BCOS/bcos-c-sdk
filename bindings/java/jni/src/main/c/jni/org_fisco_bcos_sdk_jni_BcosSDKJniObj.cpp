@@ -128,6 +128,33 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     // env->DeleteGlobalRef(jcallback);
 }
 
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    localProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_localProtocolInfo(
+    JNIEnv* env, jobject self)
+{
+    void* sdk = bcos_sdk_get_native_pointer(env, self);
+    uint32_t info = bcos_sdk_get_local_protocol_info(sdk);
+    return (jint)info;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    negotiatedProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_negotiatedProtocolInfo(
+    JNIEnv* env, jobject self)
+{
+    void* sdk = bcos_sdk_get_native_pointer(env, self);
+    uint32_t info = bcos_sdk_get_negotiated_protocol_info(sdk);
+    return (jint)info;
+}
+
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    registerBlockNotifier

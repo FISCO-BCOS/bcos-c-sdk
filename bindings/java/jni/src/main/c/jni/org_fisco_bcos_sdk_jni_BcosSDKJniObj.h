@@ -37,6 +37,22 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_destroy(JNIEnv*
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    localProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_localProtocolInfo(
+    JNIEnv*, jobject);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    negotiatedProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_negotiatedProtocolInfo(
+    JNIEnv*, jobject);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    registerBlockNotifier
  * Signature: (Ljava/lang/String;Lorg/fisco/bcos/sdk/jni/BlockNotifier;)V
  */
