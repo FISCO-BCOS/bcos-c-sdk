@@ -1,0 +1,7 @@
+bcos-sdk-jni.dll
+bcos-sdk-jni.lib
+libbcos-sdk-jni.dylib
+libbcos-sdk-jni.so
+libbcos-sdk-jni-aarch64.dylib
+libbcos-sdk-jni-aarch64.so
+libbcos-sdk-jni-static-aarch64.a

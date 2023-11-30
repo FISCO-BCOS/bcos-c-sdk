@@ -319,3 +319,17 @@ const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group)
     auto chainID = groupInfo->chainID();
     return strdup(chainID.c_str());
 }
+
+uint32_t bcos_sdk_get_local_protocol_info(void* sdk) {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, 0);
+
+    return ((bcos::cppsdk::Sdk*)sdk)->localProtocolInfo();
+}
+
+uint32_t bcos_sdk_get_negotiated_protocol_info(void* sdk) {
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(sdk, 0);
+
+    return ((bcos::cppsdk::Sdk*)sdk)->negotiatedProtocolInfo();
+}

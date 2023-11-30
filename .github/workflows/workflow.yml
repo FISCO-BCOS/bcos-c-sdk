@@ -43,7 +43,7 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install ccache lcov
       - name: fetch vcpkg
-        run: cd /usr/local/share/vcpkg/ && git fetch && git reset --hard && git pull && cd -
+        run: cd /usr/local/share/vcpkg/ && git status && git reset --hard && git stash && git fetch && git pull && cd -
       - name: configure
         if: runner.os == 'macOS'
         run: |
