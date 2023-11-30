@@ -56,6 +56,10 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
+      - name: strip libbcos-c-sdk.dylib
+        run: strip build/libbcos-c-sdk.dylib || strip -x build/libbcos-c-sdk.dylib
+      - name: strip libbcos-sdk-jni.dylib
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.dylib.zip
@@ -171,6 +175,10 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
+      - name: strip libbcos-c-sdk.so
+        run: strip build/libbcos-c-sdk.so || strip -x build/libbcos-c-sdk.so
+      - name: strip libbcos-sdk-jni.so
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
