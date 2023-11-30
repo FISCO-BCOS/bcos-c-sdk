@@ -1,4 +1,5 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
+
 public enum TransactionVersion {
   V0(0),
   V1(1);
