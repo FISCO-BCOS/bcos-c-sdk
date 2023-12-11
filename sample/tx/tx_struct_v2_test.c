@@ -348,13 +348,30 @@ int main(int argc, char** argv)
     printf(" [TxStructV2Test] new account, address: %s\n", address);
 
     const char* extra_data = "ExtraData";
-    const char* value = "BalanceValue";
-    const char* gasPrice = "BalanceGasPrice";
+    const char* value = "33";
+    const char* gasPrice = "0";
     int64_t gasLimit = 0;
-    const char* maxFeePerGas = "BalanceMaxFeePerGas";
-    const char* maxPriorityFeePerGas = "BalanceMaxPriorityFeePerGas";
+    const char* maxFeePerGas = "11";
+    const char* maxPriorityFeePerGas = "22";
 
-    printf(" [TxStructV2Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %s, maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+    printf(" [TxStructV2Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %lld, maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+    
+    // 8. deploy HelloWorld contract
+    struct bcos_sdk_c_transaction_data_v2* transaction_data_v2_deploy = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(
+            group_id, chain_id, "", sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+    const char* transaction_data_hash_deploy =
+        bcos_sdk_calc_transaction_data_struct_hash_v2(sm_crypto, transaction_data_v2_deploy);
+    const char* signed_hash_deploy =
+        bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash_deploy);
+    const char* signed_tx_deploy = bcos_sdk_create_encoded_transaction_v2(
+        transaction_data_v2_deploy, signed_hash_deploy, transaction_data_hash_deploy, 0, extra_data);
+    printf(" [TxStructV2Test] create deploy contract transaction success, signed_tx_deploy: %s\n", signed_tx_deploy);
+   
+    // call rpc interface, send transaction
+    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx_deploy, 0, on_deploy_resp_callback, NULL);
+    // wait for async operation done, just for sample
+    sleep(5);
+
     printf(" [TxStructV2Test] set operation\n");
     // 9. HelloWorld set
     // 9.1 abi encode params
@@ -376,7 +393,7 @@ int main(int argc, char** argv)
         // 9.2.1.2 decode hex tx data
         struct bcos_sdk_c_transaction_data_v2* decode_tx_data = bcos_sdk_decode_transaction_data_struct_v2(hex_tx_data);
         // 9.2.1.3 encode tx data to json
-        const char* json_tx_data = bcos_sdk_encode_transaction_data_struct_to_json_v2(transaction_data_v2);
+        const char* json_tx_data = bcos_sdk_encode_transaction_data_struct_to_json_v2(decode_tx_data);
         printf(" [TxStructV2Test] tx_data_json: %s\n", json_tx_data);
         // 9.2.1.4 decode json to tx data struct
         decode_tx_data = bcos_sdk_decode_transaction_data_struct_with_json_v2(json_tx_data);
@@ -416,10 +433,10 @@ int main(int argc, char** argv)
         printf(" [TxStructV2Test] hex_tx2: %s\n", hex_tx2);
 
         // 9.3 call rpc interface, sendTransaction
-        // bcos_rpc_send_transaction(sdk, group_id, "", hex_tx2, 0, on_send_tx_resp_callback, NULL);
+        bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
 
         // wait for async operation done, just for sample
-        // sleep(3);
+        sleep(3);
 
         // free
         if (input_bytes && input_bytes->buffer)
@@ -444,10 +461,6 @@ int main(int argc, char** argv)
 
     // free chain_id
     bcos_sdk_c_free((void*)chain_id);
-    // // free tx_hash
-    // bcos_sdk_c_free((void*)tx_hash);
-    // // free signed_tx
-    // bcos_sdk_c_free((void*)signed_tx);
     // free address
     bcos_sdk_c_free((void*)address);
     if (contract_address)
