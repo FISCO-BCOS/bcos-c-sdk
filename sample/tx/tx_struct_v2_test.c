@@ -354,7 +354,7 @@ int main(int argc, char** argv)
     const char* maxFeePerGas = "11";
     const char* maxPriorityFeePerGas = "22";
 
-    printf(" [TxStructV2Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %lld, maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+    // printf(" [TxStructV2Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %ld, maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
     
     // 8. deploy HelloWorld contract
     struct bcos_sdk_c_transaction_data_v2* transaction_data_v2_deploy = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(
