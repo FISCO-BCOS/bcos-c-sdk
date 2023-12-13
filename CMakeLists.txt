@@ -33,6 +33,8 @@ if (WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)
     add_definitions(-DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "ON")
+else ()
+    add_definitions(-DBOOST_UUID_RANDOM_PROVIDER_FORCE_POSIX)
 endif ()
 
 set(JAVA_SDK_JNI_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "The cmake path for the library")
