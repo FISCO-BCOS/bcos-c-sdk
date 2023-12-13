@@ -97,7 +97,7 @@ public class TestTxStruct {
       Usage();
     }
 
-    String endpoint = "127.0.0.1:22200";
+    String endpoint = "127.0.0.1:20200";
     String group = "group0";
     String node = "";
     JniConfig jniConfig = Utility.newJniConfig(Arrays.asList(endpoint));
@@ -107,7 +107,7 @@ public class TestTxStruct {
     System.out.println("build Rpc");
     rpcJniObj.start();
 
-    boolean smCrypto = true;
+    boolean smCrypto = false;
 
     long keyPair = KeyPairJniObj.createJniKeyPair(smCrypto ? 1 : 0);
     String jniKeyPairAddress = KeyPairJniObj.getJniKeyPairAddress(keyPair);

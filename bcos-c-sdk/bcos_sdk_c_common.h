@@ -209,6 +209,23 @@ struct bcos_sdk_c_transaction_data
     struct bcos_sdk_c_bytes* input;
 };
 
+struct bcos_sdk_c_transaction_data_v2
+{
+    int32_t version;
+    int64_t block_limit;
+    char* chain_id;
+    char* group_id;
+    char* nonce;
+    char* to;
+    char* abi;
+    struct bcos_sdk_c_bytes* input;
+    char* value;
+    char* gas_price;
+    int64_t gas_limit;
+    char* max_fee_per_gas;
+    char* max_priority_fee_per_gas;
+};
+
 /**
  * @brief: transaction
  *
@@ -216,6 +233,17 @@ struct bcos_sdk_c_transaction_data
 struct bcos_sdk_c_transaction
 {
     struct bcos_sdk_c_transaction_data* transaction_data;
+    struct bcos_sdk_c_bytes* data_hash;
+    struct bcos_sdk_c_bytes* signature;
+    struct bcos_sdk_c_bytes* sender;
+    int64_t import_time;
+    int32_t attribute;
+    char* extra_data;
+};
+
+struct bcos_sdk_c_transaction_v2
+{
+    struct bcos_sdk_c_transaction_data_v2* transaction_data;
     struct bcos_sdk_c_bytes* data_hash;
     struct bcos_sdk_c_bytes* signature;
     struct bcos_sdk_c_bytes* sender;
