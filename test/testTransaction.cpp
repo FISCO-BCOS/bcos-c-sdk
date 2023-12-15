@@ -34,7 +34,6 @@ struct TestTxFixture
 };
 
 BOOST_FIXTURE_TEST_SUITE(TransactionTest, TestTxFixture)
-
 const char* g_hw_abi =
     "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],"
     "\"name\":\"get\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]"
