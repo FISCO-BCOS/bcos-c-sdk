@@ -24,7 +24,6 @@ import "C"
 import (
 	"encoding/hex"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -44,6 +43,9 @@ type CSDK struct {
 
 var contextCache = cache.New(5*time.Minute, 10*time.Minute)
 var indexCache = cache.New(5*time.Minute, 10*time.Minute)
+
+const C_SDK_ECDSA_CRYPTO = C.int(0)
+const C_SDK_SM_CRYPTO = C.int(1)
 
 type AmopMessageContext struct {
 	Peer string
@@ -111,7 +113,6 @@ func on_callback_once(resp *C.struct_bcos_sdk_c_struct_response) {
 	chanData := getContext(resp.context, true)
 	if chanData == nil {
 		panic("callback channel is nil")
-		return
 	}
 	if int(resp.error) != 0 {
 		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
@@ -121,25 +122,23 @@ func on_callback_once(resp *C.struct_bcos_sdk_c_struct_response) {
 	}
 }
 
-func setContext(context *CallbackChan) unsafe.Pointer {
-	p := fmt.Sprintf("%p", context)
-	contextCache.Set(p, context, cache.NoExpiration)
-	parseI, _ := strconv.ParseUint(p, 0, 0)
-	// i := *(*int)(unsafe.Pointer(context))
-	return unsafe.Pointer(&parseI)
+func setContext(callback *CallbackChan) unsafe.Pointer {
+	pointer := fmt.Sprintf("%p", callback)
+	contextCache.Set(pointer, callback, cache.NoExpiration)
+	cPointer := C.CString(pointer)
+	return unsafe.Pointer(cPointer)
 }
 
 func getContext(index unsafe.Pointer, delete bool) *CallbackChan {
-	i := *(*int)(index)
-	p := fmt.Sprintf("%#x", i)
+	p := C.GoString((*C.char)(unsafe.Pointer(index)))
 	context, found := contextCache.Get(p)
 	if found {
 		if delete {
+			C.free(index)
 			contextCache.Delete(p)
 		}
 		return context.(*CallbackChan)
 	}
-
 	return nil
 }
 
@@ -515,20 +514,18 @@ func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, da
 	defer C.free(unsafe.Pointer(cExtraData))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
-	txHashHex := strings.TrimPrefix(C.GoString(tx_hash), "0x")
-	txHash, err := hex.DecodeString(txHashHex)
-	if err != nil {
-		return nil, err
-	}
 	block_limit := C.bcos_rpc_get_block_limit(csdk.sdk, csdk.groupID)
 	if block_limit < 0 {
-		return txHash, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
+		return nil, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
 
 	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, nil, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
-
 	if C.bcos_sdk_is_last_opr_success() == 0 {
-		return txHash, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+		return nil, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	txHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(tx_hash), "0x"))
+	if err != nil {
+		return nil, err
 	}
 	C.bcos_rpc_send_transaction(csdk.sdk, csdk.groupID, nil, signed_tx, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), setContext(chanData))
 
@@ -536,4 +533,100 @@ func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, da
 		return txHash, fmt.Errorf("bcos rpc send transaction failed, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
 	return txHash, nil
+}
+
+func (csdk *CSDK) CreateEncodedTransactionDataV1(blockLimit int64, to string, input []byte, abi string) ([]byte, []byte, error) {
+	cTo := C.CString(to)
+	cInput := C.CString(string(input))
+	cAbi := C.CString(abi)
+	defer C.free(unsafe.Pointer(cTo))
+	defer C.free(unsafe.Pointer(cInput))
+	defer C.free(unsafe.Pointer(cAbi))
+	inputHex := hex.EncodeToString(input)
+	cInputHex := C.CString(inputHex)
+	defer C.free(unsafe.Pointer(cInputHex))
+	encodedTransactionPointer := C.bcos_sdk_create_transaction_data(csdk.groupID, csdk.chainID, cTo, cInputHex, cAbi, C.int64_t(blockLimit))
+	defer C.bcos_sdk_destroy_transaction_data(encodedTransactionPointer)
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_create_transaction_data error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	encodedTransactionData := C.bcos_sdk_encode_transaction_data(encodedTransactionPointer)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(encodedTransactionData))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_create_transaction_data encode error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	data, err := hex.DecodeString(strings.TrimPrefix(C.GoString(encodedTransactionData), "0x"))
+	if err != nil {
+		return nil, nil, err
+	}
+	cryptoType := C.int(0)
+	if csdk.smCrypto {
+		cryptoType = C.int(1)
+	}
+	dataHashHex := C.bcos_sdk_calc_transaction_data_hash(cryptoType, encodedTransactionPointer)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(dataHashHex))
+	dataHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(dataHashHex), "0x"))
+	if err != nil {
+		return nil, nil, err
+	}
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_create_transaction_data hash error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return data, dataHash, nil
+}
+
+func (csdk *CSDK) CreateEncodedSignature(hash []byte) ([]byte, error) {
+	hexHash := hex.EncodeToString(hash)
+	cHexHash := C.CString(hexHash)
+	signatureHex := C.bcos_sdk_sign_transaction_data_hash(csdk.keyPair, cHexHash)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(signatureHex))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, fmt.Errorf("bcos_sdk_sign_transaction_data_hash error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	signatureBytes, err := hex.DecodeString(strings.TrimPrefix(C.GoString(signatureHex), "0x"))
+	if err != nil {
+		return nil, err
+	}
+	return signatureBytes, nil
+}
+
+func (csdk *CSDK) CreateEncodedTransaction(transactionData, dataHash, signature []byte, attribute int32, extraData string) ([]byte, error) {
+	cExtraData := C.CString("")
+	if len(extraData) != 0 {
+		cExtraData := C.CString(extraData)
+		defer C.free(unsafe.Pointer(cExtraData))
+	}
+	cDataHash := C.CString(hex.EncodeToString(dataHash))
+	defer C.free(unsafe.Pointer(cDataHash))
+	cSignature := C.CString(hex.EncodeToString(signature))
+	defer C.free(unsafe.Pointer(cSignature))
+	cTransactionData := C.CString(hex.EncodeToString(transactionData))
+	defer C.free(unsafe.Pointer(cTransactionData))
+	cJson := C.bcos_sdk_decode_transaction_data(cTransactionData)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(cJson))
+	txDataPointer := C.bcos_sdk_create_transaction_data_with_json(cJson)
+	defer C.bcos_sdk_destroy_transaction_data(txDataPointer)
+	encodedTransactionHex := C.bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(txDataPointer, cSignature, cDataHash, C.int(attribute), cExtraData)
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, fmt.Errorf("bcos_sdk_create_transaction_data_from_tx_data error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	data, err := hex.DecodeString(strings.TrimPrefix(C.GoString(encodedTransactionHex), "0x"))
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (csdk *CSDK) SendEncodedTransaction(chanData *CallbackChan, encodedTransaction []byte, withProof bool) error {
+	cEncodedTransaction := C.CString(hex.EncodeToString(encodedTransaction))
+	defer C.free(unsafe.Pointer(cEncodedTransaction))
+	cProof := C.int(0)
+	if withProof {
+		cProof = C.int(1)
+	}
+	C.bcos_rpc_send_transaction(csdk.sdk, csdk.groupID, nil, cEncodedTransaction, cProof, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), setContext(chanData))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return fmt.Errorf("bcos_rpc_send_raw_transaction error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return nil
 }
