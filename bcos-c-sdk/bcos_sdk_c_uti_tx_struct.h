@@ -195,17 +195,23 @@ struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_with_json(
 
 struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_with_hex_input_v2(
     const char* group_id, const char* chain_id, const char* to, const char* input, const char* abi,
-    int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit, const char* max_fee_per_gas, const char* max_priority_fee_per_gas);
+    int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit,
+    const char* max_fee_per_gas, const char* max_priority_fee_per_gas);
 
 struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_with_bytes_v2(
     const char* group_id, const char* chain_id, const char* to, const unsigned char* bytes_input,
-    uint32_t bytes_input_length, const char* abi, int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit, const char* max_fee_per_gas, const char* max_priority_fee_per_gas);
+    uint32_t bytes_input_length, const char* abi, int64_t block_limit, const char* value,
+    const char* gas_price, int64_t gas_limit, const char* max_fee_per_gas,
+    const char* max_priority_fee_per_gas);
 
-void bcos_sdk_destroy_transaction_data_struct_v2(struct bcos_sdk_c_transaction_data_v2* transaction_data);
+void bcos_sdk_destroy_transaction_data_struct_v2(
+    struct bcos_sdk_c_transaction_data_v2* transaction_data);
 
-const char* bcos_sdk_encode_transaction_data_struct_v2(struct bcos_sdk_c_transaction_data_v2* transaction_data);
+const char* bcos_sdk_encode_transaction_data_struct_v2(
+    struct bcos_sdk_c_transaction_data_v2* transaction_data);
 
-const char* bcos_sdk_encode_transaction_data_struct_to_json_v2(struct bcos_sdk_c_transaction_data_v2* transaction_data);
+const char* bcos_sdk_encode_transaction_data_struct_to_json_v2(
+    struct bcos_sdk_c_transaction_data_v2* transaction_data);
 
 struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_v2(
     const char* transaction_data_hex_str);
@@ -231,7 +237,8 @@ const char* bcos_sdk_create_encoded_transaction_v2(
 
 const char* bcos_sdk_encode_transaction_struct_v2(struct bcos_sdk_c_transaction_v2* transaction);
 
-const char* bcos_sdk_encode_transaction_struct_to_json_v2(struct bcos_sdk_c_transaction_v2* transaction);
+const char* bcos_sdk_encode_transaction_struct_to_json_v2(
+    struct bcos_sdk_c_transaction_v2* transaction);
 
 struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_v2(
     const char* transaction_hex_str);
