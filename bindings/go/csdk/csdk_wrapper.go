@@ -25,6 +25,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 
@@ -39,6 +40,7 @@ type CSDK struct {
 	groupID         *C.char
 	keyPair         unsafe.Pointer
 	privateKeyBytes []byte
+	keyPairMutex    sync.Mutex
 }
 
 var contextCache = cache.New(5*time.Minute, 10*time.Minute)
@@ -255,6 +257,8 @@ func NewSDKByConfigFile(configFile string, groupID string, privateKey []byte) (*
 }
 
 func (csdk *CSDK) Close() {
+	csdk.keyPairMutex.Lock()
+	defer csdk.keyPairMutex.Unlock()
 	C.bcos_sdk_stop(csdk.sdk)
 	C.bcos_sdk_destroy(csdk.sdk)
 	C.bcos_sdk_c_free(unsafe.Pointer(csdk.groupID))
@@ -272,6 +276,24 @@ func (csdk *CSDK) ChainID() string {
 
 func (csdk *CSDK) PrivateKeyBytes() []byte {
 	return csdk.privateKeyBytes
+}
+
+// SetPrivateKey set private key
+func (csdk *CSDK) SetPrivateKey(privateKeyBytes []byte) error {
+	cryptoType := C_SDK_ECDSA_CRYPTO
+	if csdk.smCrypto {
+		cryptoType = C_SDK_SM_CRYPTO
+	}
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(cryptoType, unsafe.Pointer(&privateKeyBytes[0]), C.uint(len(privateKeyBytes)))
+	if keyPair == nil {
+		message := C.bcos_sdk_get_last_error_msg()
+		return fmt.Errorf("SetPrivateKey bcos_sdk_create_keypair_by_private_key failed with error: %s", C.GoString(message))
+	}
+	csdk.keyPairMutex.Lock()
+	defer csdk.keyPairMutex.Unlock()
+	C.bcos_sdk_destroy_keypair(csdk.keyPair)
+	csdk.keyPair = keyPair
+	return nil
 }
 
 func (csdk *CSDK) SMCrypto() bool {
@@ -518,11 +540,13 @@ func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, da
 	if block_limit < 0 {
 		return nil, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
-
+	csdk.keyPairMutex.Lock()
 	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, nil, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
 	if C.bcos_sdk_is_last_opr_success() == 0 {
+		csdk.keyPairMutex.Unlock()
 		return nil, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
+	csdk.keyPairMutex.Unlock()
 	txHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(tx_hash), "0x"))
 	if err != nil {
 		return nil, err
@@ -578,6 +602,8 @@ func (csdk *CSDK) CreateEncodedTransactionDataV1(blockLimit int64, to string, in
 func (csdk *CSDK) CreateEncodedSignature(hash []byte) ([]byte, error) {
 	hexHash := hex.EncodeToString(hash)
 	cHexHash := C.CString(hexHash)
+	csdk.keyPairMutex.Lock()
+	defer csdk.keyPairMutex.Unlock()
 	signatureHex := C.bcos_sdk_sign_transaction_data_hash(csdk.keyPair, cHexHash)
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signatureHex))
 	if C.bcos_sdk_is_last_opr_success() == 0 {
