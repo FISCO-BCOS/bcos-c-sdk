@@ -2,6 +2,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx_struct.h"
+#include "org_fisco_bcos_sdk_common.h"
 #include "org_fisco_bcos_sdk_exception.h"
 
 struct bcos_sdk_c_bytes* convert_to_bytes_struct(JNIEnv* env, jobject bytesObj)
@@ -85,6 +86,12 @@ struct bcos_sdk_c_transaction_data* convert_to_tx_data_struct(
 {
     try
     {
+        if (transactionObject == NULL)
+        {
+            THROW_JNI_EXCEPTION(
+                env, "exception in convert_to_tx_data_struct, transactionObject is nullptr");
+        }
+
         bcos_sdk_c_transaction_data* tx_data_struct =
             (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
         jclass txDataClass = env->GetObjectClass(transactionObject);
@@ -158,6 +165,12 @@ jobject convert_to_tx_data_jobject(
 {
     try
     {
+        if (transactionData == NULL)
+        {
+            THROW_JNI_EXCEPTION(
+                env, "exception in convert_to_tx_data_jobject, transactionData is nullptr");
+        }
+
         jclass txDataClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionData");
         if (txDataClass == NULL)
         {
@@ -272,10 +285,6 @@ jobject convert_to_tx_jobject(JNIEnv* env, const struct bcos_sdk_c_transaction* 
         env->SetObjectField(javaTxObj, signatureField, javaSignatureObj);
         // Sender
         jobject javaSenderObj = convert_to_bytes_jobject(env, tx_struct->sender);
-        if (javaSenderObj == NULL)
-        {
-            THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_jobject");
-        }
         env->SetObjectField(javaTxObj, senderField, javaSenderObj);
         // ImportTime
         env->SetLongField(javaTxObj, importTimeField, tx_struct->import_time);
@@ -297,6 +306,11 @@ struct bcos_sdk_c_transaction* convert_to_tx_struct(JNIEnv* env, jobject jTxObj)
 {
     try
     {
+        if (jTxObj == NULL)
+        {
+            THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_struct, jTxObj is nullptr");
+        }
+
         jclass javaTxClass = env->GetObjectClass(jTxObj);
         jfieldID transactionDataField = env->GetFieldID(javaTxClass, "transactionData",
             "Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionData;");
@@ -340,10 +354,6 @@ struct bcos_sdk_c_transaction* convert_to_tx_struct(JNIEnv* env, jobject jTxObj)
         // Sender
         jobject javaSenderObj = env->GetObjectField(jTxObj, senderField);
         struct bcos_sdk_c_bytes* senderStruct = convert_to_bytes_struct(env, javaSenderObj);
-        if (senderStruct == NULL)
-        {
-            THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_struct");
-        }
         txStruct->sender = senderStruct;
         // ImportTime
         jlong importTimeValue = env->GetLongField(jTxObj, importTimeField);
@@ -461,6 +471,7 @@ JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStruct(
     JNIEnv* env, jclass, jstring jTxDataHexStr)
 {
+    checkJString(env, jTxDataHexStr);
     const char* tx_data_hex_str = env->GetStringUTFChars(jTxDataHexStr, nullptr);
     struct bcos_sdk_c_transaction_data* tx_data_struct =
         bcos_sdk_decode_transaction_data_struct(tx_data_hex_str);
@@ -535,6 +546,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createEn
     JNIEnv* env, jclass, jobject jTxDataObj, jstring jSignature, jstring jTxDataHash,
     jint jAttribute, jstring jExtraData)
 {
+    checkJString(env, jSignature);
+    checkJString(env, jTxDataHash);
+    checkJString(env, jExtraData);
+
     struct bcos_sdk_c_transaction_data* tx_data_struct = convert_to_tx_data_struct(env, jTxDataObj);
     if (tx_data_struct == NULL)
     {
@@ -651,6 +666,8 @@ JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStruct(
     JNIEnv* env, jclass, jstring jTxHexStr)
 {
+    checkJString(env, jTxHexStr);
+
     const char* tx_hex_str = env->GetStringUTFChars(jTxHexStr, nullptr);
     struct bcos_sdk_c_transaction* tx_struct = bcos_sdk_decode_transaction_struct(tx_hex_str);
     if (!bcos_sdk_is_last_opr_success())

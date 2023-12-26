@@ -9,15 +9,10 @@ public class TransactionDataV2 {
     private String to;
     private String abi;
     private TransactionBytes input;
-
     private String value;
-
     private String gasPrice;
-
     private long gasLimit;
-
     private String maxFeePerGas;
-
     private String maxPriorityFeePerGas;
 
     public int getVersion() {
