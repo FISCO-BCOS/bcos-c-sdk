@@ -121,8 +121,8 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcServiceJniObj_sendT
     JNIEnv* env, jclass, jlong jsdk, jlong jkeypair, jstring jgroup, jstring jnode, jstring jto,
     jbyteArray jdata, jstring jabi, jint jatti, jstring jextra_data, jobject jcallback)
 {
-    checkJString(env, jgroup);
-    checkJByteArray(env, jdata);
+    CHECK_OBJECT_NOT_NULL(env, jgroup, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
 
     void* sdk = reinterpret_cast<void*>(jsdk);
     void* keypair = reinterpret_cast<void*>(jkeypair);

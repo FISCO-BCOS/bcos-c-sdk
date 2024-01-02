@@ -17,9 +17,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransact
     jclass, jstring jgroup_id, jstring jchain_id, jstring jto, jstring jdata, jstring jabi,
     jlong jblock_limit)
 {
-    checkJString(env, jgroup_id);
-    checkJString(env, jchain_id);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, jdata, 0);
 
     // group id
     const char* group_id = env->GetStringUTFChars(jgroup_id, NULL);
@@ -60,7 +60,7 @@ JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransactionDataWithJson(
     JNIEnv* env, jclass, jstring jjson)
 {
-    checkJString(env, jjson);
+    CHECK_OBJECT_NOT_NULL(env, jjson, 0);
     const char* json = env->GetStringUTFChars(jjson, NULL);
     void* transaction_data = bcos_sdk_create_transaction_data_with_json(json);
 
@@ -125,7 +125,7 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionDataToJsonObj(
     JNIEnv* env, jclass, jstring jtransaction_bytes)
 {
-    checkJString(env, jtransaction_bytes);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, NULL);
 
     const char* transaction_data = env->GetStringUTFChars(jtransaction_bytes, NULL);
     const char* transaction_data_json = bcos_sdk_decode_transaction_data(transaction_data);
@@ -183,7 +183,7 @@ JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransaction(
     JNIEnv* env, jclass, jstring jtransaction_bytes)
 {
-    checkJString(env, jtransaction_bytes);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, 0);
     const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
     void* transaction_data = bcos_sdk_decode_transaction(transaction);
     env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
@@ -203,7 +203,7 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionToJsonObj(
     JNIEnv* env, jclass, jstring jtransaction_bytes)
 {
-    checkJString(env, jtransaction_bytes);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, NULL);
     const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
     const char* transaction_json = bcos_sdk_decode_transaction_to_json_obj(transaction);
     env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
@@ -242,7 +242,7 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_signTransactionDataHash(
     JNIEnv* env, jclass, jlong jkeypair, jstring jtransaction_data_hash)
 {
-    checkJString(env, jtransaction_data_hash);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
 
     void* keypair = reinterpret_cast<void*>(jkeypair);
     // transaction_data_hash
@@ -278,8 +278,8 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jtransaction_data, jstring jtransaction_data_signed_data,
     jstring jtransaction_data_hash, jint jattr)
 {
-    checkJString(env, jtransaction_data_hash);
-    checkJString(env, jtransaction_data_signed_data);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_signed_data, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
     void* transaction_data = reinterpret_cast<void*>(jtransaction_data);
 
     const char* transaction_data_signed_data =
@@ -320,9 +320,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jtransaction_data, jstring jtransaction_data_signed_data,
     jstring jtransaction_data_hash, jint jattr, jstring jextra_data)
 {
-    checkJString(env, jtransaction_data_hash);
-    checkJString(env, jtransaction_data_signed_data);
-    checkJString(env, jextra_data);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_signed_data, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jextra_data, NULL);
+
     void* transaction_data = reinterpret_cast<void*>(jtransaction_data);
 
     const char* transaction_data_signed_data =
@@ -366,9 +367,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jkeypair, jstring jgroup_id, jstring jchain_id, jstring jto,
     jstring jdata, jstring jabi, jlong jblock_limit, jint jattr)
 {
-    checkJString(env, jgroup_id);
-    checkJString(env, jchain_id);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
 
     // keypair
     void* keypair = reinterpret_cast<void*>(jkeypair);
@@ -452,9 +453,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jkeypair, jstring jgroup_id, jstring jchain_id, jstring jto,
     jstring jdata, jstring jabi, jlong jblock_limit, jint jattr, jstring jextra_data)
 {
-    checkJString(env, jgroup_id);
-    checkJString(env, jchain_id);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
 
     // keypair
     void* keypair = reinterpret_cast<void*>(jkeypair);

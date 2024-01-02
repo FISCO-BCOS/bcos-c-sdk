@@ -14,8 +14,8 @@
 JNIEXPORT jbyteArray JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign(
     JNIEnv* env, jclass, jlong jkeypair, jstring jtx_data_hash, jstring jhsm_lib_path)
 {
-    checkJString(env, jtx_data_hash);
-    checkJString(env, jhsm_lib_path);
+    CHECK_OBJECT_NOT_NULL(env, jtx_data_hash, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jhsm_lib_path, NULL);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     const char* tx_data_hash = env->GetStringUTFChars(jtx_data_hash, NULL);
     void* keypair = reinterpret_cast<void*>(jkeypair);
@@ -51,9 +51,10 @@ JNIEXPORT jboolean JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_Signa
     JNIEnv* env, jclass, jint jcrypto_type, jbyteArray jpub_key, jstring jtx_data_hash,
     jstring jsigned_data, jstring jhsm_lib_path)
 {
-    checkJString(env, jtx_data_hash);
-    checkJString(env, jsigned_data);
-    checkJString(env, jhsm_lib_path);
+    CHECK_OBJECT_NOT_NULL(env, jpub_key, false);
+    CHECK_OBJECT_NOT_NULL(env, jtx_data_hash, false);
+    CHECK_OBJECT_NOT_NULL(env, jsigned_data, false);
+    CHECK_OBJECT_NOT_NULL(env, jhsm_lib_path, false);
 
     int crypto_type = (int)jcrypto_type;
     jbyte* public_key = (jbyte*)env->GetByteArrayElements(jpub_key, 0);

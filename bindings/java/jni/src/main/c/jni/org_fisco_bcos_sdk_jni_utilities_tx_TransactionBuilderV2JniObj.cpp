@@ -36,9 +36,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransa
     JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_input,
     jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price, jlong j_gas_limit)
 {
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, j_input, 0);
 
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
@@ -81,9 +81,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP155
     jstring j_abi, jlong j_block_limit, jstring j_value, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas)
 {
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, j_input, 0);
 
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
@@ -130,10 +130,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
     jlong j_block_limit, jstring j_value, jstring j_gasPrice, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas)
 {
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
-    checkJString(env, j_nonce);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_nonce, NULL);
 
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
@@ -194,7 +194,7 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransactionDataHashWithJson(
     JNIEnv* env, jclass, jint j_crypto_type, jstring j_json)
 {
-    checkJString(env, j_json);
+    CHECK_OBJECT_NOT_NULL(env, j_json, NULL);
     const char* json = env->GetStringUTFChars(j_json, NULL);
     int crypto_type = (int)j_crypto_type;
 
@@ -232,12 +232,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas, jint j_attribute,
     jstring j_extra_data)
 {
-    checkJString(env, j_signature);
-    checkJString(env, j_tx_hash);
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
-    checkJString(env, j_nonce);
+    CHECK_OBJECT_NOT_NULL(env, j_signature, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_tx_hash, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_nonce, NULL);
 
     int64_t block_limit = (int64_t)j_block_limit;
     int64_t gas_limit = (int64_t)j_gas_limit;
@@ -307,9 +307,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     jstring j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price,
     jlong j_gas_limit, jint j_attribute, jstring j_extra_data)
 {
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
 
     void* keypair = reinterpret_cast<void*>(j_key_pair);
     int64_t block_limit = (int64_t)j_block_limit;
@@ -392,9 +392,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     jstring j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_max_fee_per_gas,
     jstring j_max_priority_fee_per_gas, jlong j_gas_limit, jint j_attribute, jstring j_extra_data)
 {
-    checkJString(env, j_group_id);
-    checkJString(env, j_chain_id);
-    checkJString(env, j_input);
+    CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_chain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
 
     void* keypair = reinterpret_cast<void*>(j_key_pair);
     int64_t block_limit = (int64_t)j_block_limit;
