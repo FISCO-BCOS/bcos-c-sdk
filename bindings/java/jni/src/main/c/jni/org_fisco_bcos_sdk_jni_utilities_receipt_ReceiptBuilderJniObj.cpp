@@ -16,9 +16,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceipt
     jclass, jstring jgas_used, jstring jcontract_address, jstring jout_put,
     jlong jblock_number)
 {
-    checkJString(env, jgas_used);
-    checkJString(env, jcontract_address);
-    checkJString(env, jout_put);
+    CHECK_OBJECT_NOT_NULL(env, jgas_used, 0);
+    CHECK_OBJECT_NOT_NULL(env, jcontract_address, 0);
+    CHECK_OBJECT_NOT_NULL(env, jout_put, 0);
 
     // group id
     const char* gas_used = env->GetStringUTFChars(jgas_used, NULL);
@@ -53,7 +53,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceipt
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptDataWithJson
   (JNIEnv *env, jclass, jstring jjson)
 {
-    checkJString(env, jjson);
+    CHECK_OBJECT_NOT_NULL(env, jjson, 0);
     const char* json = env->GetStringUTFChars(jjson, NULL);
     void* receipt_data = bcos_sdk_create_receipt_data_with_json(json);
 
@@ -114,7 +114,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_encodeReceipt
 JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_decodeReceiptDataToJsonObj
   (JNIEnv* env, jclass, jstring jreceipt_bytes)
 {
-    checkJString(env, jreceipt_bytes);
+    CHECK_OBJECT_NOT_NULL(env, jreceipt_bytes, NULL);
     const char* receipt_data = env->GetStringUTFChars(jreceipt_bytes, NULL);
     const char* receipt_data_json = bcos_sdk_decode_receipt_data(receipt_data);
 

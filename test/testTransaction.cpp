@@ -24,6 +24,8 @@
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
+#include <utilities/tx/Transaction.h>
+
 #include <boost/test/tools/old/interface.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -73,7 +75,20 @@ BOOST_AUTO_TEST_CASE(testTxData)
     success = bcos_sdk_is_last_opr_success();
     BOOST_TEST(success == true);
 
+    void* txRaw = bcos_sdk_decode_transaction(signed_tx);
+    success = bcos_sdk_is_last_opr_success();
+    BOOST_TEST(success == true);
+    auto tx = (bcostars::Transaction*)txRaw;
+    BOOST_TEST(tx->extraData == extra_data);
+    BOOST_TEST(tx->data.version == 0);
+    BOOST_TEST(tx->data.blockLimit == block_limit);
+    BOOST_TEST(tx->data.groupID == group_id);
+    BOOST_TEST(tx->data.chainID == chain_id);
+    BOOST_TEST(tx->data.abi == g_hw_abi);
+
+
     bcos_sdk_destroy_transaction_data(transaction_data);
+    bcos_sdk_destroy_transaction(txRaw);
     bcos_sdk_c_free((void*)transaction_data_hash);
     bcos_sdk_c_free((void*)signed_hash);
     bcos_sdk_c_free((void*)signed_tx);

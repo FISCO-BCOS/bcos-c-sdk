@@ -161,6 +161,28 @@ const char* bcos_sdk_create_signed_transaction_with_signed_data_ver_extra_data(
     void* transaction_data, const char* signature, const char* transaction_data_hash,
     int32_t attribute, const char* extra_data);
 
+
+/**
+ * @brief Decode transaction hex string to Transaction object raw pointer
+ * @param transaction_bytes encoded transaction hex string
+ * @return Transaction object pointer
+ */
+void* bcos_sdk_decode_transaction(const char* transaction_bytes);
+
+/**
+ * @brief Decode transaction hex string to Transaction object json string
+ * @param transaction_bytes encoded transaction hex string
+ * @return Transaction object json string
+ */
+const char* bcos_sdk_decode_transaction_to_json_obj(const char* transaction_bytes);
+
+/**
+ * @brief Destroy transaction object
+ *
+ * @param transaction transaction object pointer
+ */
+void bcos_sdk_destroy_transaction(void* transaction);
+
 /**
  * @brief
  *

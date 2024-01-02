@@ -151,7 +151,7 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_rpc_RpcCallback_2(
     JNIEnv* env, jobject self, jstring jdata, jobject jcallback)
 {
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
 
@@ -184,8 +184,8 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_rpc_RpcCallback_2(
     JNIEnv* env, jobject self, jstring jgroup, jstring jdata, jobject jcallback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
 
@@ -223,8 +223,8 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_rpc_RpcCallback_2(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jstring jdata, jobject jcallback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
 
@@ -265,9 +265,9 @@ Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_genericMethod__Ljava_lang_String_2Ljav
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_call(JNIEnv* env, jobject self,
     jstring jgroup, jstring jnode, jstring jto, jstring jdata, jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jto);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jto);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -309,8 +309,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_call(JNIEnv* en
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_sendTransaction(JNIEnv* env,
     jobject self, jstring jgroup, jstring jnode, jstring jdata, jboolean jproof, jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jdata);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -353,8 +353,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransaction(
     jobject self, jstring jgroup, jstring jnode, jstring jtx_hash, jboolean jproof,
     jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jtx_hash);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtx_hash);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -396,8 +396,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTransactionR
     jobject self, jstring jgroup, jstring jnode, jstring jtx_hash, jboolean jproof,
     jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jtx_hash);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtx_hash);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -440,8 +440,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByHash(
     jobject self, jstring jgroup, jstring jnode, jstring jblock_hash, jboolean jonly_header,
     jboolean jonly_txhash, jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jblock_hash);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jblock_hash);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -485,7 +485,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByNumbe
     jobject self, jstring jgroup, jstring jnode, jlong jnumber, jboolean jonly_header,
     jboolean jonly_txhash, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -527,7 +527,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockByNumbe
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockHashByNumber(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jlong jnumber, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -566,7 +566,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockHashByN
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockLimit(
     JNIEnv* env, jobject self, jstring jgroup)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL(env, jgroup, 0);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -586,7 +586,7 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockLimit(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockNumber(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -623,8 +623,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getBlockNumber(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getCode(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jstring jaddress, jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jaddress);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jaddress);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -662,7 +662,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getCode(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSealerList(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -698,7 +698,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSealerList(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getObserverList(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -734,7 +734,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getObserverList
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPbftView(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -769,7 +769,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPbftView(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPendingTxSize(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -805,7 +805,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getPendingTxSiz
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSyncStatus(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -841,8 +841,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSyncStatus(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSystemConfigByKey(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jstring jkey, jobject callback)
 {
-    checkJString(env, jgroup);
-    checkJString(env, jkey);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jkey);
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
     // group
@@ -880,7 +880,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getSystemConfig
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTotalTransactionCount(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -916,7 +916,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getTotalTransac
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupPeers(
     JNIEnv* env, jobject self, jstring jgroup, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -1003,7 +1003,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupList(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfo(
     JNIEnv* env, jobject self, jstring jgroup, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);
@@ -1063,7 +1063,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupInfoLis
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcJniObj_getGroupNodeInfo(
     JNIEnv* env, jobject self, jstring jgroup, jstring jnode, jobject callback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     // rpc obj handler
     void* rpc = bcos_sdk_get_native_pointer(env, self);

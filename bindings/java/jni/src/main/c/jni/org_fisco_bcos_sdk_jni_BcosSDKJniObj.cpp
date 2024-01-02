@@ -14,6 +14,7 @@
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_create(
     JNIEnv* env, jclass self, jobject jconfig)
 {
+    CHECK_OBJECT_NOT_NULL(env, jconfig, 0);
     (void)self;
     // config
     struct bcos_sdk_c_config* config = create_config_from_java_obj(env, jconfig);
@@ -163,7 +164,7 @@ JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_negotiatedProto
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNotifier(
     JNIEnv* env, jobject self, jstring jgroup, jobject jcallback)
 {
-    checkJString(env, jgroup);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
 
     void* sdk = bcos_sdk_get_native_pointer(env, self);
     if (!sdk)

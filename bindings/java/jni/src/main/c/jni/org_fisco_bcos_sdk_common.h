@@ -9,10 +9,21 @@
 extern "C" {
 #endif
 
-#define GET_J_STRING_CONTENT(env, jstr) \
-    (env)->GetStringUTFChars((jstr), NULL)
+#define GET_J_STRING_CONTENT(env, jstr) (env)->GetStringUTFChars((jstr), NULL)
 #define GET_J_STRING_CONTENT_DEF(env, jstr, def) \
     ((jstr) == NULL ? (def) : GET_J_STRING_CONTENT((env), (jstr)))
+#define CHECK_OBJECT_NOT_NULL(env, obj, ret)                           \
+    if (NULL == (obj))                                                 \
+    {                                                                  \
+        THROW_JNI_EXCEPTION((env), "illegal NULL " #obj " parameter"); \
+        return (ret);                                                  \
+    }
+#define CHECK_OBJECT_NOT_NULL_RET_VOID(env, obj)                       \
+    if (NULL == (obj))                                                 \
+    {                                                                  \
+        THROW_JNI_EXCEPTION((env), "illegal NULL " #obj " parameter"); \
+        return;                                                        \
+    }
 
 struct cb_context
 {
@@ -27,20 +38,24 @@ jclass bcos_sdk_c_find_jclass(JNIEnv* env, const char* className);
 struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconfig);
 
 // check jstring not null
-inline void checkJString(JNIEnv* env, jstring jstr)
+inline bool checkJString(JNIEnv* env, jstring jstr)
 {
     if (jstr == NULL)
     {
         THROW_JNI_EXCEPTION(env, "illegal NULL string parameter");
+        return false;
     }
+    return true;
 }
 // check jByteArray not null
-inline void checkJByteArray(JNIEnv* env, jbyteArray jbyte_array)
+inline bool checkJByteArray(JNIEnv* env, jbyteArray jbyte_array)
 {
     if (jbyte_array == NULL)
     {
         THROW_JNI_EXCEPTION(env, "illegal NULL byteArray parameter");
+        return false;
     }
+    return true;
 }
 
 #ifdef __cplusplus
