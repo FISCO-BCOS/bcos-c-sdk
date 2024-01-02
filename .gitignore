@@ -36,7 +36,7 @@ deps
 *.out
 *.app
 .cache
-build
+build**
 deps
 .gradle
 .vscode/

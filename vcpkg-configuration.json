@@ -3,14 +3,15 @@
     {
       "kind": "git",
       "repository": "https://github.com/FISCO-BCOS/registry",
-      "baseline": "ffebe39f161b78791148924f18ed0c9d4d4bce71",
+      "baseline": "3765dfb347d9fc820cfad9005b2f87d0755895ec",
       "packages": [
         "openssl",
         "hsm-crypto",
         "fisco-bcos-cpp-sdk",
         "wedprcrypto",
         "secp256k1",
-        "boost-uuid"
+        "boost-uuid",
+        "boost-beast"
       ]
     }
   ]

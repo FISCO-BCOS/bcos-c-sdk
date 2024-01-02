@@ -176,6 +176,65 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_calcTransactio
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransaction
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransaction(
+    JNIEnv* env, jclass, jstring jtransaction_bytes)
+{
+    checkJString(env, jtransaction_bytes);
+    const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
+    void* transaction_data = bcos_sdk_decode_transaction(transaction);
+    env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+    }
+    return reinterpret_cast<jlong>(transaction_data);
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransactionToJsonObj
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionToJsonObj(
+    JNIEnv* env, jclass, jstring jtransaction_bytes)
+{
+    checkJString(env, jtransaction_bytes);
+    const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
+    const char* transaction_json = bcos_sdk_decode_transaction_to_json_obj(transaction);
+    env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+    }
+    jstring jtransaction_json = env->NewStringUTF(transaction_json);
+    if (transaction_json)
+    {
+        free((void*)transaction_json);
+        transaction_json = NULL;
+    }
+    return jtransaction_json;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    destroyTransaction
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_destroyTransaction(
+    JNIEnv*, jclass, jlong jtransaction)
+{
+    void* transaction = reinterpret_cast<void*>(jtransaction);
+    bcos_sdk_destroy_transaction(transaction);
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
  * Method:    signTransactionDataHash
  * Signature: (JLjava/lang/String;)Ljava/lang/String;
  */
