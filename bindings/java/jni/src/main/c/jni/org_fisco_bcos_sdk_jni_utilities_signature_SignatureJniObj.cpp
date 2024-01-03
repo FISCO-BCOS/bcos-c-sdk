@@ -29,6 +29,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_Sig
     if (operation_status == -1)
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jbyte* signed_data_r = (jbyte*)sign_result.r;
@@ -73,6 +74,7 @@ JNIEXPORT jboolean JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_Signa
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return JNI_FALSE;
     }
 
     return is_verify_success ? JNI_TRUE : JNI_FALSE;

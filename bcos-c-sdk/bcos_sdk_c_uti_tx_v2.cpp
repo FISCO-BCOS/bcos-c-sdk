@@ -34,8 +34,8 @@ using namespace bcos::cppsdk::utilities;
 #include <system_error>
 
 void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chain_id,
-    const char* to, const char* input, const char* abi, int64_t block_limit, const char* value,
-    const char* gas_price, int64_t gas_limit)
+    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL)
@@ -47,9 +47,9 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
     try
     {
         TransactionBuilderV2 builder;
-        auto bytesData = fromHexString(input);
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto transactionData =
-            builder.createTransactionData(1, group_id, chain_id, to, "", *bytesData, abi,
+            builder.createTransactionData(1, group_id, chain_id, to, "", std::move(bytesData), abi,
                 block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit);
         return transactionData.release();
     }
@@ -71,8 +71,9 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
 }
 
 void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char* chain_id,
-    const char* to, const char* input, const char* abi, int64_t block_limit, const char* value,
-    int64_t gas_limit, const char* max_fee_per_gas, const char* max_priority_fee_per_gas)
+    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    int64_t block_limit, const char* value, int64_t gas_limit, const char* max_fee_per_gas,
+    const char* max_priority_fee_per_gas)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL)
@@ -84,9 +85,9 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
     try
     {
         TransactionBuilderV2 builder;
-        auto bytesData = fromHexString(input);
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto transactionData = builder.createTransactionData(1, group_id, chain_id, to, "",
-            *bytesData, abi, block_limit, value ? value : "", "", gas_limit,
+            std::move(bytesData), abi, block_limit, value ? value : "", "", gas_limit,
             max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "");
         return transactionData.release();
@@ -112,9 +113,9 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
 
 const char* bcos_sdk_calc_transaction_data_hash_with_full_fields(int crypto_type,
     transaction_version version, const char* group_id, const char* chain_id, const char* to,
-    const char* nonce, const char* input, const char* abi, int64_t block_limit, const char* value,
-    const char* gas_price, int64_t gas_limit, const char* max_fee_per_gas,
-    const char* max_priority_fee_per_gas)
+    const char* nonce, const unsigned char* input, long inputSize, const char* abi,
+    int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit,
+    const char* max_fee_per_gas, const char* max_priority_fee_per_gas)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL)
@@ -126,12 +127,12 @@ const char* bcos_sdk_calc_transaction_data_hash_with_full_fields(int crypto_type
 
     try
     {
-        auto bytesData = fromHexString(input);
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         TransactionBuilderV2 builder;
         auto transactionDataHash = builder.calculateTransactionDataHash(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2, version,
-            group_id, chain_id, to ? to : "", nonce, *bytesData, abi ? abi : "", block_limit,
-            value ? value : "", gas_price ? gas_price : "", gas_limit,
+            group_id, chain_id, to ? to : "", nonce, std::move(bytesData), abi ? abi : "",
+            block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit,
             max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "");
         return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
@@ -180,12 +181,12 @@ const char* bcos_sdk_calc_transaction_data_hash_with_json(int crypto_type, const
     return nullptr;
 }
 
-const char* bcos_sdk_create_signed_transaction_with_signature(const char* signature,
-    const char* transaction_hash, transaction_version version, const char* group_id,
-    const char* chain_id, const char* to, const char* nonce, const char* input, const char* abi,
-    int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit,
-    const char* max_fee_per_gas, const char* max_priority_fee_per_gas, int32_t attribute,
-    const char* extra_data)
+const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned char* signature,
+    long signSize, const char* transaction_hash, transaction_version version, const char* group_id,
+    const char* chain_id, const char* to, const char* nonce, const unsigned char* input,
+    long inputSize, const char* abi, int64_t block_limit, const char* value, const char* gas_price,
+    int64_t gas_limit, const char* max_fee_per_gas, const char* max_priority_fee_per_gas,
+    int32_t attribute, const char* extra_data)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(signature, NULL)
@@ -199,14 +200,14 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const char* signat
     try
     {
         TransactionBuilderV2 builder;
-        auto bytesData = fromHexString(input);
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         crypto::HashType tx_hash(fromHex(std::string_view(transaction_hash)));
-        bytes sign = fromHex(std::string_view(signature));
+        auto sign = bytes(signature, signature + signSize * sizeof(byte));
 
         auto transaction = builder.createTransaction(std::move(sign), tx_hash, attribute,
-            (int32_t)version, group_id, chain_id, to ? to : "", nonce ? nonce : "", *bytesData,
-            abi ? abi : "", block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit,
-            max_fee_per_gas ? max_fee_per_gas : "",
+            version, group_id, chain_id, to ? to : "", nonce ? nonce : "",
+            std::move(bytesData), abi ? abi : "", block_limit, value ? value : "",
+            gas_price ? gas_price : "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "", extra_data ? extra_data : "");
 
         auto bytes = builder.encodeTransaction(*transaction);
@@ -235,8 +236,55 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const char* signat
 }
 
 void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const char* group_id,
-    const char* chain_id, const char* to, const char* input, const char* abi, int64_t block_limit,
-    const char* value, const char* gas_price, int64_t gas_limit, int32_t attribute,
+    const char* chain_id, const char* to, const unsigned char* input, long inputSize,
+    const char* abi, int64_t block_limit, const char* value, const char* gas_price,
+    int64_t gas_limit, int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, )
+    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, )
+    BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, )
+    BCOS_SDK_C_PARAMS_VERIFICATION(input, )
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", )
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", )
+    BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, )
+    BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, )
+
+    try
+    {
+        TransactionBuilderV2 builder;
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
+        auto result =
+            builder.createSignedTransaction(*static_cast<bcos::crypto::KeyPairInterface*>(key_pair),
+                attribute, 1, group_id, chain_id, to ? to : "", "", std::move(bytesData),
+                abi ? abi : "", block_limit, value ? value : "", gas_price ? gas_price : "",
+                gas_limit, "", "", extra_data ? extra_data : "");
+        *tx_hash = strdup(result.first.c_str());
+        *signed_tx = strdup(result.second.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_with_full_fields")
+                          << LOG_DESC("exception") << LOG_KV("group_id", group_id)
+                          << LOG_KV("chain_id", chain_id)
+                          << LOG_KV("to", std::string_view(to ? to : ""))
+                          << LOG_KV("inputSize", inputSize)
+                          << LOG_KV("abi", std::string_view(abi ? abi : ""))
+                          << LOG_KV("block_limit", block_limit)
+                          << LOG_KV("value", std::string_view(value ? value : ""))
+                          << LOG_KV("gas_price", std::string_view(gas_price ? gas_price : ""))
+                          << LOG_KV("gas_limit", gas_limit) << LOG_KV("attribute", attribute)
+                          << LOG_KV("extra_data", std::string_view(extra_data ? extra_data : ""))
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+}
+
+void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
+    const char* group_id, const char* chain_id, const char* to, const unsigned char* input,
+    long inputSize, const char* abi, int64_t block_limit, const char* value, int64_t gas_limit,
+    const char* max_fee_per_gas, const char* max_priority_fee_per_gas, int32_t attribute,
     const char* extra_data, char** tx_hash, char** signed_tx)
 {
     bcos_sdk_clear_last_error();
@@ -252,54 +300,11 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
     try
     {
         TransactionBuilderV2 builder;
-        auto bytesData = fromHexString(input);
-        auto result = builder.createSignedTransaction(*((bcos::crypto::KeyPairInterface*)key_pair),
-            attribute, 1, group_id, chain_id, to ? to : "", "", *bytesData, abi ? abi : "",
-            block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit, "", "",
-            extra_data ? extra_data : "");
-        *tx_hash = strdup(result.first.c_str());
-        *signed_tx = strdup(result.second.c_str());
-    }
-    catch (const std::exception& e)
-    {
-        std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_with_full_fields")
-                          << LOG_DESC("exception") << LOG_KV("group_id", group_id)
-                          << LOG_KV("chain_id", chain_id) << LOG_KV("to", std::string(to ? to : ""))
-                          << LOG_KV("input", input) << LOG_KV("abi", std::string(abi ? abi : ""))
-                          << LOG_KV("block_limit", block_limit)
-                          << LOG_KV("value", std::string(value ? value : ""))
-                          << LOG_KV("gas_price", std::string(gas_price ? gas_price : ""))
-                          << LOG_KV("gas_limit", gas_limit) << LOG_KV("attribute", attribute)
-                          << LOG_KV("extra_data", std::string(extra_data ? extra_data : ""))
-                          << LOG_KV("error", errorMsg);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
-    }
-}
-
-void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
-    const char* group_id, const char* chain_id, const char* to, const char* input, const char* abi,
-    int64_t block_limit, const char* value, int64_t gas_limit, const char* max_fee_per_gas,
-    const char* max_priority_fee_per_gas, int32_t attribute, const char* extra_data, char** tx_hash,
-    char** signed_tx)
-{
-    bcos_sdk_clear_last_error();
-    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, )
-    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, )
-    BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, )
-    BCOS_SDK_C_PARAMS_VERIFICATION(input, )
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", )
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", )
-    BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, )
-    BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, )
-
-    try
-    {
-        TransactionBuilderV2 builder;
-        auto bytesData = fromHexString(input);
-        auto result = builder.createSignedTransaction(*((bcos::crypto::KeyPairInterface*)key_pair),
-            attribute, 1, group_id, chain_id, to ? to : "", "", *bytesData, abi ? abi : "",
-            block_limit, value ? value : "", "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
+        auto bytesData = bytes(input, input + inputSize * sizeof(byte));
+        auto result = builder.createSignedTransaction(
+            *static_cast<bcos::crypto::KeyPairInterface*>(key_pair), attribute, 1, group_id,
+            chain_id, to ? to : "", "", std::move(bytesData), abi ? abi : "", block_limit,
+            value ? value : "", "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "", extra_data ? extra_data : "");
         *tx_hash = strdup(result.first.c_str());
         *signed_tx = strdup(result.second.c_str());
@@ -310,14 +315,15 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
         BCOS_LOG(WARNING)
             << LOG_BADGE("bcos_sdk_create_signed_eip1559_transaction_with_full_fields")
             << LOG_DESC("exception") << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-            << LOG_KV("to", std::string(to ? to : "")) << LOG_KV("input", input)
-            << LOG_KV("abi", std::string(abi ? abi : "")) << LOG_KV("block_limit", block_limit)
-            << LOG_KV("value", std::string(value ? value : "")) << LOG_KV("gas_limit", gas_limit)
-            << LOG_KV("max_fee_per_gas", std::string(max_fee_per_gas ? max_fee_per_gas : ""))
+            << LOG_KV("to", std::string_view(to ? to : "")) << LOG_KV("inputSize", inputSize)
+            << LOG_KV("abi", std::string_view(abi ? abi : "")) << LOG_KV("block_limit", block_limit)
+            << LOG_KV("value", std::string_view(value ? value : ""))
+            << LOG_KV("gas_limit", gas_limit)
+            << LOG_KV("max_fee_per_gas", std::string_view(max_fee_per_gas ? max_fee_per_gas : ""))
             << LOG_KV("max_priority_fee_per_gas",
-                   std::string(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
+                   std::string_view(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
             << LOG_KV("attribute", attribute)
-            << LOG_KV("extra_data", std::string(extra_data ? extra_data : ""))
+            << LOG_KV("extra_data", std::string_view(extra_data ? extra_data : ""))
             << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }

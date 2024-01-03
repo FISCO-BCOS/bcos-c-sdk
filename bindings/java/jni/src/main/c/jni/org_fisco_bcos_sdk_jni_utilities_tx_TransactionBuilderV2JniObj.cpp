@@ -29,11 +29,11 @@
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    createTransactionData
  * Signature:
- * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;J)J
+ * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransactionData(
-    JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_input,
+    JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jbyteArray j_input,
     jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price, jlong j_gas_limit)
 {
     CHECK_OBJECT_NOT_NULL(env, j_group_id, 0);
@@ -43,27 +43,31 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransa
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* gas_price = GET_J_STRING_CONTENT_DEF(env, j_gas_price, NULL);
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
 
-    void* transaction_data = bcos_sdk_create_transaction_v2_data(
-        group_id, chain_id, to, input, abi, block_limit, value, gas_price, gas_limit);
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
+
+    void* transaction_data = bcos_sdk_create_transaction_v2_data(group_id, chain_id, to,
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
+        gas_price, gas_limit);
 
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_gas_price, gas_price);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(transaction_data);
@@ -73,11 +77,11 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransa
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    createEIP1559TransactionData
  * Signature:
- * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;)J
+ * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP1559TransactionData(
-    JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_input,
+    JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jbyteArray j_input,
     jstring j_abi, jlong j_block_limit, jstring j_value, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas)
 {
@@ -88,30 +92,33 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP155
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* max_fee_per_gas = GET_J_STRING_CONTENT_DEF(env, j_max_fee_per_gas, NULL);
     const char* max_priority_fee_per_gas =
         GET_J_STRING_CONTENT_DEF(env, j_max_priority_fee_per_gas, NULL);
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
 
-    void* transaction_data = bcos_sdk_create_eip1559_transaction_data(group_id, chain_id, to, input,
-        abi, block_limit, value, gas_limit, max_fee_per_gas, max_priority_fee_per_gas);
+    void* transaction_data = bcos_sdk_create_eip1559_transaction_data(group_id, chain_id, to,
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
+        gas_limit, max_fee_per_gas, max_priority_fee_per_gas);
 
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_max_fee_per_gas, max_fee_per_gas);
     env->ReleaseStringUTFChars(j_max_priority_fee_per_gas, max_priority_fee_per_gas);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(transaction_data);
@@ -121,12 +128,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP155
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    calcTransactionDataHashWithFullFields
  * Signature:
- * (ILorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+ * (ILorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransactionDataHashWithFullFields(
     JNIEnv* env, jclass, jint j_crypto_type, jobject j_tx_version, jstring j_group_id,
-    jstring j_chain_id, jstring j_to, jstring j_nonce, jstring j_input, jstring j_abi,
+    jstring j_chain_id, jstring j_to, jstring j_nonce, jbyteArray j_input, jstring j_abi,
     jlong j_block_limit, jstring j_value, jstring j_gasPrice, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas)
 {
@@ -139,39 +146,43 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
     const char* nonce = GET_J_STRING_CONTENT(env, j_nonce);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* gas_price = GET_J_STRING_CONTENT_DEF(env, j_gasPrice, NULL);
     const char* max_fee_per_gas = GET_J_STRING_CONTENT_DEF(env, j_max_fee_per_gas, NULL);
     const char* max_priority_fee_per_gas =
         GET_J_STRING_CONTENT_DEF(env, j_max_priority_fee_per_gas, NULL);
-    int crypto_type = (int)j_crypto_type;
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
+
+    int crypto_type = j_crypto_type;
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
 
     jclass tx_version = env->GetObjectClass(j_tx_version);
     jmethodID j_methodId = env->GetMethodID(tx_version, "getValue", "()I");
-    int32_t ver = (int32_t)env->CallIntMethod(j_tx_version, j_methodId);
+    int32_t ver = env->CallIntMethod(j_tx_version, j_methodId);
 
     const char* tx_hash = bcos_sdk_calc_transaction_data_hash_with_full_fields(crypto_type,
-        (transaction_version)ver, group_id, chain_id, to, nonce, input, abi, block_limit, value,
+        (transaction_version)ver, group_id, chain_id, to, nonce,
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
         gas_price, gas_limit, max_fee_per_gas, max_priority_fee_per_gas);
 
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
     env->ReleaseStringUTFChars(j_nonce, nonce);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_gasPrice, gas_price);
     env->ReleaseStringUTFChars(j_max_fee_per_gas, max_fee_per_gas);
     env->ReleaseStringUTFChars(j_max_priority_fee_per_gas, max_priority_fee_per_gas);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring j_transaction_data_hash = env->NewStringUTF(tx_hash);
@@ -205,6 +216,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring j_transaction_data_hash = env->NewStringUTF(tx_hash);
@@ -222,12 +234,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    createSignedTransactionWithSignature
  * Signature:
- * (Ljava/lang/String;Ljava/lang/String;Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
+ * ([BLjava/lang/String;Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedTransactionWithSignature(
-    JNIEnv* env, jclass, jstring j_signature, jstring j_tx_hash, jobject j_tx_version,
-    jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_nonce, jstring j_input,
+    JNIEnv* env, jclass, jbyteArray j_signature, jstring j_tx_hash, jobject j_tx_version,
+    jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_nonce, jbyteArray j_input,
     jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas, jint j_attribute,
     jstring j_extra_data)
@@ -239,16 +251,14 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
     CHECK_OBJECT_NOT_NULL(env, j_nonce, NULL);
 
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
-    int32_t attribute = (int32_t)j_attribute;
-    const char* signature = GET_J_STRING_CONTENT(env, j_signature);
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
+    int32_t attribute = j_attribute;
     const char* tx_hash = GET_J_STRING_CONTENT(env, j_tx_hash);
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
     const char* nonce = GET_J_STRING_CONTENT(env, j_nonce);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* gas_price = GET_J_STRING_CONTENT_DEF(env, j_gas_price, NULL);
@@ -256,32 +266,39 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     const char* max_priority_fee_per_gas =
         GET_J_STRING_CONTENT_DEF(env, j_max_priority_fee_per_gas, NULL);
     const char* extra_data = GET_J_STRING_CONTENT_DEF(env, j_extra_data, NULL);
+    jbyte* signBuffer = env->GetByteArrayElements(j_signature, NULL);
+    jsize signSize = env->GetArrayLength(j_signature);
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
 
     jclass tx_version = env->GetObjectClass(j_tx_version);
     jmethodID j_methodId = env->GetMethodID(tx_version, "getValue", "()I");
-    int32_t ver = (int32_t)env->CallIntMethod(j_tx_version, j_methodId);
+    int32_t ver = env->CallIntMethod(j_tx_version, j_methodId);
 
-    const char* encodedTx = bcos_sdk_create_signed_transaction_with_signature(signature, tx_hash,
-        (transaction_version)ver, group_id, chain_id, to, nonce, input, abi, block_limit, value,
+    const char* encodedTx = bcos_sdk_create_signed_transaction_with_signature(
+        reinterpret_cast<unsigned char*>(signBuffer), signSize, tx_hash,
+        static_cast<transaction_version>(ver), group_id, chain_id, to, nonce,
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
         gas_price, gas_limit, max_fee_per_gas, max_priority_fee_per_gas, attribute, extra_data);
 
-    env->ReleaseStringUTFChars(j_signature, signature);
     env->ReleaseStringUTFChars(j_tx_hash, tx_hash);
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
     env->ReleaseStringUTFChars(j_nonce, nonce);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_gas_price, gas_price);
     env->ReleaseStringUTFChars(j_max_fee_per_gas, max_fee_per_gas);
     env->ReleaseStringUTFChars(j_max_priority_fee_per_gas, max_priority_fee_per_gas);
     env->ReleaseStringUTFChars(j_extra_data, extra_data);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
+    env->ReleaseByteArrayElements(j_signature, signBuffer, 0);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring encoded_tx_hex = env->NewStringUTF(encodedTx);
@@ -299,12 +316,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    createSignedTransactionWithFullFields
  * Signature:
- * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedTransactionWithFullFields(
     JNIEnv* env, jclass, jlong j_key_pair, jstring j_group_id, jstring j_chain_id, jstring j_to,
-    jstring j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price,
+    jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price,
     jlong j_gas_limit, jint j_attribute, jstring j_extra_data)
 {
     CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
@@ -312,26 +329,29 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
 
     void* keypair = reinterpret_cast<void*>(j_key_pair);
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
-    int32_t attribute = (int32_t)j_attribute;
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
+    int32_t attribute = j_attribute;
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* gas_price = GET_J_STRING_CONTENT_DEF(env, j_gas_price, NULL);
     const char* extra_data = GET_J_STRING_CONTENT_DEF(env, j_extra_data, NULL);
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
 
     char* tx_hash = NULL;
     char* signed_tx = NULL;
-    bcos_sdk_create_signed_transaction_with_full_fields(keypair, group_id, chain_id, to, input, abi,
-        block_limit, value, gas_price, gas_limit, attribute, extra_data, &tx_hash, &signed_tx);
+    bcos_sdk_create_signed_transaction_with_full_fields(keypair, group_id, chain_id, to,
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
+        gas_price, gas_limit, attribute, extra_data, &tx_hash, &signed_tx);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring j_tx_hash = env->NewStringUTF(tx_hash);
@@ -356,11 +376,11 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_gas_price, gas_price);
     env->ReleaseStringUTFChars(j_extra_data, extra_data);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
 
     env->DeleteLocalRef(j_tx_hash);
     env->DeleteLocalRef(j_signed_tx);
@@ -384,42 +404,46 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
  * Method:    createSignedEIP1559TransactionWithFullFields
  * Signature:
- * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedEIP1559TransactionWithFullFields(
     JNIEnv* env, jclass, jlong j_key_pair, jstring j_group_id, jstring j_chain_id, jstring j_to,
-    jstring j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_max_fee_per_gas,
-    jstring j_max_priority_fee_per_gas, jlong j_gas_limit, jint j_attribute, jstring j_extra_data)
+    jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value,
+    jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas, jlong j_gas_limit,
+    jint j_attribute, jstring j_extra_data)
 {
     CHECK_OBJECT_NOT_NULL(env, j_group_id, NULL);
     CHECK_OBJECT_NOT_NULL(env, j_chain_id, NULL);
     CHECK_OBJECT_NOT_NULL(env, j_input, NULL);
 
     void* keypair = reinterpret_cast<void*>(j_key_pair);
-    int64_t block_limit = (int64_t)j_block_limit;
-    int64_t gas_limit = (int64_t)j_gas_limit;
-    int32_t attribute = (int32_t)j_attribute;
+    int64_t block_limit = j_block_limit;
+    int64_t gas_limit = j_gas_limit;
+    int32_t attribute = j_attribute;
     const char* group_id = GET_J_STRING_CONTENT(env, j_group_id);
     const char* chain_id = GET_J_STRING_CONTENT(env, j_chain_id);
     const char* to = GET_J_STRING_CONTENT_DEF(env, j_to, NULL);
-    const char* input = GET_J_STRING_CONTENT(env, j_input);
     const char* abi = GET_J_STRING_CONTENT_DEF(env, j_abi, NULL);
     const char* value = GET_J_STRING_CONTENT_DEF(env, j_value, NULL);
     const char* max_fee_per_gas = GET_J_STRING_CONTENT_DEF(env, j_max_fee_per_gas, NULL);
     const char* max_priority_fee_per_gas =
         GET_J_STRING_CONTENT_DEF(env, j_max_priority_fee_per_gas, NULL);
     const char* extra_data = GET_J_STRING_CONTENT_DEF(env, j_extra_data, NULL);
+    jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
+    jsize inputSize = env->GetArrayLength(j_input);
 
     char* tx_hash = NULL;
     char* signed_tx = NULL;
     bcos_sdk_create_signed_eip1559_transaction_with_full_fields(keypair, group_id, chain_id, to,
-        input, abi, block_limit, value, gas_limit, max_fee_per_gas, max_priority_fee_per_gas,
-        attribute, extra_data, &tx_hash, &signed_tx);
+        reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
+        gas_limit, max_fee_per_gas, max_priority_fee_per_gas, attribute, extra_data, &tx_hash,
+        &signed_tx);
 
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring j_tx_hash = env->NewStringUTF(tx_hash);
@@ -444,12 +468,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
     env->ReleaseStringUTFChars(j_group_id, group_id);
     env->ReleaseStringUTFChars(j_chain_id, chain_id);
     env->ReleaseStringUTFChars(j_to, to);
-    env->ReleaseStringUTFChars(j_input, input);
     env->ReleaseStringUTFChars(j_abi, abi);
     env->ReleaseStringUTFChars(j_value, value);
     env->ReleaseStringUTFChars(j_max_fee_per_gas, max_fee_per_gas);
     env->ReleaseStringUTFChars(j_max_priority_fee_per_gas, max_priority_fee_per_gas);
     env->ReleaseStringUTFChars(j_extra_data, extra_data);
+    env->ReleaseByteArrayElements(j_input, inputBuffer, 0);
 
     env->DeleteLocalRef(j_tx_hash);
     env->DeleteLocalRef(j_signed_tx);
