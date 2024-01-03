@@ -161,6 +161,7 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcServiceJniObj_sendT
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtx_hash = env->NewStringUTF(tx_hash);

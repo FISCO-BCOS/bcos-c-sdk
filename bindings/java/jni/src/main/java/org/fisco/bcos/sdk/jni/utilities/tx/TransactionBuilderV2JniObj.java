@@ -29,7 +29,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
@@ -58,7 +58,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
@@ -95,7 +95,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String chainID,
       String to,
       String nonce,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
@@ -120,7 +120,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
   /**
    * create encoded transaction data with external signature
    *
-   * @param signature signature hex string, if ECDSA, it is r||s||v, if SM2, it is r||s||pk
+   * @param signature signature bytes array, if ECDSA, it is r||s||v, if SM2, it is r||s||pk
    * @param txDataHash transactionData hash hex string
    * @param version tx version, only support 0 and 1 now, if version==1, then enable
    *     (value,gasPrice,gasLimit,maxFeePerGas,maxPriorityFeePerGas) fields
@@ -142,14 +142,14 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @apiNote version 1 transaction only supported in FISCO BCOS 3.6.0 and later
    */
   public static native String createSignedTransactionWithSignature(
-      String signature,
+      byte[] signature,
       String txDataHash,
       TransactionVersion version,
       String groupID,
       String chainID,
       String to,
       String nonce,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
@@ -184,7 +184,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
@@ -218,7 +218,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
-      String input,
+      byte[] input,
       String abi,
       long blockLimit,
       String value,
