@@ -163,25 +163,6 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithHexInputV2)
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
     BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("input can not be empty string"));
 
-    // create transaction_data_struct_v2 failed (value = "")
-    txData =
-        bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to, input,
-            abi, block_limit, "", gas_price, gas_limit, max_fee_per_gas, max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("value can not be empty string"));
-
-    // create transaction_data_struct_v2 failed (gas_price = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to,
-        input, abi, block_limit, value, "", gas_limit, max_fee_per_gas, max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("gas_price can not be empty string"));
-
     // create transaction_data_struct_v2 failed (gas_limit <0)
     txData = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to,
         input, abi, block_limit, value, gas_price, -1, max_fee_per_gas, max_priority_fee_per_gas);
@@ -190,26 +171,6 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithHexInputV2)
     BOOST_TEST(txData == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
     BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("gas limit must >= 0"));
-
-    // create transaction_data_struct_v2 failed (max_fee_per_gas = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to,
-        input, abi, block_limit, value, gas_price, gas_limit, "", max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(
-        bcos_sdk_get_last_error_msg() == std::string("max_fee_per_gas can not be empty string"));
-
-    // create transaction_data_struct_v2 failed (max_priority_fee_per_gas = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to,
-        input, abi, block_limit, value, gas_price, gas_limit, max_fee_per_gas, "");
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() ==
-               std::string("max_priority_fee_per_gas can not be empty string"));
 
     // create transaction_data_struct_v2 success
     txData = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(group_id, chain_id, to,
@@ -370,26 +331,6 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputV2)
         reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
     BOOST_TEST(txDataInputString3 == fromInputHexString3);
 
-    // create transaction_data_struct_v2 failed (value = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_bytes_v2(group_id, chain_id, to,
-        bytesInput->data(), bytesInput->size(), abi, block_limit, "", gas_price, gas_limit,
-        max_fee_per_gas, max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("value can not be empty string"));
-
-    // create transaction_data_struct_v2 failed (gas_price = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_bytes_v2(group_id, chain_id, to,
-        bytesInput->data(), bytesInput->size(), abi, block_limit, value, "", gas_limit,
-        max_fee_per_gas, max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("gas_price can not be empty string"));
-
     // create transaction_data_struct_v2 failed (gas_limit <0)
     txData = bcos_sdk_create_transaction_data_struct_with_bytes_v2(group_id, chain_id, to,
         bytesInput->data(), bytesInput->size(), abi, block_limit, value, gas_price, -1,
@@ -399,28 +340,6 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputV2)
     BOOST_TEST(txData == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
     BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("gas limit must >= 0"));
-
-    // create transaction_data_struct_v2 failed (max_fee_per_gas = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_bytes_v2(group_id, chain_id, to,
-        bytesInput->data(), bytesInput->size(), abi, block_limit, value, gas_price, gas_limit, "",
-        max_priority_fee_per_gas);
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(
-        bcos_sdk_get_last_error_msg() == std::string("max_fee_per_gas can not be empty string"));
-
-    // create transaction_data_struct_v2 failed (max_priority_fee_per_gas = "")
-    txData = bcos_sdk_create_transaction_data_struct_with_bytes_v2(group_id, chain_id, to,
-        bytesInput->data(), bytesInput->size(), abi, block_limit, value, gas_price, gas_limit,
-        max_fee_per_gas, "");
-    success = bcos_sdk_is_last_opr_success();
-    BOOST_TEST(success == false);
-    BOOST_TEST(txData == nullptr);
-    BOOST_TEST(bcos_sdk_get_last_error() == -1);
-    BOOST_TEST(bcos_sdk_get_last_error_msg() ==
-               std::string("max_priority_fee_per_gas can not be empty string"));
 
     // create transaction_data_struct_v2 success
     group_id = "";
@@ -456,7 +375,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
 
     // 1. test tx data encode decode hex
     // encode to hex failed (transaction_data == NULL)
-    auto encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_v2(nullptr);
+    auto encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_to_hex_v2(nullptr);
     auto hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == false);
@@ -464,14 +383,14 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // encode to hex success
-    encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_v2(txDataWithHex);
+    encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_to_hex_v2(txDataWithHex);
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == true);
     BOOST_TEST(encodedTxDataHex != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
-    encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_v2(txDataWithBytes);
+    encodedTxDataHex = bcos_sdk_encode_transaction_data_struct_to_hex_v2(txDataWithBytes);
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == true);
@@ -479,7 +398,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
     // decode hex failed (transaction_data_hex_str == NULL)
-    auto decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_v2(nullptr);
+    auto decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_from_hex_v2(nullptr);
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == false);
@@ -487,7 +406,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode hex failed (transaction_data_hex_str == "")
-    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_v2("");
+    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_from_hex_v2("");
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == false);
@@ -497,7 +416,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
                std::string("transaction_data_hex_str can not be empty string"));
 
     // decode hex failed (the length of transaction_data_hex_str is not even number)
-    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_v2("0xabc");
+    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_from_hex_v2("0xabc");
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == false);
@@ -507,7 +426,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
                std::string("the length of transaction_data_hex_str must be an even number"));
 
     // decode hex success
-    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_v2(encodedTxDataHex);
+    decodedTxDataHex = bcos_sdk_decode_transaction_data_struct_from_hex_v2(encodedTxDataHex);
     hexSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(hexSuccess == true);
@@ -557,7 +476,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
     // decode json failed (transaction_data_json_str == NULL)
-    auto decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_with_json_v2(nullptr);
+    auto decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_from_json_v2(nullptr);
     jsonSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(jsonSuccess == false);
@@ -565,7 +484,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode json failed (transaction_data_json_str == "")
-    decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_with_json_v2("");
+    decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_from_json_v2("");
     jsonSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(jsonSuccess == false);
@@ -575,7 +494,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructV2)
                std::string("transaction_data_json_str can not be empty string"));
 
     // decode json success
-    decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_with_json_v2(encodedTxDataJson);
+    decodedTxDataJson = bcos_sdk_decode_transaction_data_struct_from_json_v2(encodedTxDataJson);
     jsonSuccess = bcos_sdk_is_last_opr_success();
 
     BOOST_TEST(jsonSuccess == true);
@@ -609,8 +528,8 @@ BOOST_AUTO_TEST_CASE(testCalculateTxDataHashV2)
 {
     auto txDataWithHex = createTxDataStructWithHexInputV2();
     auto txDataWithByte = createTxDataStructWithByteInputV2();
-    auto encodedtxDataWithHex = bcos_sdk_encode_transaction_data_struct_v2(txDataWithHex);
-    auto encodedtxDataWithByte = bcos_sdk_encode_transaction_data_struct_v2(txDataWithByte);
+    auto encodedtxDataWithHex = bcos_sdk_encode_transaction_data_struct_to_hex_v2(txDataWithHex);
+    auto encodedtxDataWithByte = bcos_sdk_encode_transaction_data_struct_to_hex_v2(txDataWithByte);
 
     // 1. test cal tx data hash with struct
     // calculate tx data hash failed (cryptoType not in 0,1)
@@ -851,16 +770,16 @@ BOOST_AUTO_TEST_CASE(testCreateEncodedTxV2)
     BOOST_TEST(encodedTx != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
-    // 2. test bcos_sdk_encode_transaction_struct_v2
+    // 2. test bcos_sdk_encode_transaction_struct_to_hex__v2
     // create encoded tx with tx_struct failed (transaction_struct == "")
-    auto encodedTxWithTxStruct = bcos_sdk_encode_transaction_struct_v2(nullptr);
+    auto encodedTxWithTxStruct = bcos_sdk_encode_transaction_struct_to_hex_v2(nullptr);
     success = bcos_sdk_is_last_opr_success();
     BOOST_TEST(success == false);
     BOOST_TEST(encodedTxWithTxStruct == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // create encoded tx with tx_struct success
-    encodedTxWithTxStruct = bcos_sdk_encode_transaction_struct_v2(txStruct);
+    encodedTxWithTxStruct = bcos_sdk_encode_transaction_struct_to_hex_v2(txStruct);
     success = bcos_sdk_is_last_opr_success();
     BOOST_TEST(success == true);
     BOOST_TEST(encodedTxWithTxStruct != nullptr);
@@ -887,28 +806,28 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStructV2)
 
     // 1. test tx encode decode hex
     // encode tx to hex failed (transaction == NULL)
-    auto encodedTxHex = bcos_sdk_encode_transaction_struct_v2(nullptr);
+    auto encodedTxHex = bcos_sdk_encode_transaction_struct_to_hex_v2(nullptr);
     auto hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == false);
     BOOST_TEST(encodedTxHex == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // encode tx to hex success
-    encodedTxHex = bcos_sdk_encode_transaction_struct_v2(txStruct);
+    encodedTxHex = bcos_sdk_encode_transaction_struct_to_hex_v2(txStruct);
     hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == true);
     BOOST_TEST(encodedTxHex != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
     // decode hex failed (transaction_hex_str == NULL)
-    auto decodedTxHex = bcos_sdk_decode_transaction_struct_v2(nullptr);
+    auto decodedTxHex = bcos_sdk_decode_transaction_struct_from_hex_v2(nullptr);
     hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == false);
     BOOST_TEST(decodedTxHex == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode hex failed (transaction_hex_str == "")
-    decodedTxHex = bcos_sdk_decode_transaction_struct_v2("");
+    decodedTxHex = bcos_sdk_decode_transaction_struct_from_hex_v2("");
     hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == false);
     BOOST_TEST(decodedTxHex == nullptr);
@@ -917,7 +836,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStructV2)
                std::string("transaction_hex_str can not be empty string"));
 
     // decode hex failed (the length of transaction_hex_str is not even number)
-    decodedTxHex = bcos_sdk_decode_transaction_struct_v2("0xabc");
+    decodedTxHex = bcos_sdk_decode_transaction_struct_from_hex_v2("0xabc");
     hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == false);
     BOOST_TEST(decodedTxHex == nullptr);
@@ -926,7 +845,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStructV2)
                std::string("the length of transaction_hex_str must be an even number"));
 
     // decode hex success
-    decodedTxHex = bcos_sdk_decode_transaction_struct_v2(encodedTxHex);
+    decodedTxHex = bcos_sdk_decode_transaction_struct_from_hex_v2(encodedTxHex);
     hexSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(hexSuccess == true);
     BOOST_TEST(decodedTxHex != nullptr);
@@ -950,14 +869,14 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
     // decode json failed (transaction_json_str == NULL)
-    auto decodedTxJson = bcos_sdk_decode_transaction_struct_with_json_v2(nullptr);
+    auto decodedTxJson = bcos_sdk_decode_transaction_struct_from_json_v2(nullptr);
     jsonSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(jsonSuccess == false);
     BOOST_TEST(decodedTxJson == nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
 
     // decode json failed (transaction_json_str == "")
-    decodedTxJson = bcos_sdk_decode_transaction_struct_with_json_v2("");
+    decodedTxJson = bcos_sdk_decode_transaction_struct_from_json_v2("");
     jsonSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(jsonSuccess == false);
     BOOST_TEST(decodedTxJson == nullptr);
@@ -966,7 +885,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStructV2)
                std::string("transaction_json_str can not be empty string"));
 
     // decode json success
-    decodedTxJson = bcos_sdk_decode_transaction_struct_with_json_v2(encodedTxJson);
+    decodedTxJson = bcos_sdk_decode_transaction_struct_from_json_v2(encodedTxJson);
     jsonSuccess = bcos_sdk_is_last_opr_success();
     BOOST_TEST(jsonSuccess == true);
     BOOST_TEST(decodedTxJson != nullptr);

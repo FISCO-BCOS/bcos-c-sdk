@@ -145,6 +145,8 @@ public class TestTxStructV2 {
             String txDataHex = TransactionStructBuilderV2JniObj.encodeTransactionDataStructV2(transactionDataStructV2);
             // decode hex tx data to TxData
             TransactionDataV2 decodeTransactionDataStructHex = TransactionStructBuilderV2JniObj.decodeTransactionDataStructV2(txDataHex);
+//            TransactionDataV2 decodeTransactionDataStructHex2 = TransactionStructBuilderV2JniObj.decodeTransactionDataStructV2(null);
+//            TransactionDataV2 decodeTransactionDataStructHex3 = TransactionStructBuilderV2JniObj.decodeTransactionDataStructV2("");
 
             // assert
             Assert.assertEquals(transactionDataStructV2.getChainId(), decodeTransactionDataStructHex.getChainId());

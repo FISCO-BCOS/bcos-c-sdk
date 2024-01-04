@@ -74,6 +74,7 @@ struct bcos_sdk_c_transaction_data_v2* convert_to_tx_data_struct_v2(
     {
         THROW_JNI_EXCEPTION(
             env, "exception in convert_to_tx_data_struct_v2, transactionObject is nullptr");
+        return NULL;
     }
 
     bcos_sdk_c_transaction_data_v2* tx_data_struct_v2 =
@@ -127,6 +128,7 @@ struct bcos_sdk_c_transaction_data_v2* convert_to_tx_data_struct_v2(
     if (inputStruct == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_struct_v2");
+        return NULL;
     }
     tx_data_struct_v2->input = inputStruct;
 
@@ -182,6 +184,7 @@ jobject convert_to_tx_data_jobject_v2(
     {
         THROW_JNI_EXCEPTION(
             env, "exception in convert_to_tx_data_jobject_v2, transactionDataV2 is nullptr");
+        return NULL;
     }
 
     jclass txDataClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV2");
@@ -224,6 +227,7 @@ jobject convert_to_tx_data_jobject_v2(
     if (jInput == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_jobject_v2");
+        return NULL;
     }
     jfieldID inputField = env->GetFieldID(
         txDataClass, "input", "Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionBytes;");
@@ -258,6 +262,7 @@ jobject convert_to_tx_jobject_v2(JNIEnv* env, const struct bcos_sdk_c_transactio
     if (tx_struct_v2 == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_jobject_v2, tx_struct_v2 is nullptr");
+        return NULL;
     }
 
     jclass txClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionV2");
@@ -288,12 +293,18 @@ jobject convert_to_tx_jobject_v2(JNIEnv* env, const struct bcos_sdk_c_transactio
     jobject javaTxObj = env->NewObject(txClass, txMtd);
     // TransactionData
     jobject javaTxDataObj = convert_to_tx_data_jobject_v2(env, tx_struct_v2->transaction_data);
+    if (javaTxDataObj == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_jobject_v2");
+        return NULL;
+    }
     env->SetObjectField(javaTxObj, txDataField, javaTxDataObj);
     // DataHash
     jobject javaDataHashObj = convert_to_bytes_jobject_v2(env, tx_struct_v2->data_hash);
     if (javaDataHashObj == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_jobject_v2");
+        return NULL;
     }
     env->SetObjectField(javaTxObj, dataHashField, javaDataHashObj);
     // Signature
@@ -301,6 +312,7 @@ jobject convert_to_tx_jobject_v2(JNIEnv* env, const struct bcos_sdk_c_transactio
     if (javaSignatureObj == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_jobject_v2");
+        return NULL;
     }
     env->SetObjectField(javaTxObj, signatureField, javaSignatureObj);
     // Sender
@@ -322,6 +334,7 @@ struct bcos_sdk_c_transaction_v2* convert_to_tx_struct_v2(JNIEnv* env, jobject j
     if (jTxObj == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_struct_v2, jTxObj is nullptr");
+        return NULL;
     }
 
     jclass javaTxClass = env->GetObjectClass(jTxObj);
@@ -346,6 +359,7 @@ struct bcos_sdk_c_transaction_v2* convert_to_tx_struct_v2(JNIEnv* env, jobject j
     if (txDataStruct == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_struct_v2");
+        return NULL;
     }
     txStruct->transaction_data = txDataStruct;
     // DataHash
@@ -354,6 +368,7 @@ struct bcos_sdk_c_transaction_v2* convert_to_tx_struct_v2(JNIEnv* env, jobject j
     if (dataHashStruct == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_struct_v2");
+        return NULL;
     }
     txStruct->data_hash = dataHashStruct;
     // Signature
@@ -362,6 +377,7 @@ struct bcos_sdk_c_transaction_v2* convert_to_tx_struct_v2(JNIEnv* env, jobject j
     if (signatureStruct == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_bytes_struct_v2");
+        return NULL;
     }
     txStruct->signature = signatureStruct;
     // Sender
@@ -395,15 +411,16 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_encode
 {
     struct bcos_sdk_c_transaction_data_v2* tx_data_struct_v2 =
         convert_to_tx_data_struct_v2(env, jTransactionDataObj);
-
     if (tx_data_struct_v2 == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_struct_v2");
+        return nullptr;
     }
-    const char* tx_data_hex = bcos_sdk_encode_transaction_data_struct_v2(tx_data_struct_v2);
+    const char* tx_data_hex = bcos_sdk_encode_transaction_data_struct_to_hex_v2(tx_data_struct_v2);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxDataHex = env->NewStringUTF(tx_data_hex);
@@ -435,12 +452,14 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_encode
     if (tx_data_struct_v2 == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_struct_v2");
+        return nullptr;
     }
     const char* tx_data_json =
         bcos_sdk_encode_transaction_data_struct_to_json_v2(tx_data_struct_v2);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxDataJson = env->NewStringUTF(tx_data_json);
@@ -471,13 +490,19 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_decode
 
     const char* tx_data_hex_str = env->GetStringUTFChars(jTxDataHexStr, nullptr);
     struct bcos_sdk_c_transaction_data_v2* tx_data_struct_v2 =
-        bcos_sdk_decode_transaction_data_struct_v2(tx_data_hex_str);
+        bcos_sdk_decode_transaction_data_struct_from_hex_v2(tx_data_hex_str);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jobject jTxDataObj = convert_to_tx_data_jobject_v2(env, tx_data_struct_v2);
+    if (jTxDataObj == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_jobject_v2");
+        return nullptr;
+    }
 
     // release source
     if (tx_data_struct_v2)
@@ -503,6 +528,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_calcTr
     if (tx_data_struct_v2 == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_struct_v2");
+        return nullptr;
     }
     int crypto_type = jCrytpTyte;
     const char* tx_data_hash =
@@ -510,6 +536,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_calcTr
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxDataHash = env->NewStringUTF(tx_data_hash);
@@ -548,6 +575,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_create
     if (tx_data_struct_v2 == NULL)
     {
         THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_data_struct_v2");
+        return nullptr;
     }
     const char* signature = env->GetStringUTFChars(jSignature, NULL);
     const char* tx_data_hash = env->GetStringUTFChars(jTxDataHash, NULL);
@@ -559,6 +587,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_create
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxStr = env->NewStringUTF(tx_str);
@@ -590,10 +619,17 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_encode
     JNIEnv* env, jclass, jobject jTransactionObj)
 {
     struct bcos_sdk_c_transaction_v2* tx_struct_v2 = convert_to_tx_struct_v2(env, jTransactionObj);
-    const char* tx_hex = bcos_sdk_encode_transaction_struct_v2(tx_struct_v2);
+    if (tx_struct_v2 == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_struct_v2");
+        return nullptr;
+    }
+
+    const char* tx_hex = bcos_sdk_encode_transaction_struct_to_hex_v2(tx_struct_v2);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxHex = env->NewStringUTF(tx_hex);
@@ -622,10 +658,17 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_encode
     JNIEnv* env, jclass, jobject jTransactionObj)
 {
     struct bcos_sdk_c_transaction_v2* tx_struct_v2 = convert_to_tx_struct_v2(env, jTransactionObj);
+    if (tx_struct_v2 == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_struct_v2");
+        return nullptr;
+    }
+
     const char* tx_json = bcos_sdk_encode_transaction_struct_to_json_v2(tx_struct_v2);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jstring jTxJson = env->NewStringUTF(tx_json);
@@ -656,13 +699,19 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderV2JniObj_decode
 
     const char* tx_hex_str = env->GetStringUTFChars(jTxHexStr, nullptr);
     struct bcos_sdk_c_transaction_v2* tx_struct_v2 =
-        bcos_sdk_decode_transaction_struct_v2(tx_hex_str);
+        bcos_sdk_decode_transaction_struct_from_hex_v2(tx_hex_str);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
     }
 
     jobject jTxObj = convert_to_tx_jobject_v2(env, tx_struct_v2);
+    if (jTxObj == NULL)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in convert_to_tx_jobject_v2");
+        return nullptr;
+    }
 
     // release source
     if (tx_struct_v2)

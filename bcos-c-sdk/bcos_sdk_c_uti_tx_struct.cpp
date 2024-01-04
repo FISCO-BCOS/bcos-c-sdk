@@ -534,9 +534,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL);
-    // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(input, NULL);
-    // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((input[0] != '\0'), "input can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
 
@@ -544,8 +542,6 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     {
         struct bcos_sdk_c_transaction_data* transaction_data_struct =
             (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
-        std::string toStr = to ? to : "";
-        std::string abiStr = abi ? abi : "";
         auto bytesInput = fromHexString(input);
         TransactionBuilder builder;
         std::string nonceStr = builder.generateRandomStr();
@@ -554,8 +550,8 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
         transaction_data_struct->block_limit = block_limit;
         transaction_data_struct->group_id = my_strdup(group_id);
         transaction_data_struct->chain_id = my_strdup(chain_id);
-        transaction_data_struct->to = my_strdup(toStr.data());
-        transaction_data_struct->abi = my_strdup(abiStr.data());
+        transaction_data_struct->to = to ? my_strdup(to) : my_strdup("");
+        transaction_data_struct->abi = abi ? my_strdup(abi) : my_strdup("");
         transaction_data_struct->nonce = my_strdup(nonceStr.data());
         transaction_data_struct->input =
             create_bytes_struct(bytesInput->size(), reinterpret_cast<char*>(bytesInput->data()));
@@ -595,9 +591,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(group_id, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, NULL);
-    // BCOS_SDK_C_PARAMS_VERIFICATION(to, NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(bytes_input, NULL);
-    // BCOS_SDK_C_PARAMS_VERIFICATION(abi, NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (bytes_input_length > 0), "bytes input length must > 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
@@ -606,8 +600,6 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
     {
         struct bcos_sdk_c_transaction_data* transaction_data_struct =
             (struct bcos_sdk_c_transaction_data*)malloc(sizeof(struct bcos_sdk_c_transaction_data));
-        std::string toStr = to ? to : "";
-        std::string abiStr = abi ? abi : "";
         TransactionBuilder builder;
         std::string nonceStr = builder.generateRandomStr();
 
@@ -615,8 +607,8 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_create_transaction_data_struct_with
         transaction_data_struct->block_limit = block_limit;
         transaction_data_struct->group_id = my_strdup(group_id);
         transaction_data_struct->chain_id = my_strdup(chain_id);
-        transaction_data_struct->to = my_strdup(toStr.data());
-        transaction_data_struct->abi = my_strdup(abiStr.data());
+        transaction_data_struct->to = to ? my_strdup(to) : my_strdup("");
+        transaction_data_struct->abi = abi ? my_strdup(abi) : my_strdup("");
         transaction_data_struct->nonce = my_strdup(nonceStr.data());
         transaction_data_struct->input = create_bytes_struct(
             bytes_input_length, const_cast<char*>(reinterpret_cast<const char*>(bytes_input)));
@@ -694,7 +686,7 @@ void bcos_sdk_destroy_transaction_data_struct(struct bcos_sdk_c_transaction_data
  * @param transaction_data: struct bcos_sdk_c_transaction_data*
  * @return const char*
  */
-const char* bcos_sdk_encode_transaction_data_struct(
+const char* bcos_sdk_encode_transaction_data_struct_to_hex(
     struct bcos_sdk_c_transaction_data* transaction_data)
 {
     bcos_sdk_clear_last_error();
@@ -711,7 +703,7 @@ const char* bcos_sdk_encode_transaction_data_struct(
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data_struct")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data_struct_to_hex")
                           << LOG_DESC("exception") << LOG_KV("transaction_data", transaction_data)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -754,7 +746,7 @@ const char* bcos_sdk_encode_transaction_data_struct_to_json(
  * @param transaction_data_hex_str
  * @return struct bcos_sdk_c_transaction_data*
  */
-struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct(
+struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_from_hex(
     const char* transaction_data_hex_str)
 {
     bcos_sdk_clear_last_error();
@@ -794,7 +786,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct(
  *              nonce:string
  * @return struct bcos_sdk_c_transaction*
  */
-struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_with_json(
+struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_from_json(
     const char* transaction_data_json_str)
 {
     bcos_sdk_clear_last_error();
@@ -813,7 +805,7 @@ struct bcos_sdk_c_transaction_data* bcos_sdk_decode_transaction_data_struct_with
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_data_struct_with_json")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_data_struct_from_json")
                           << LOG_DESC("exception")
                           << LOG_KV("transaction_data_json_str", transaction_data_json_str)
                           << LOG_KV("error", errorMsg);
@@ -886,7 +878,7 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex(
     try
     {
         struct bcos_sdk_c_transaction_data* transaction_data_struct =
-            bcos_sdk_decode_transaction_data_struct(transaction_data_hex);
+            bcos_sdk_decode_transaction_data_struct_from_hex(transaction_data_hex);
         auto tars_transaction_data = convert_transaction_data_to_tars(transaction_data_struct);
         TransactionBuilder builder;
         auto transactionDataHash = builder.calculateTransactionDataHash(
@@ -1073,7 +1065,7 @@ const char* bcos_sdk_create_encoded_transaction(
  * @param transaction: struct bcos_sdk_c_transaction*
  * @return const char*
  */
-const char* bcos_sdk_encode_transaction_struct(struct bcos_sdk_c_transaction* transaction)
+const char* bcos_sdk_encode_transaction_struct_to_hex(struct bcos_sdk_c_transaction* transaction)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction, NULL);
@@ -1089,7 +1081,7 @@ const char* bcos_sdk_encode_transaction_struct(struct bcos_sdk_c_transaction* tr
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct_to_hex")
                           << LOG_DESC("exception") << LOG_KV("transaction", transaction)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -1118,7 +1110,7 @@ const char* bcos_sdk_encode_transaction_struct_to_json(struct bcos_sdk_c_transac
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct_to_json")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct_to_hex")
                           << LOG_DESC("exception") << LOG_KV("transaction", transaction)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -1133,7 +1125,8 @@ const char* bcos_sdk_encode_transaction_struct_to_json(struct bcos_sdk_c_transac
  * @param transaction_hex_str
  * @return struct bcos_sdk_c_transaction*
  */
-struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct(const char* transaction_hex_str)
+struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_from_hex(
+    const char* transaction_hex_str)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_hex_str, NULL);
@@ -1168,7 +1161,7 @@ struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct(const char* tr
  * @param transaction_json_str
  * @return struct bcos_sdk_c_transaction*
  */
-struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_with_json(
+struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_from_json(
     const char* transaction_json_str)
 {
     bcos_sdk_clear_last_error();
@@ -1186,7 +1179,7 @@ struct bcos_sdk_c_transaction* bcos_sdk_decode_transaction_struct_with_json(
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_struct_with_json")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_struct_from_json")
                           << LOG_DESC("exception")
                           << LOG_KV("transaction_json_str", transaction_json_str)
                           << LOG_KV("error", errorMsg);
@@ -1208,25 +1201,16 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_w
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((input[0] != '\0'), "input can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(value, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((value[0] != '\0'), "value can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(gas_price, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (gas_price[0] != '\0'), "gas_price can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(max_fee_per_gas, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (max_fee_per_gas[0] != '\0'), "max_fee_per_gas can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(max_priority_fee_per_gas, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((max_priority_fee_per_gas[0] != '\0'),
-        "max_priority_fee_per_gas can not be empty string", NULL);
 
     try
     {
         struct bcos_sdk_c_transaction_data_v2* transaction_data_struct_v2 =
             (struct bcos_sdk_c_transaction_data_v2*)malloc(
                 sizeof(struct bcos_sdk_c_transaction_data_v2));
-        std::string toStr = to ? to : "";
-        std::string abiStr = abi ? abi : "";
         auto bytesInput = fromHexString(input);
         TransactionBuilder builder;
         std::string nonceStr = builder.generateRandomStr();
@@ -1235,8 +1219,8 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_w
         transaction_data_struct_v2->block_limit = block_limit;
         transaction_data_struct_v2->group_id = my_strdup(group_id);
         transaction_data_struct_v2->chain_id = my_strdup(chain_id);
-        transaction_data_struct_v2->to = my_strdup(toStr.data());
-        transaction_data_struct_v2->abi = my_strdup(abiStr.data());
+        transaction_data_struct_v2->to = to ? my_strdup(to) : my_strdup("");
+        transaction_data_struct_v2->abi = abi ? my_strdup(abi) : my_strdup("");
         transaction_data_struct_v2->nonce = my_strdup(nonceStr.data());
         transaction_data_struct_v2->input =
             create_bytes_struct(bytesInput->size(), reinterpret_cast<char*>(bytesInput->data()));
@@ -1280,25 +1264,16 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_w
         (bytes_input_length > 0), "bytes input length must > 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(value, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((value[0] != '\0'), "value can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(gas_price, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (gas_price[0] != '\0'), "gas_price can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(max_fee_per_gas, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
-        (max_fee_per_gas[0] != '\0'), "max_fee_per_gas can not be empty string", NULL);
     BCOS_SDK_C_PARAMS_VERIFICATION(max_priority_fee_per_gas, NULL);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((max_priority_fee_per_gas[0] != '\0'),
-        "max_priority_fee_per_gas can not be empty string", NULL);
 
     try
     {
         struct bcos_sdk_c_transaction_data_v2* transaction_data_struct_v2 =
             (struct bcos_sdk_c_transaction_data_v2*)malloc(
                 sizeof(struct bcos_sdk_c_transaction_data_v2));
-        std::string toStr = to ? to : "";
-        std::string abiStr = abi ? abi : "";
         TransactionBuilder builder;
         std::string nonceStr = builder.generateRandomStr();
 
@@ -1306,8 +1281,8 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_w
         transaction_data_struct_v2->block_limit = block_limit;
         transaction_data_struct_v2->group_id = my_strdup(group_id);
         transaction_data_struct_v2->chain_id = my_strdup(chain_id);
-        transaction_data_struct_v2->to = my_strdup(toStr.data());
-        transaction_data_struct_v2->abi = my_strdup(abiStr.data());
+        transaction_data_struct_v2->to = to ? my_strdup(to) : my_strdup("");
+        transaction_data_struct_v2->abi = abi ? my_strdup(abi) : my_strdup("");
         transaction_data_struct_v2->nonce = my_strdup(nonceStr.data());
         transaction_data_struct_v2->input = create_bytes_struct(
             bytes_input_length, const_cast<char*>(reinterpret_cast<const char*>(bytes_input)));
@@ -1404,7 +1379,7 @@ void bcos_sdk_destroy_transaction_data_struct_v2(
     bcos_sdk_c_free(transaction_data);
 }
 
-const char* bcos_sdk_encode_transaction_data_struct_v2(
+const char* bcos_sdk_encode_transaction_data_struct_to_hex_v2(
     struct bcos_sdk_c_transaction_data_v2* transaction_data)
 {
     bcos_sdk_clear_last_error();
@@ -1421,7 +1396,7 @@ const char* bcos_sdk_encode_transaction_data_struct_v2(
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data_struct_v2")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_data_struct_to_hex_v2")
                           << LOG_DESC("exception") << LOG_KV("transaction_data", transaction_data)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -1454,7 +1429,7 @@ const char* bcos_sdk_encode_transaction_data_struct_to_json_v2(
     return NULL;
 }
 
-struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_v2(
+struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_from_hex_v2(
     const char* transaction_data_hex_str)
 {
     bcos_sdk_clear_last_error();
@@ -1482,7 +1457,7 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_v
     return NULL;
 }
 
-struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_with_json_v2(
+struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_from_json_v2(
     const char* transaction_data_json_str)
 {
     bcos_sdk_clear_last_error();
@@ -1501,7 +1476,7 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_decode_transaction_data_struct_w
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_data_struct_with_json_v2")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_data_struct_from_json_v2")
                           << LOG_DESC("exception")
                           << LOG_KV("transaction_data_json_str", transaction_data_json_str)
                           << LOG_KV("error", errorMsg);
@@ -1560,7 +1535,7 @@ const char* bcos_sdk_calc_transaction_data_struct_hash_with_hex_v2(
     try
     {
         struct bcos_sdk_c_transaction_data_v2* transaction_data_struct_v2 =
-            bcos_sdk_decode_transaction_data_struct_v2(transaction_data_hex);
+            bcos_sdk_decode_transaction_data_struct_from_hex_v2(transaction_data_hex);
         auto tars_transaction_data_v2 =
             convert_transaction_data_to_tars_v2(transaction_data_struct_v2);
         TransactionBuilder builder;
@@ -1719,7 +1694,8 @@ const char* bcos_sdk_create_encoded_transaction_v2(
     return NULL;
 }
 
-const char* bcos_sdk_encode_transaction_struct_v2(struct bcos_sdk_c_transaction_v2* transaction)
+const char* bcos_sdk_encode_transaction_struct_to_hex_v2(
+    struct bcos_sdk_c_transaction_v2* transaction)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction, NULL);
@@ -1735,7 +1711,7 @@ const char* bcos_sdk_encode_transaction_struct_v2(struct bcos_sdk_c_transaction_
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct_v2")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_encode_transaction_struct_to_hex_v2")
                           << LOG_DESC("exception") << LOG_KV("transaction", transaction)
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
@@ -1768,7 +1744,7 @@ const char* bcos_sdk_encode_transaction_struct_to_json_v2(
     return NULL;
 }
 
-struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_v2(
+struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_from_hex_v2(
     const char* transaction_hex_str)
 {
     bcos_sdk_clear_last_error();
@@ -1798,7 +1774,7 @@ struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_v2(
     return NULL;
 }
 
-struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_with_json_v2(
+struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_from_json_v2(
     const char* transaction_json_str)
 {
     bcos_sdk_clear_last_error();
@@ -1816,7 +1792,7 @@ struct bcos_sdk_c_transaction_v2* bcos_sdk_decode_transaction_struct_with_json_v
     catch (const std::exception& e)
     {
         std::string errorMsg = boost::diagnostic_information(e);
-        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_struct_with_json_v2")
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_decode_transaction_struct_from_json_v2")
                           << LOG_DESC("exception")
                           << LOG_KV("transaction_json_str", transaction_json_str)
                           << LOG_KV("error", errorMsg);

@@ -388,15 +388,15 @@ int main(int argc, char** argv)
             group_id, chain_id, contract_address, input_bytes->buffer, input_bytes->length, g_hw_abi, block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
 
         // 9.2.1.1 encode tx data to hex
-        const char* hex_tx_data = bcos_sdk_encode_transaction_data_struct_v2(transaction_data_v2);
+        const char* hex_tx_data = bcos_sdk_encode_transaction_data_struct_to_hex_v2(transaction_data_v2);
         printf(" [TxStructV2Test] tx_data_hex: %s\n", hex_tx_data);
         // 9.2.1.2 decode hex tx data
-        struct bcos_sdk_c_transaction_data_v2* decode_tx_data = bcos_sdk_decode_transaction_data_struct_v2(hex_tx_data);
+        struct bcos_sdk_c_transaction_data_v2* decode_tx_data = bcos_sdk_decode_transaction_data_struct_from_hex_v2(hex_tx_data);
         // 9.2.1.3 encode tx data to json
         const char* json_tx_data = bcos_sdk_encode_transaction_data_struct_to_json_v2(decode_tx_data);
         printf(" [TxStructV2Test] tx_data_json: %s\n", json_tx_data);
         // 9.2.1.4 decode json to tx data struct
-        decode_tx_data = bcos_sdk_decode_transaction_data_struct_with_json_v2(json_tx_data);
+        decode_tx_data = bcos_sdk_decode_transaction_data_struct_from_json_v2(json_tx_data);
 
         // 9.2.2 calc transaction data hash
         const char* transaction_data_hash =
@@ -417,16 +417,16 @@ int main(int argc, char** argv)
         struct bcos_sdk_c_transaction_v2* transaction = bcos_sdk_create_transaction_struct_v2(decode_tx_data, 
         signed_hash, transaction_data_hash, 0, extra_data);
         // 9.2.4.2 encode tx to hex
-        const char* hex_tx = bcos_sdk_encode_transaction_struct_v2(transaction);
+        const char* hex_tx = bcos_sdk_encode_transaction_struct_to_hex_v2(transaction);
         printf(" [TxStructV2Test] tx_hex: %s\n", hex_tx);
         // 9.2.4.3 decode hex to tx
-        struct bcos_sdk_c_transaction_v2* decode_tx = bcos_sdk_decode_transaction_struct_v2(hex_tx);
+        struct bcos_sdk_c_transaction_v2* decode_tx = bcos_sdk_decode_transaction_struct_from_hex_v2(hex_tx);
         // 9.2.4.4 encode tx to json
         const char* json_tx = bcos_sdk_encode_transaction_struct_to_json_v2(decode_tx);
         printf(" [TxStructV2Test] tx_json: %s\n", json_tx);
         // 9.2.4.5 decode json to tx
-        decode_tx = bcos_sdk_decode_transaction_struct_with_json_v2(json_tx);
-        const char* hex_tx2 = bcos_sdk_encode_transaction_struct_v2(decode_tx);
+        decode_tx = bcos_sdk_decode_transaction_struct_from_json_v2(json_tx);
+        const char* hex_tx2 = bcos_sdk_encode_transaction_struct_to_hex_v2(decode_tx);
 
         printf(" [TxStructV2Test] signed_tx: %s\n", signed_tx);
         printf(" [TxStructV2Test] hex_tx: %s\n", hex_tx);
