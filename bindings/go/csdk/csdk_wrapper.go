@@ -438,6 +438,21 @@ func (csdk *CSDK) GetSystemConfigByKey(chanData *CallbackChan, key string) {
 	C.bcos_rpc_get_system_config_by_key(csdk.sdk, csdk.groupID, nil, cKey, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), setContext(chanData))
 }
 
+// SendRPCRequest to specific group or node, group and node can be empty
+func (csdk *CSDK) SendRPCRequest(group, node, request string, chanData *CallbackChan) error {
+	cGroup := C.CString(group)
+	defer C.free(unsafe.Pointer(cGroup))
+	cNode := C.CString(node)
+	defer C.free(unsafe.Pointer(cNode))
+	cRequest := C.CString(request)
+	defer C.free(unsafe.Pointer(cRequest))
+	C.bcos_rpc_generic_method_call_to_group_node(csdk.sdk, cGroup, cNode, cRequest, C.bcos_sdk_c_struct_response_cb(C.on_recv_resp_callback), setContext(chanData))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return fmt.Errorf("SendRPCRequest, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return nil
+}
+
 // // amop
 // func (csdk *CSDK) SubscribeAmopTopicDefaultHandler(topic []string) {
 // 	cTopic := C.CString(topic)
