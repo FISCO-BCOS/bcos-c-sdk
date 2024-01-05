@@ -22,8 +22,8 @@ deps
 *.dll
 
 # Fortran module files
-*.mod
 *.smod
+*.sum
 
 # Compiled Static libraries
 *.lai

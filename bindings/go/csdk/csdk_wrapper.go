@@ -536,32 +536,34 @@ func (csdk *CSDK) RegisterBlockNotifier(chanData *CallbackChan) { // TODO: imple
 	C.bcos_sdk_register_block_notifier(csdk.sdk, csdk.groupID, setContext(chanData), C.bcos_sdk_c_struct_response_cb(C.on_recv_notify_resp_callback))
 }
 
-func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, data, extraData string, withProof bool) ([]byte, error) {
+func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, data, abi, extraData string, withProof bool) ([]byte, error) {
 	cTo := C.CString(to)
+	defer C.free(unsafe.Pointer(cTo))
 	cProof := C.int(0)
 	if withProof {
 		cProof = C.int(1)
 	}
 	cData := C.CString(data)
+	defer C.free(unsafe.Pointer(cData))
+	cAbi := C.CString(abi)
+	defer C.free(unsafe.Pointer(cAbi))
 	cExtraData := C.CString(extraData)
+	defer C.free(unsafe.Pointer(cExtraData))
 	var tx_hash *C.char
 	var signed_tx *C.char
-	defer C.free(unsafe.Pointer(cTo))
-	defer C.free(unsafe.Pointer(cData))
-	defer C.free(unsafe.Pointer(cExtraData))
-	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
-	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
 	block_limit := C.bcos_rpc_get_block_limit(csdk.sdk, csdk.groupID)
 	if block_limit < 0 {
 		return nil, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
 	csdk.keyPairMutex.Lock()
-	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, nil, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
+	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, cAbi, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
 	if C.bcos_sdk_is_last_opr_success() == 0 {
 		csdk.keyPairMutex.Unlock()
 		return nil, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
 	csdk.keyPairMutex.Unlock()
+	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
+	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
 	txHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(tx_hash), "0x"))
 	if err != nil {
 		return nil, err
