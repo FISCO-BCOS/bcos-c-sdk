@@ -44,6 +44,7 @@ enum transaction_version
  * @param group_id group id
  * @param chain_id chain id
  * @param to contract address, if it is a contract creation transaction, it can be empty
+ * @param nonce random number to avoid duplicate transactions, if empty, then will generate one
  * @param input encoded contract method and params, bytes array
  * @param inputSize encoded contract method and params size
  * @param abi contract abi, only create contract need
@@ -54,7 +55,7 @@ enum transaction_version
  * @return void* transaction data pointer, you should release it after use
  */
 void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chain_id,
-    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit);
 
 /**
@@ -64,6 +65,7 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
  * @param group_id group id
  * @param chain_id chain id
  * @param to contract address, if it is a contract creation transaction, it can be empty
+ * @param nonce random number to avoid duplicate transactions, if empty, then will generate one
  * @param input encoded contract method and params, bytes array
  * @param inputSize encoded contract method and params size
  * @param abi contract abi, only create contract need
@@ -75,7 +77,7 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
  * @return void* transaction data pointer, you should release it after use
  */
 void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char* chain_id,
-    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, int64_t gas_limit, const char* max_fee_per_gas,
     const char* max_priority_fee_per_gas);
 
@@ -159,6 +161,7 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned cha
  * @param group_id group id
  * @param chain_id chain id
  * @param to contract address, if it is a contract creation transaction, it can be empty
+ * @param nonce random number to avoid duplicate transactions, if empty, then will generate one
  * @param input encoded contract method and params, bytes array
  * @param inputSize encoded contract method and params size
  * @param abi contract abi, only create contract need
@@ -172,8 +175,8 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned cha
  * @param signed_tx output signed transaction hex string
  */
 void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const char* group_id,
-    const char* chain_id, const char* to, const unsigned char* input, long inputSize,
-    const char* abi, int64_t block_limit, const char* value, const char* gas_price,
+    const char* chain_id, const char* to, const char* nonce, const unsigned char* input,
+    long inputSize, const char* abi, int64_t block_limit, const char* value, const char* gas_price,
     int64_t gas_limit, int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx);
 
 /**
@@ -184,6 +187,7 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
  * @param group_id group id
  * @param chain_id chain id
  * @param to contract address, if it is a contract creation transaction, it can be empty
+ * @param nonce random number to avoid duplicate transactions, if empty, then will generate one
  * @param input encoded contract method and params, bytes array
  * @param inputSize encoded contract method and params size
  * @param abi contract abi, only create contract need
@@ -198,10 +202,11 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
  * @param signed_tx output signed transaction hex string
  */
 void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
-    const char* group_id, const char* chain_id, const char* to, const unsigned char* input,
-    long inputSize, const char* abi, int64_t block_limit, const char* value, int64_t gas_limit,
-    const char* max_fee_per_gas, const char* max_priority_fee_per_gas, int32_t attribute,
-    const char* extra_data, char** tx_hash, char** signed_tx);
+    const char* group_id, const char* chain_id, const char* to, const char* nonce,
+    const unsigned char* input, long inputSize, const char* abi, int64_t block_limit,
+    const char* value, int64_t gas_limit, const char* max_fee_per_gas,
+    const char* max_priority_fee_per_gas, int32_t attribute, const char* extra_data, char** tx_hash,
+    char** signed_tx);
 
 #ifdef __cplusplus
 }
