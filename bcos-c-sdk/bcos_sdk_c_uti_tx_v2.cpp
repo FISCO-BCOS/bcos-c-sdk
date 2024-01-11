@@ -34,7 +34,7 @@ using namespace bcos::cppsdk::utilities;
 #include <system_error>
 
 void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chain_id,
-    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit)
 {
     bcos_sdk_clear_last_error();
@@ -48,9 +48,9 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
     {
         TransactionBuilderV2 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
-        auto transactionData =
-            builder.createTransactionData(1, group_id, chain_id, to, "", std::move(bytesData), abi,
-                block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit);
+        auto transactionData = builder.createTransactionData(1, group_id, chain_id, to,
+            nonce ? nonce : "", std::move(bytesData), abi, block_limit, value ? value : "",
+            gas_price ? gas_price : "", gas_limit);
         return transactionData.release();
     }
     catch (const std::exception& e)
@@ -58,11 +58,13 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_transaction_data") << LOG_DESC("exception")
                           << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-                          << LOG_KV("to", std::string(to ? to : "")) << LOG_KV("input", input)
-                          << LOG_KV("abi", std::string(abi ? abi : ""))
+                          << LOG_KV("to", std::string_view(to ? to : ""))
+                          << LOG_KV("nonoce", std::string_view(nonce ? nonce : ""))
+                          << LOG_KV("inputSize", inputSize)
+                          << LOG_KV("abi", std::string_view(abi ? abi : ""))
                           << LOG_KV("block_limit", block_limit)
-                          << LOG_KV("value", std::string(value ? value : ""))
-                          << LOG_KV("gas_price", std::string(gas_price ? gas_price : ""))
+                          << LOG_KV("value", std::string_view(value ? value : ""))
+                          << LOG_KV("gas_price", std::string_view(gas_price ? gas_price : ""))
                           << LOG_KV("gas_limit", gas_limit) << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
@@ -71,7 +73,7 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
 }
 
 void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char* chain_id,
-    const char* to, const unsigned char* input, long inputSize, const char* abi,
+    const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, int64_t gas_limit, const char* max_fee_per_gas,
     const char* max_priority_fee_per_gas)
 {
@@ -86,9 +88,9 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
     {
         TransactionBuilderV2 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
-        auto transactionData = builder.createTransactionData(1, group_id, chain_id, to, "",
-            std::move(bytesData), abi, block_limit, value ? value : "", "", gas_limit,
-            max_fee_per_gas ? max_fee_per_gas : "",
+        auto transactionData = builder.createTransactionData(1, group_id, chain_id, to,
+            nonce ? nonce : "", std::move(bytesData), abi, block_limit, value ? value : "", "",
+            gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "");
         return transactionData.release();
     }
@@ -98,12 +100,15 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
         BCOS_LOG(WARNING)
             << LOG_BADGE("bcos_sdk_create_eip1559_transaction_data") << LOG_DESC("exception")
             << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-            << LOG_KV("to", std::string(to ? to : "")) << LOG_KV("input", input)
-            << LOG_KV("abi", std::string(abi ? abi : "")) << LOG_KV("block_limit", block_limit)
-            << LOG_KV("value", std::string(value ? value : "")) << LOG_KV("gas_limit", gas_limit)
-            << LOG_KV("max_fee_per_gas", std::string(max_fee_per_gas ? max_fee_per_gas : ""))
+            << LOG_KV("to", std::string_view(to ? to : ""))
+            << LOG_KV("nonoce", std::string_view(nonce ? nonce : ""))
+            << LOG_KV("inputSize", inputSize) << LOG_KV("abi", std::string_view(abi ? abi : ""))
+            << LOG_KV("block_limit", block_limit)
+            << LOG_KV("value", std::string_view(value ? value : ""))
+            << LOG_KV("gas_limit", gas_limit)
+            << LOG_KV("max_fee_per_gas", std::string_view(max_fee_per_gas ? max_fee_per_gas : ""))
             << LOG_KV("max_priority_fee_per_gas",
-                   std::string(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
+                   std::string_view(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
             << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
@@ -143,15 +148,16 @@ const char* bcos_sdk_calc_transaction_data_hash_with_full_fields(int crypto_type
         BCOS_LOG(WARNING)
             << LOG_BADGE("bcos_sdk_calc_transaction_data_hash_with_full_fields")
             << LOG_DESC("exception") << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-            << LOG_KV("to", std::string(to ? to : ""))
-            << LOG_KV("nonce", std::string(nonce ? nonce : "")) << LOG_KV("input", input)
-            << LOG_KV("abi", std::string(abi ? abi : "")) << LOG_KV("block_limit", block_limit)
-            << LOG_KV("value", std::string(value ? value : ""))
-            << LOG_KV("gas_price", std::string(gas_price ? gas_price : ""))
+            << LOG_KV("to", std::string_view(to ? to : ""))
+            << LOG_KV("nonce", std::string_view(nonce ? nonce : ""))
+            << LOG_KV("inputSize", inputSize) << LOG_KV("abi", std::string_view(abi ? abi : ""))
+            << LOG_KV("block_limit", block_limit)
+            << LOG_KV("value", std::string_view(value ? value : ""))
+            << LOG_KV("gas_price", std::string_view(gas_price ? gas_price : ""))
             << LOG_KV("gas_limit", gas_limit)
-            << LOG_KV("max_fee_per_gas", std::string(max_fee_per_gas ? max_fee_per_gas : ""))
+            << LOG_KV("max_fee_per_gas", std::string_view(max_fee_per_gas ? max_fee_per_gas : ""))
             << LOG_KV("max_priority_fee_per_gas",
-                   std::string(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
+                   std::string_view(max_priority_fee_per_gas ? max_priority_fee_per_gas : ""))
             << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
@@ -174,7 +180,7 @@ const char* bcos_sdk_calc_transaction_data_hash_with_json(int crypto_type, const
     {
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_calc_transaction_data_hash_with_json")
-                          << LOG_DESC("exception") << LOG_KV("json", json)
+                          << LOG_DESC("exception") << LOG_KV("json", std::string_view(json))
                           << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
@@ -201,13 +207,14 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned cha
     {
         TransactionBuilderV2 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
-        crypto::HashType tx_hash(fromHex(std::string_view(transaction_hash)));
+        auto hash = std::string_view(transaction_hash);
+        crypto::HashType tx_hash(fromHex(hash, hash.starts_with("0x") ? "0x" : ""));
         auto sign = bytes(signature, signature + signSize * sizeof(byte));
 
-        auto transaction = builder.createTransaction(std::move(sign), tx_hash, attribute,
-            version, group_id, chain_id, to ? to : "", nonce ? nonce : "",
-            std::move(bytesData), abi ? abi : "", block_limit, value ? value : "",
-            gas_price ? gas_price : "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
+        auto transaction = builder.createTransaction(std::move(sign), tx_hash, attribute, version,
+            group_id, chain_id, to ? to : "", nonce ? nonce : "", std::move(bytesData),
+            abi ? abi : "", block_limit, value ? value : "", gas_price ? gas_price : "", gas_limit,
+            max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "", extra_data ? extra_data : "");
 
         auto bytes = builder.encodeTransaction(*transaction);
@@ -218,26 +225,27 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned cha
     {
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_with_signature")
-                          << LOG_DESC("exception") << LOG_KV("signature", signature)
+                          << LOG_DESC("exception") << LOG_KV("signSize", signSize)
                           << LOG_KV("transaction_hash", transaction_hash)
                           << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-                          << LOG_KV("to", std::string(to ? to : ""))
-                          << LOG_KV("nonce", std::string(nonce ? nonce : ""))
-                          << LOG_KV("input", input) << LOG_KV("abi", std::string(abi ? abi : ""))
+                          << LOG_KV("to", std::string_view(to ? to : ""))
+                          << LOG_KV("nonce", std::string_view(nonce ? nonce : ""))
+                          << LOG_KV("inputSize", inputSize)
+                          << LOG_KV("abi", std::string_view(abi ? abi : ""))
                           << LOG_KV("block_limit", block_limit)
-                          << LOG_KV("value", std::string(value ? value : ""))
-                          << LOG_KV("gas_price", std::string(gas_price ? gas_price : ""))
+                          << LOG_KV("value", std::string_view(value ? value : ""))
+                          << LOG_KV("gas_price", std::string_view(gas_price ? gas_price : ""))
                           << LOG_KV("gas_limit", gas_limit)
                           << LOG_KV("max_fee_per_gas",
-                                 std::string(max_fee_per_gas ? max_fee_per_gas : ""));
+                                 std::string_view(max_fee_per_gas ? max_fee_per_gas : ""));
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
     return nullptr;
 }
 
 void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const char* group_id,
-    const char* chain_id, const char* to, const unsigned char* input, long inputSize,
-    const char* abi, int64_t block_limit, const char* value, const char* gas_price,
+    const char* chain_id, const char* to, const char* nonce, const unsigned char* input,
+    long inputSize, const char* abi, int64_t block_limit, const char* value, const char* gas_price,
     int64_t gas_limit, int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx)
 {
     bcos_sdk_clear_last_error();
@@ -256,9 +264,9 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto result =
             builder.createSignedTransaction(*static_cast<bcos::crypto::KeyPairInterface*>(key_pair),
-                attribute, 1, group_id, chain_id, to ? to : "", "", std::move(bytesData),
-                abi ? abi : "", block_limit, value ? value : "", gas_price ? gas_price : "",
-                gas_limit, "", "", extra_data ? extra_data : "");
+                attribute, 1, group_id, chain_id, to ? to : "", nonce ? nonce : "",
+                std::move(bytesData), abi ? abi : "", block_limit, value ? value : "",
+                gas_price ? gas_price : "", gas_limit, "", "", extra_data ? extra_data : "");
         *tx_hash = strdup(result.first.c_str());
         *signed_tx = strdup(result.second.c_str());
     }
@@ -269,6 +277,7 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
                           << LOG_DESC("exception") << LOG_KV("group_id", group_id)
                           << LOG_KV("chain_id", chain_id)
                           << LOG_KV("to", std::string_view(to ? to : ""))
+                          << LOG_KV("nonoce", std::string_view(nonce ? nonce : ""))
                           << LOG_KV("inputSize", inputSize)
                           << LOG_KV("abi", std::string_view(abi ? abi : ""))
                           << LOG_KV("block_limit", block_limit)
@@ -282,10 +291,11 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
 }
 
 void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
-    const char* group_id, const char* chain_id, const char* to, const unsigned char* input,
-    long inputSize, const char* abi, int64_t block_limit, const char* value, int64_t gas_limit,
-    const char* max_fee_per_gas, const char* max_priority_fee_per_gas, int32_t attribute,
-    const char* extra_data, char** tx_hash, char** signed_tx)
+    const char* group_id, const char* chain_id, const char* to, const char* nonce,
+    const unsigned char* input, long inputSize, const char* abi, int64_t block_limit,
+    const char* value, int64_t gas_limit, const char* max_fee_per_gas,
+    const char* max_priority_fee_per_gas, int32_t attribute, const char* extra_data, char** tx_hash,
+    char** signed_tx)
 {
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, )
@@ -303,8 +313,8 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto result = builder.createSignedTransaction(
             *static_cast<bcos::crypto::KeyPairInterface*>(key_pair), attribute, 1, group_id,
-            chain_id, to ? to : "", "", std::move(bytesData), abi ? abi : "", block_limit,
-            value ? value : "", "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
+            chain_id, to ? to : "", nonce ? nonce : "", std::move(bytesData), abi ? abi : "",
+            block_limit, value ? value : "", "", gas_limit, max_fee_per_gas ? max_fee_per_gas : "",
             max_priority_fee_per_gas ? max_priority_fee_per_gas : "", extra_data ? extra_data : "");
         *tx_hash = strdup(result.first.c_str());
         *signed_tx = strdup(result.second.c_str());
@@ -315,8 +325,10 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
         BCOS_LOG(WARNING)
             << LOG_BADGE("bcos_sdk_create_signed_eip1559_transaction_with_full_fields")
             << LOG_DESC("exception") << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
-            << LOG_KV("to", std::string_view(to ? to : "")) << LOG_KV("inputSize", inputSize)
-            << LOG_KV("abi", std::string_view(abi ? abi : "")) << LOG_KV("block_limit", block_limit)
+            << LOG_KV("to", std::string_view(to ? to : ""))
+            << LOG_KV("nonoce", std::string_view(nonce ? nonce : ""))
+            << LOG_KV("inputSize", inputSize) << LOG_KV("abi", std::string_view(abi ? abi : ""))
+            << LOG_KV("block_limit", block_limit)
             << LOG_KV("value", std::string_view(value ? value : ""))
             << LOG_KV("gas_limit", gas_limit)
             << LOG_KV("max_fee_per_gas", std::string_view(max_fee_per_gas ? max_fee_per_gas : ""))

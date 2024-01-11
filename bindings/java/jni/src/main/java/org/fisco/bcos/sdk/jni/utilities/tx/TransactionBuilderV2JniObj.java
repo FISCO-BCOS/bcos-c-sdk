@@ -15,6 +15,8 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @param groupID group id
    * @param chainID chain id
    * @param to contract address, if it is a contract creation transaction, it can be empty
+   * @param nonce random number to avoid duplicate transactions, if it is empty or null, then it
+   *     will generate one
    * @param input encoded contract method and params
    * @param abi contract abi, only create contract need
    * @param blockLimit block limit
@@ -29,6 +31,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
+      String nonce,
       byte[] input,
       String abi,
       long blockLimit,
@@ -43,6 +46,8 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @param groupID group id
    * @param chainID chain id
    * @param to contract address, if it is a contract creation transaction, it can be empty
+   * @param nonce random number to avoid duplicate transactions, if it is empty or null, then it
+   *     will generate one
    * @param input encoded contract method and params
    * @param abi contract abi, only create contract need
    * @param blockLimit block limit
@@ -58,6 +63,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
+      String nonce,
       byte[] input,
       String abi,
       long blockLimit,
@@ -111,8 +117,8 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @param cryptoType 0: keccak256, 1: sm3
    * @param json transaction data json string
    * @return const char* transaction data hash hex string
-   * @apiNote version 1 transaction only supported in FISCO BCOS 3.6.0 and later
    * @throws JniException if lack of some required fields, or some fields are invalid
+   * @apiNote version 1 transaction only supported in FISCO BCOS 3.6.0 and later
    */
   public static native String calcTransactionDataHashWithJson(int cryptoType, String json)
       throws JniException;
@@ -168,6 +174,8 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @param groupID group id
    * @param chainID chain id
    * @param to contract address, if it is a contract creation transaction, it can be empty
+   * @param nonce random number to avoid duplicate transactions, if it is empty or null, then it
+   *     will generate one
    * @param input encoded contract method and params
    * @param abi contract abi, only create contract need
    * @param blockLimit block limit
@@ -184,6 +192,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
+      String nonce,
       byte[] input,
       String abi,
       long blockLimit,
@@ -201,6 +210,8 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
    * @param groupID group id
    * @param chainID chain id
    * @param to contract address, if it is a contract creation transaction, it can be empty
+   * @param nonce random number to avoid duplicate transactions, if it is empty or null, then it
+   *     will generate one
    * @param input encoded contract method and params
    * @param abi contract abi, only create contract need
    * @param blockLimit block limit
@@ -218,6 +229,7 @@ public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
       String groupID,
       String chainID,
       String to,
+      String nonce,
       byte[] input,
       String abi,
       long blockLimit,
