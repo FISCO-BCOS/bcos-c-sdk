@@ -58,7 +58,8 @@ public class TransactionStructBuilderV2JniObj {
    * @param transaction Transaction struct
    * @return Hexed Transaction
    */
-  public static native String encodeTransactionStructV2(TransactionV2 transaction) throws JniException;
+  public static native String encodeTransactionStructV2(TransactionV2 transaction)
+      throws JniException;
 
   /**
    * @param transaction Transaction struct

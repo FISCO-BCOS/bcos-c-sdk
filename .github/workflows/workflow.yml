@@ -42,8 +42,6 @@ jobs:
       - name: install macOS dependencies
         if: runner.os == 'macOS'
         run: brew install ccache lcov
-      - name: fetch vcpkg
-        run: cd /usr/local/share/vcpkg/ && git status && git reset --hard && git stash && git fetch && git pull && cd -
       - name: configure
         if: runner.os == 'macOS'
         run: |
@@ -91,8 +89,6 @@ jobs:
             vcpkg-gcc-v1-notest-${{ runner.temp }}-
       - name: install Ubuntu dependencies
         run: sudo apt install -y git curl openssl build-essential cmake ccache lcov
-      # - name: fetch vcpkg
-      #   run: cd /usr/local/share/vcpkg/ && git fetch --all && git checkout master && git pull && cd -
       - name: configure
         run: |
           export CC='gcc-10'; export CXX='g++-10'
@@ -156,8 +152,6 @@ jobs:
           ln -s /usr/local/cmake/bin/cmake /usr/bin/cmake
           cmake --version
           git --version
-      # - name: fetch vcpkg
-      #   run: cd /usr/local/share/vcpkg/ && git fetch --all && git checkout master && git pull && cd -
       - name: configure
         run: |
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -210,8 +204,6 @@ jobs:
             vcpkg-msvc-v1-notest-${{ runner.temp }}-
       - name: Add MSbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
-      - name: fetch vcpkg
-        run: cd C:\vcpkg && git fetch && git reset --hard && git pull && cd -
       - name: configure
         if: runner.os == 'Windows'
         run: |
