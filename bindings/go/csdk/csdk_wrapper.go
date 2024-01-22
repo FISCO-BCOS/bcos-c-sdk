@@ -183,7 +183,7 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 	} else {
 		config.disable_ssl = C.int(1)
 	}
-
+	config.message_timeout_ms = C.int(-1)
 	sdk := C.bcos_sdk_create(config)
 	if sdk == nil {
 		message := C.bcos_sdk_get_last_error_msg()
