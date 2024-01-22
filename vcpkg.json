@@ -32,6 +32,7 @@
     "openssl",
     "secp256k1",
     "wedprcrypto",
+    "zlib",
     "fisco-bcos-cpp-sdk"
   ],
   "builtin-baseline": "51b14cd4e1230dd51c11ffeff6f7d53c61cc5297",
@@ -103,6 +104,11 @@
     {
       "name": "jsoncpp",
       "version": "1.9.5"
+    },
+    {
+      "name": "zlib",
+      "version": "1.2.12",
+      "port-version": 1
     }
   ]
 }
