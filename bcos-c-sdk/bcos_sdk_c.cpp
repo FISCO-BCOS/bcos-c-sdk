@@ -208,6 +208,7 @@ void bcos_sdk_start(void* sdk)
 
     try
     {
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_start") << LOG_KV("sdk", sdk);
         ((bcos::cppsdk::Sdk*)sdk)->start();
     }
     catch (const std::exception& e)
@@ -217,8 +218,6 @@ void bcos_sdk_start(void* sdk)
                         << LOG_KV("errorMsg", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
-
-    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_start") << LOG_KV("sdk", sdk);
 }
 
 /**
@@ -231,10 +230,9 @@ void bcos_sdk_stop(void* sdk)
     bcos_sdk_clear_last_error();
     if (sdk)
     {
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_stop") << LOG_KV("sdk", sdk);
         ((bcos::cppsdk::Sdk*)sdk)->stop();
     }
-
-    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_stop") << LOG_KV("sdk", sdk);
 }
 
 /**
@@ -247,11 +245,10 @@ void bcos_sdk_destroy(void* sdk)
     bcos_sdk_clear_last_error();
     if (sdk)
     {
+        BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_destroy") << LOG_KV("sdk", sdk);
         ((bcos::cppsdk::Sdk*)sdk)->stop();
         delete (bcos::cppsdk::Sdk*)sdk;
     }
-
-    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_destroy") << LOG_KV("sdk", sdk);
 }
 
 /**
@@ -267,14 +264,13 @@ void bcos_sdk_register_block_notifier(void* sdk, const char* group, void* contex
     BCOS_SDK_C_PARAMS_VERIFICATION(group, );
     BCOS_SDK_C_PARAMS_VERIFICATION(callback, );
 
+    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
+                   << LOG_KV("group", group);
     auto service = ((bcos::cppsdk::Sdk*)sdk)->service();
     service->registerBlockNumberNotifier(
         group, [context, callback](const std::string& _group, int64_t _blockNumber) {
             callback(_group.c_str(), _blockNumber, context);
         });
-
-    BCOS_LOG(INFO) << LOG_BADGE("bcos_sdk_register_block_notifier") << LOG_KV("sdk", sdk)
-                   << LOG_KV("group", group);
 }
 
 /**
@@ -320,14 +316,16 @@ const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group)
     return strdup(chainID.c_str());
 }
 
-uint32_t bcos_sdk_get_local_protocol_info(void* sdk) {
+uint32_t bcos_sdk_get_local_protocol_info(void* sdk)
+{
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(sdk, 0);
 
     return ((bcos::cppsdk::Sdk*)sdk)->localProtocolInfo();
 }
 
-uint32_t bcos_sdk_get_negotiated_protocol_info(void* sdk) {
+uint32_t bcos_sdk_get_negotiated_protocol_info(void* sdk)
+{
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(sdk, 0);
 

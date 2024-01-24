@@ -87,6 +87,7 @@ find_package(unofficial-secp256k1 CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(wedprcrypto REQUIRED)
 find_package(HSM-CRYPTO REQUIRED)
+find_package(ZLIB REQUIRED)
 find_package(fiscobcos REQUIRED)
 
 file(GLOB_RECURSE SOURCES "bcos-c-sdk/*.h" "bcos-c-sdk/*.cpp" "bcos-c-sdk/*.c")
