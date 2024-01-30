@@ -81,7 +81,7 @@ static void on_receive_rpc_response(struct bcos_sdk_c_struct_response* resp)
 
     // byte[] data
     jfieldID dataFieldID = env->GetFieldID(responseClass, "data", "[B");
-    if (errorMsgFieldID == NULL)
+    if (dataFieldID == NULL)
     {
         env->ExceptionDescribe();
         env->DeleteGlobalRef(jcallback);

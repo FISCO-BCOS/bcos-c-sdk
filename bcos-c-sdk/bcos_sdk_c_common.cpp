@@ -228,6 +228,7 @@ void bcos_sdk_c_handle_response(
     if (errorPtr && errorPtr->errorCode() != 0)
     {
         resp->error = errorPtr->errorCode();
+        // not copy here because cpp sdk will release the errorPtr
         resp->desc = (char*)errorPtr->errorMessage().c_str();
         resp->data = NULL;
         resp->size = 0;

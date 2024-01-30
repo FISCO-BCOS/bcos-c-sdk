@@ -31,6 +31,13 @@ public class TransactionStructBuilderJniObj {
       throws JniException;
 
   /**
+   * @param transactionDataHex transactionData hex string
+   * @return TxData
+   */
+  public static native TransactionDataV2 decodeTransactionDataStructV2(String transactionDataHex)
+          throws JniException;
+
+  /**
    * @param cryptoType crypto type
    * @param transactionData Transaction Data struct
    * @return Hash hex string
@@ -73,4 +80,11 @@ public class TransactionStructBuilderJniObj {
    */
   public static native Transaction decodeTransactionStruct(String transactionHex)
       throws JniException;
+
+  /**
+   * @param transactionHex transaction hex string
+   * @return Tx
+   */
+  public static native Transaction decodeTransactionStructV2(String transactionHex)
+          throws JniException;
 }
