@@ -643,32 +643,32 @@ void bcos_sdk_destroy_transaction_data_struct(struct bcos_sdk_c_transaction_data
         return;
     }
 
-    if (transaction_data && transaction_data->chain_id)
+    if (transaction_data->chain_id)
     {
         bcos_sdk_c_free(transaction_data->chain_id);
     }
 
-    if (transaction_data && transaction_data->group_id)
+    if (transaction_data->group_id)
     {
         bcos_sdk_c_free(transaction_data->group_id);
     }
 
-    if (transaction_data && transaction_data->nonce)
+    if (transaction_data->nonce)
     {
         bcos_sdk_c_free(transaction_data->nonce);
     }
 
-    if (transaction_data && transaction_data->to)
+    if (transaction_data->to)
     {
         bcos_sdk_c_free(transaction_data->to);
     }
 
-    if (transaction_data && transaction_data->abi)
+    if (transaction_data->abi)
     {
         bcos_sdk_c_free((void*)transaction_data->abi);
     }
 
-    if (transaction_data && transaction_data->input)
+    if (transaction_data->input)
     {
         if (transaction_data->input->buffer)
         {
@@ -974,12 +974,12 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
         return;
     }
 
-    if (transaction && transaction->transaction_data)
+    if (transaction->transaction_data)
     {
         bcos_sdk_destroy_transaction_data_struct(transaction->transaction_data);
     }
 
-    if (transaction && transaction->data_hash)
+    if (transaction->data_hash)
     {
         if (transaction->data_hash->buffer)
         {
@@ -988,7 +988,7 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
         bcos_sdk_c_free(transaction->data_hash);
     }
 
-    if (transaction && transaction->signature)
+    if (transaction->signature)
     {
         if (transaction->signature->buffer)
         {
@@ -997,7 +997,7 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
         bcos_sdk_c_free(transaction->signature);
     }
 
-    if (transaction && transaction->sender)
+    if (transaction->sender)
     {
         if (transaction->sender->buffer)
         {
@@ -1006,7 +1006,7 @@ void bcos_sdk_destroy_transaction_struct(struct bcos_sdk_c_transaction* transact
         bcos_sdk_c_free(transaction->sender);
     }
 
-    if (transaction && transaction->extra_data)
+    if (transaction->extra_data)
     {
         bcos_sdk_c_free(transaction->extra_data);
     }
@@ -1322,32 +1322,32 @@ void bcos_sdk_destroy_transaction_data_struct_v2(
         return;
     }
 
-    if (transaction_data && transaction_data->chain_id)
+    if (transaction_data->chain_id)
     {
         bcos_sdk_c_free(transaction_data->chain_id);
     }
 
-    if (transaction_data && transaction_data->group_id)
+    if (transaction_data->group_id)
     {
         bcos_sdk_c_free(transaction_data->group_id);
     }
 
-    if (transaction_data && transaction_data->nonce)
+    if (transaction_data->nonce)
     {
         bcos_sdk_c_free(transaction_data->nonce);
     }
 
-    if (transaction_data && transaction_data->to)
+    if (transaction_data->to)
     {
         bcos_sdk_c_free(transaction_data->to);
     }
 
-    if (transaction_data && transaction_data->abi)
+    if (transaction_data->abi)
     {
         bcos_sdk_c_free((void*)transaction_data->abi);
     }
 
-    if (transaction_data && transaction_data->input)
+    if (transaction_data->input)
     {
         if (transaction_data->input->buffer)
         {
@@ -1356,22 +1356,22 @@ void bcos_sdk_destroy_transaction_data_struct_v2(
         bcos_sdk_c_free((void*)transaction_data->input);
     }
 
-    if (transaction_data && transaction_data->value)
+    if (transaction_data->value)
     {
         bcos_sdk_c_free(transaction_data->value);
     }
 
-    if (transaction_data && transaction_data->gas_price)
+    if (transaction_data->gas_price)
     {
         bcos_sdk_c_free(transaction_data->gas_price);
     }
 
-    if (transaction_data && transaction_data->max_fee_per_gas)
+    if (transaction_data->max_fee_per_gas)
     {
         bcos_sdk_c_free(transaction_data->max_fee_per_gas);
     }
 
-    if (transaction_data && transaction_data->max_priority_fee_per_gas)
+    if (transaction_data->max_priority_fee_per_gas)
     {
         bcos_sdk_c_free(transaction_data->max_priority_fee_per_gas);
     }

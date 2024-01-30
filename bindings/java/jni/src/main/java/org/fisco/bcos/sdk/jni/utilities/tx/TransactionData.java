@@ -1,14 +1,14 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
 
 public class TransactionData {
-  private int version;
-  private long blockLimit;
-  private String chainId;
-  private String groupId;
-  private String nonce;
-  private String to;
-  private String abi;
-  private TransactionBytes input;
+  protected int version;
+  protected long blockLimit;
+  protected String chainId;
+  protected String groupId;
+  protected String nonce;
+  protected String to;
+  protected String abi;
+  protected byte[] input;
 
   public int getVersion() {
     return version;
@@ -66,11 +66,11 @@ public class TransactionData {
     this.abi = abi;
   }
 
-  public TransactionBytes getInput() {
+  public byte[] getInput() {
     return input;
   }
 
-  public void setInput(TransactionBytes input) {
+  public void setInput(byte[] input) {
     this.input = input;
   }
 }

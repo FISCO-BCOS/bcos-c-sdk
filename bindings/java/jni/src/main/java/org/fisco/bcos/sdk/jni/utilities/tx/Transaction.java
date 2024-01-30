@@ -2,9 +2,9 @@ package org.fisco.bcos.sdk.jni.utilities.tx;
 
 public class Transaction {
   private TransactionData transactionData;
-  private TransactionBytes dataHash;
-  private TransactionBytes signature;
-  private TransactionBytes sender;
+  private byte[] dataHash;
+  private byte[] signature;
+  private byte[]  sender;
   private long importTime;
   private int attribute;
   private String extraData;
@@ -17,27 +17,27 @@ public class Transaction {
     this.transactionData = transactionData;
   }
 
-  public TransactionBytes getDataHash() {
+  public byte[] getDataHash() {
     return dataHash;
   }
 
-  public void setDataHash(TransactionBytes dataHash) {
+  public void setDataHash(byte[] dataHash) {
     this.dataHash = dataHash;
   }
 
-  public TransactionBytes getSignature() {
+  public byte[] getSignature() {
     return signature;
   }
 
-  public void setSignature(TransactionBytes signature) {
+  public void setSignature(byte[] signature) {
     this.signature = signature;
   }
 
-  public TransactionBytes getSender() {
+  public byte[] getSender() {
     return sender;
   }
 
-  public void setSender(TransactionBytes sender) {
+  public void setSender(byte[] sender) {
     this.sender = sender;
   }
 
