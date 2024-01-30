@@ -695,6 +695,13 @@ BOOST_AUTO_TEST_CASE(testCreateTxStructV2)
     BOOST_TEST(bcos_sdk_get_last_error() == -1);
     BOOST_TEST(bcos_sdk_get_last_error_msg() == std::string("signature can not be empty string"));
 
+    // create transaction_struct success (extraData = NULL)
+    txStruct = bcos_sdk_create_transaction_struct_v2(
+        txDataStruct, signature, transactionDataHash, attribute, nullptr);
+    success = bcos_sdk_is_last_opr_success();
+    BOOST_TEST(success == true);
+    compareTxStruct(txStruct, txDataStruct, signature, "", attribute);
+
     // create transaction_struct success
     txStruct = bcos_sdk_create_transaction_struct_v2(
         txDataStruct, signature, transactionDataHash, attribute, extraData);

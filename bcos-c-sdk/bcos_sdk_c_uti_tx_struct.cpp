@@ -929,7 +929,7 @@ struct bcos_sdk_c_transaction* bcos_sdk_create_transaction_struct(
         transaction_struct->sender = NULL;
         transaction_struct->import_time = 0;
         transaction_struct->attribute = attribute;
-        transaction_struct->extra_data = my_strdup(extra_data);
+        transaction_struct->extra_data = extra_data ? my_strdup(extra_data) : my_strdup("");
         // signature
         auto signatureWithoutHex = fromHexString(signature);
         struct bcos_sdk_c_bytes* signature_bytes =
@@ -1578,7 +1578,7 @@ struct bcos_sdk_c_transaction_v2* bcos_sdk_create_transaction_struct_v2(
         transaction_struct_v2->sender = NULL;
         transaction_struct_v2->import_time = 0;
         transaction_struct_v2->attribute = attribute;
-        transaction_struct_v2->extra_data = my_strdup(extra_data);
+        transaction_struct_v2->extra_data = extra_data ? my_strdup(extra_data) : my_strdup("");
         // signature
         auto signatureWithoutHex = fromHexString(signature);
         struct bcos_sdk_c_bytes* signature_bytes =
