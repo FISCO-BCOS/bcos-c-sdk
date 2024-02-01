@@ -13,26 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj.cpp
+ * @file org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj.cpp
  * @author: kyonGuo
  * @date 2023/11/29
  */
 
-#include "org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj.h"
+#include "org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj.h"
+#include "bcos-c-sdk/bcos_sdk_c_uti_tx_v1.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
-#include "bcos-c-sdk/bcos_sdk_c_uti_tx_v2.h"
 #include "org_fisco_bcos_sdk_common.h"
 #include <tuple>
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    createTransactionData
  * Signature:
  * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransactionData(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createTransactionData(
     JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_nonce,
     jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price,
     jlong j_gas_limit)
@@ -54,7 +54,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransa
     jbyte* inputBuffer = env->GetByteArrayElements(j_input, NULL);
     jsize inputSize = env->GetArrayLength(j_input);
 
-    void* transaction_data = bcos_sdk_create_transaction_v2_data(group_id, chain_id, to, nonce,
+    void* transaction_data = bcos_sdk_create_transaction_v1_data(group_id, chain_id, to, nonce,
         reinterpret_cast<unsigned char*>(inputBuffer), inputSize, abi, block_limit, value,
         gas_price, gas_limit);
 
@@ -77,13 +77,13 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createTransa
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    createEIP1559TransactionData
  * Signature:
  * (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;JLjava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP1559TransactionData(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createEIP1559TransactionData(
     JNIEnv* env, jclass, jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_nonce,
     jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value, jlong j_gas_limit,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas)
@@ -130,13 +130,13 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createEIP155
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    calcTransactionDataHashWithFullFields
  * Signature:
  * (ILorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransactionDataHashWithFullFields(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_calcTransactionDataHashWithFullFields(
     JNIEnv* env, jclass, jint j_crypto_type, jobject j_tx_version, jstring j_group_id,
     jstring j_chain_id, jstring j_to, jstring j_nonce, jbyteArray j_input, jstring j_abi,
     jlong j_block_limit, jstring j_value, jstring j_gasPrice, jlong j_gas_limit,
@@ -202,12 +202,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    calcTransactionDataHashWithJson
  * Signature: (ILjava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransactionDataHashWithJson(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_calcTransactionDataHashWithJson(
     JNIEnv* env, jclass, jint j_crypto_type, jstring j_json)
 {
     CHECK_OBJECT_NOT_NULL(env, j_json, NULL);
@@ -236,13 +236,13 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_calcTransact
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    createSignedTransactionWithSignature
  * Signature:
  * ([BLjava/lang/String;Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionVersion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedTransactionWithSignature(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedTransactionWithSignature(
     JNIEnv* env, jclass, jbyteArray j_signature, jstring j_tx_hash, jobject j_tx_version,
     jstring j_group_id, jstring j_chain_id, jstring j_to, jstring j_nonce, jbyteArray j_input,
     jstring j_abi, jlong j_block_limit, jstring j_value, jstring j_gas_price, jlong j_gas_limit,
@@ -318,13 +318,13 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    createSignedTransactionWithFullFields
  * Signature:
  * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedTransactionWithFullFields(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedTransactionWithFullFields(
     JNIEnv* env, jclass, jlong j_key_pair, jstring j_group_id, jstring j_chain_id, jstring j_to,
     jstring j_nonce, jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value,
     jstring j_gas_price, jlong j_gas_limit, jint j_attribute, jstring j_extra_data)
@@ -408,13 +408,13 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSigned
 }
 
 /*
- * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
  * Method:    createSignedEIP1559TransactionWithFullFields
  * Signature:
  * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV2JniObj_createSignedEIP1559TransactionWithFullFields(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedEIP1559TransactionWithFullFields(
     JNIEnv* env, jclass, jlong j_key_pair, jstring j_group_id, jstring j_chain_id, jstring j_to,
     jstring j_nonce, jbyteArray j_input, jstring j_abi, jlong j_block_limit, jstring j_value,
     jstring j_max_fee_per_gas, jstring j_max_priority_fee_per_gas, jlong j_gas_limit,

@@ -209,7 +209,7 @@ struct bcos_sdk_c_transaction_data
     struct bcos_sdk_c_bytes* input;
 };
 
-struct bcos_sdk_c_transaction_data_v2
+struct bcos_sdk_c_transaction_data_v1
 {
     int32_t version;
     int64_t block_limit;
@@ -241,9 +241,9 @@ struct bcos_sdk_c_transaction
     char* extra_data;
 };
 
-struct bcos_sdk_c_transaction_v2
+struct bcos_sdk_c_transaction_v1
 {
-    struct bcos_sdk_c_transaction_data_v2* transaction_data;
+    struct bcos_sdk_c_transaction_data_v1* transaction_data;
     struct bcos_sdk_c_bytes* data_hash;
     struct bcos_sdk_c_bytes* signature;
     struct bcos_sdk_c_bytes* sender;

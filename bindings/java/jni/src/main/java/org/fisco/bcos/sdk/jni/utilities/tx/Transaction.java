@@ -4,7 +4,7 @@ public class Transaction {
   private TransactionData transactionData;
   private byte[] dataHash;
   private byte[] signature;
-  private byte[]  sender;
+  private byte[] sender;
   private long importTime;
   private int attribute;
   private String extraData;
