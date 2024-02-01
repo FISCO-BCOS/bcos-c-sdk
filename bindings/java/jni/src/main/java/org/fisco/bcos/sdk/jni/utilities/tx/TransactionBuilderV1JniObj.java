@@ -3,7 +3,7 @@ package org.fisco.bcos.sdk.jni.utilities.tx;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.common.JniLibLoader;
 
-public class TransactionBuilderV2JniObj extends TransactionBuilderJniObj {
+public class TransactionBuilderV1JniObj extends TransactionBuilderJniObj {
 
   static {
     JniLibLoader.loadJniLibrary();

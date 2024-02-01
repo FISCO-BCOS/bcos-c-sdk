@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file bcos_sdk_c_uti_tx_v2.cpp
+ * @file bcos_sdk_c_uti_tx_v1.cpp
  * @author: kyonGuo
  * @date 2023/11/28
  */
 
-#include "bcos_sdk_c_uti_tx_v2.h"
+#include "bcos_sdk_c_uti_tx_v1.h"
 #include "bcos_sdk_c_error.h"
 #include <bcos-c-sdk/bcos_sdk_c_common.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
-#include <bcos-cpp-sdk/utilities/tx/TransactionBuilderV2.h>
+#include <bcos-cpp-sdk/utilities/tx/TransactionBuilderV1.h>
 
 using namespace bcos;
 using namespace bcos::cppsdk;
@@ -33,7 +33,7 @@ using namespace bcos::cppsdk::utilities;
 #include <exception>
 #include <system_error>
 
-void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chain_id,
+void* bcos_sdk_create_transaction_v1_data(const char* group_id, const char* chain_id,
     const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit)
 {
@@ -46,7 +46,7 @@ void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chai
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto transactionData = builder.createTransactionData(1, group_id, chain_id, to,
             nonce ? nonce : "", std::move(bytesData), abi, block_limit, value ? value : "",
@@ -86,7 +86,7 @@ void* bcos_sdk_create_eip1559_transaction_data(const char* group_id, const char*
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto transactionData = builder.createTransactionData(1, group_id, chain_id, to,
             nonce ? nonce : "", std::move(bytesData), abi, block_limit, value ? value : "", "",
@@ -133,7 +133,7 @@ const char* bcos_sdk_calc_transaction_data_hash_with_full_fields(int crypto_type
     try
     {
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto transactionDataHash = builder.calculateTransactionDataHash(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2, version,
             group_id, chain_id, to ? to : "", nonce, std::move(bytesData), abi ? abi : "",
@@ -171,7 +171,7 @@ const char* bcos_sdk_calc_transaction_data_hash_with_json(int crypto_type, const
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto transactionDataHash = builder.calculateTransactionDataHashWithJson(
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2, json);
         return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
@@ -205,7 +205,7 @@ const char* bcos_sdk_create_signed_transaction_with_signature(const unsigned cha
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto hash = std::string_view(transaction_hash);
         crypto::HashType tx_hash(fromHex(hash, hash.starts_with("0x") ? "0x" : ""));
@@ -260,7 +260,7 @@ void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const c
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto result =
             builder.createSignedTransaction(*static_cast<bcos::crypto::KeyPairInterface*>(key_pair),
@@ -309,7 +309,7 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
 
     try
     {
-        TransactionBuilderV2 builder;
+        TransactionBuilderV1 builder;
         auto bytesData = bytes(input, input + inputSize * sizeof(byte));
         auto result = builder.createSignedTransaction(
             *static_cast<bcos::crypto::KeyPairInterface*>(key_pair), attribute, 1, group_id,

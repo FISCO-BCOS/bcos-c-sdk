@@ -59,6 +59,10 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 
 char* my_strdup(const char* s)
 {
+    if (s == NULL)
+    {
+        return NULL;
+    }
     size_t len = strlen(s) + 1;
     char* result = (char*)malloc(len);
     if (result == (char*)0)

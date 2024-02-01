@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file tx_struct_v2_test.c
+ * @file tx_struct_v1_test.c
  * @author: lucasli
  * @date 2023-11-29
  */
@@ -131,14 +131,15 @@ const char* g_hw_abi =
 
 void usage(void)
 {
-    printf("Desc: tx struct v2 test sample\n");
-    printf("Usage: tx_struct_v2_test <config> <group_id>\n");
+    printf("Desc: tx struct v1 test sample\n");
+    printf("Usage: tx_struct_v1_test <config> <group_id>\n");
     printf("Example:\n");
-    printf("    ./tx_struct_v2_test ./config.ini group0\n");
+    printf("    ./tx_struct_v1_test ./config.ini group0\n");
     exit(0);
 }
 
-int convertCharToHexNumber(char hexChar) {
+int convertCharToHexNumber(char hexChar)
+{
     if (hexChar >= '0' && hexChar <= '9')
         return hexChar - '0';
     if (hexChar >= 'a' && hexChar <= 'f')
@@ -148,15 +149,20 @@ int convertCharToHexNumber(char hexChar) {
     return -1;
 }
 
-struct bcos_sdk_c_bytes* fromHexString(const char* hexedString) {
-    unsigned startIndex = (strlen(hexedString) >= 2 && hexedString[0] == '0' && hexedString[1] == 'x') ? 2 : 0;
-    struct bcos_sdk_c_bytes* bytesData = (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+struct bcos_sdk_c_bytes* fromHexString(const char* hexedString)
+{
+    unsigned startIndex =
+        (strlen(hexedString) >= 2 && hexedString[0] == '0' && hexedString[1] == 'x') ? 2 : 0;
+    struct bcos_sdk_c_bytes* bytesData =
+        (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
     bytesData->buffer = (uint8_t*)malloc((strlen(hexedString) - startIndex + 1) / 2);
     bytesData->length = 0;
 
-    if (strlen(hexedString) % 2) {
+    if (strlen(hexedString) % 2)
+    {
         int h = convertCharToHexNumber(hexedString[startIndex++]);
-        if (h == -1) {
+        if (h == -1)
+        {
             // Handle error
             free(bytesData->buffer);
             free(bytesData);
@@ -164,10 +170,12 @@ struct bcos_sdk_c_bytes* fromHexString(const char* hexedString) {
         }
         bytesData->buffer[bytesData->length++] = (uint8_t)h;
     }
-    for (unsigned i = startIndex; i < strlen(hexedString); i += 2) {
+    for (unsigned i = startIndex; i < strlen(hexedString); i += 2)
+    {
         int highValue = convertCharToHexNumber(hexedString[i]);
         int lowValue = convertCharToHexNumber(hexedString[i + 1]);
-        if (highValue == -1 || lowValue == -1) {
+        if (highValue == -1 || lowValue == -1)
+        {
             // Handle error
             free(bytesData->buffer);
             free(bytesData);
@@ -212,15 +220,15 @@ void on_deploy_resp_callback(struct bcos_sdk_c_struct_response* resp)
     memcpy(contract_address, p1, p2 - p1);
     contract_address[p2 - p1] = '\0';
 
-    printf(" [TxStructV2Test] contractAddress ===>>>>: %s\n", contract_address);
-    printf(" [TxStructV2Test] transaction receipt ===>>>>: %s\n", (char*)resp->data);
+    printf(" [TxStructv1Test] contractAddress ===>>>>: %s\n", contract_address);
+    printf(" [TxStructv1Test] transaction receipt ===>>>>: %s\n", (char*)resp->data);
 }
 
 /* resp->data 的数据结构
 {
     "id" : 2,
     "jsonrpc" : "2.0",
-    "result" : 
+    "result" :
     {
         "blockNumber" : 113,
         "checksumContractAddress" : "",
@@ -229,7 +237,8 @@ void on_deploy_resp_callback(struct bcos_sdk_c_struct_response* resp)
         "from" : "0x69df04bec1c36551be6298f7e4c2f867592a4b37",
         "gasUsed" : "13063",
         "hash" : "0x7d816bbde4aef3bd4c084b0887982f2c50cb9a50975a4d07328ec5fd5dd4e6e6",
-        "input" : "0x3590b49f0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001748656c6c6f20464953434f2d42434f5320332e30212121000000000000000000",
+        "input" :
+"0x3590b49f0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001748656c6c6f20464953434f2d42434f5320332e30212121000000000000000000",
         "logEntries" : [],
         "message" : "",
         "output" : "0x",
@@ -272,7 +281,7 @@ int main(int argc, char** argv)
     const char* config = argv[1];
     const char* group_id = argv[2];
 
-    printf("[TxStructV2Test] params ===>>>> \n");
+    printf("[TxStructv1Test] params ===>>>> \n");
     printf("\t # config: %s\n", config);
     printf("\t # group_id: %s\n", group_id);
 
@@ -290,13 +299,14 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [TxStructV2Test] start sdk ... \n");
+    printf(" [TxStructv1Test] start sdk ... \n");
 
     // 2. start bcos c sdk
     bcos_sdk_start(sdk);
     if (!bcos_sdk_is_last_opr_success())
     {
-        printf(" [TxStructV2Test] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
+        printf(
+            " [TxStructv1Test] bcos_sdk_start failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
@@ -312,40 +322,41 @@ int main(int argc, char** argv)
         exit(-1);
     }
 
-    printf(" [TxStructV2Test] sm crypto: %d\n", sm_crypto);
+    printf(" [TxStructv1Test] sm crypto: %d\n", sm_crypto);
     // 4. get chain_id of the group_id
     const char* chain_id = bcos_sdk_get_group_chain_id(sdk, group_id);
     if (!bcos_sdk_is_last_opr_success())
     {
-        printf(" [TxStructV2Test] bcos_sdk_get_group_chain_id failed, error: %s\n",
+        printf(" [TxStructv1Test] bcos_sdk_get_group_chain_id failed, error: %s\n",
             bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
-    printf(" [TxStructV2Test] chain id: %s\n", chain_id);
+    printf(" [TxStructv1Test] chain id: %s\n", chain_id);
     // 5. get blocklimit of the group_id
     int64_t block_limit = bcos_rpc_get_block_limit(sdk, group_id);
     if (block_limit < 0)
     {
-        printf(" [TxStructV2Test] group not exist, group: %s\n", group_id);
+        printf(" [TxStructv1Test] group not exist, group: %s\n", group_id);
         exit(-1);
     }
 
-    printf(" [TxStructV2Test] block limit: %d\n", (int32_t)block_limit);
+    printf(" [TxStructv1Test] block limit: %d\n", (int32_t)block_limit);
     // 6. load or create keypair for transaction sign
     void* key_pair = bcos_sdk_create_keypair(sm_crypto);
     if (!key_pair)
     {
-        printf(" [TxStructV2Test] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
+        printf(
+            " [TxStructv1Test] create keypair failed, error: %s\n", bcos_sdk_get_last_error_msg());
         exit(-1);
     }
 
-    // printf(" [TxStructV2Test] bcos_sdk_get_keypair_type: %d\n",
+    // printf(" [TxStructv1Test] bcos_sdk_get_keypair_type: %d\n",
     // bcos_sdk_get_keypair_type(key_pair));
 
     // 7. get account address of the keypair
     const char* address = bcos_sdk_get_keypair_address(key_pair);
-    printf(" [TxStructV2Test] new account, address: %s\n", address);
+    printf(" [TxStructv1Test] new account, address: %s\n", address);
 
     const char* extra_data = "ExtraData";
     const char* value = "33";
@@ -354,25 +365,32 @@ int main(int argc, char** argv)
     const char* maxFeePerGas = "11";
     const char* maxPriorityFeePerGas = "22";
 
-    // printf(" [TxStructV2Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %ld, maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
-    
+    // printf(" [TxStructv1Test] extra_data: %s, value: %s, gasPrice: %s, gasLimit: %ld,
+    // maxFeePerGas: %s, maxPriorityFeePerGas: %s\n", extra_data, value, gasPrice, gasLimit,
+    // maxFeePerGas, maxPriorityFeePerGas);
+
     // 8. deploy HelloWorld contract
-    struct bcos_sdk_c_transaction_data_v2* transaction_data_v2_deploy = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(
-            group_id, chain_id, "", sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+    struct bcos_sdk_c_transaction_data_v1* transaction_data_v1_deploy =
+        bcos_sdk_create_transaction_data_struct_with_hex_input_v1(group_id, chain_id, "",
+            sm_crypto ? g_hw_sm_bin : g_hw_bin, "", block_limit, value, gasPrice, gasLimit,
+            maxFeePerGas, maxPriorityFeePerGas);
     const char* transaction_data_hash_deploy =
-        bcos_sdk_calc_transaction_data_struct_hash_v2(sm_crypto, transaction_data_v2_deploy);
+        bcos_sdk_calc_transaction_data_struct_hash_v1(sm_crypto, transaction_data_v1_deploy);
     const char* signed_hash_deploy =
         bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash_deploy);
-    const char* signed_tx_deploy = bcos_sdk_create_encoded_transaction_v2(
-        transaction_data_v2_deploy, signed_hash_deploy, transaction_data_hash_deploy, 0, extra_data);
-    printf(" [TxStructV2Test] create deploy contract transaction success, signed_tx_deploy: %s\n", signed_tx_deploy);
-   
+    const char* signed_tx_deploy =
+        bcos_sdk_create_encoded_transaction_v1(transaction_data_v1_deploy, signed_hash_deploy,
+            transaction_data_hash_deploy, 0, extra_data);
+    printf(" [TxStructv1Test] create deploy contract transaction success, signed_tx_deploy: %s\n",
+        signed_tx_deploy);
+
     // call rpc interface, send transaction
-    bcos_rpc_send_transaction(sdk, group_id, "", signed_tx_deploy, 0, on_deploy_resp_callback, NULL);
+    bcos_rpc_send_transaction(
+        sdk, group_id, "", signed_tx_deploy, 0, on_deploy_resp_callback, NULL);
     // wait for async operation done, just for sample
     sleep(5);
 
-    printf(" [TxStructV2Test] set operation\n");
+    printf(" [TxStructv1Test] set operation\n");
     // 9. HelloWorld set
     // 9.1 abi encode params
     const char* set_data =
@@ -380,57 +398,65 @@ int main(int argc, char** argv)
     // 9.2 create signed transaction
     {
         // 9.2.1 create transaction data with hex input
-        struct bcos_sdk_c_transaction_data_v2* transaction_data_v2 = bcos_sdk_create_transaction_data_struct_with_hex_input_v2(
-            group_id, chain_id, contract_address, set_data, g_hw_abi, block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+        struct bcos_sdk_c_transaction_data_v1* transaction_data_v1 =
+            bcos_sdk_create_transaction_data_struct_with_hex_input_v1(group_id, chain_id,
+                contract_address, set_data, g_hw_abi, block_limit, value, gasPrice, gasLimit,
+                maxFeePerGas, maxPriorityFeePerGas);
         // create transaction data with bytes input
         struct bcos_sdk_c_bytes* input_bytes = fromHexString(set_data);
-        transaction_data_v2 = bcos_sdk_create_transaction_data_struct_with_bytes_v2(
-            group_id, chain_id, contract_address, input_bytes->buffer, input_bytes->length, g_hw_abi, block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
+        transaction_data_v1 = bcos_sdk_create_transaction_data_struct_with_bytes_v1(group_id,
+            chain_id, contract_address, input_bytes->buffer, input_bytes->length, g_hw_abi,
+            block_limit, value, gasPrice, gasLimit, maxFeePerGas, maxPriorityFeePerGas);
 
         // 9.2.1.1 encode tx data to hex
-        const char* hex_tx_data = bcos_sdk_encode_transaction_data_struct_to_hex_v2(transaction_data_v2);
-        printf(" [TxStructV2Test] tx_data_hex: %s\n", hex_tx_data);
+        const char* hex_tx_data =
+            bcos_sdk_encode_transaction_data_struct_to_hex_v1(transaction_data_v1);
+        printf(" [TxStructv1Test] tx_data_hex: %s\n", hex_tx_data);
         // 9.2.1.2 decode hex tx data
-        struct bcos_sdk_c_transaction_data_v2* decode_tx_data = bcos_sdk_decode_transaction_data_struct_from_hex_v2(hex_tx_data);
+        struct bcos_sdk_c_transaction_data_v1* decode_tx_data =
+            bcos_sdk_decode_transaction_data_struct_from_hex_v1(hex_tx_data);
         // 9.2.1.3 encode tx data to json
-        const char* json_tx_data = bcos_sdk_encode_transaction_data_struct_to_json_v2(decode_tx_data);
-        printf(" [TxStructV2Test] tx_data_json: %s\n", json_tx_data);
+        const char* json_tx_data =
+            bcos_sdk_encode_transaction_data_struct_to_json_v1(decode_tx_data);
+        printf(" [TxStructv1Test] tx_data_json: %s\n", json_tx_data);
         // 9.2.1.4 decode json to tx data struct
-        decode_tx_data = bcos_sdk_decode_transaction_data_struct_from_json_v2(json_tx_data);
+        decode_tx_data = bcos_sdk_decode_transaction_data_struct_from_json_v1(json_tx_data);
 
         // 9.2.2 calc transaction data hash
         const char* transaction_data_hash =
-            bcos_sdk_calc_transaction_data_struct_hash_v2(sm_crypto, decode_tx_data);
-        printf(" [TxStructV2Test] set tx hash: %s\n", transaction_data_hash);
-        transaction_data_hash = bcos_sdk_calc_transaction_data_struct_hash_with_hex_v2(sm_crypto, hex_tx_data);
-        printf(" [TxStructV2Test] set tx hash with tx_data_hex: %s\n", transaction_data_hash);
+            bcos_sdk_calc_transaction_data_struct_hash_v1(sm_crypto, decode_tx_data);
+        printf(" [TxStructv1Test] set tx hash: %s\n", transaction_data_hash);
+        transaction_data_hash =
+            bcos_sdk_calc_transaction_data_struct_hash_with_hex_v1(sm_crypto, hex_tx_data);
+        printf(" [TxStructv1Test] set tx hash with tx_data_hex: %s\n", transaction_data_hash);
 
         // 9.2.3 sign transaction hash
         const char* signed_hash =
             bcos_sdk_sign_transaction_data_hash(key_pair, transaction_data_hash);
-        
-        // 9.2.4 create signed transaction
-        const char* signed_tx = bcos_sdk_create_encoded_transaction_v2(
-            decode_tx_data, signed_hash, transaction_data_hash, 0, extra_data);
-       
-        // 9.2.4.1 create transaction struct
-        struct bcos_sdk_c_transaction_v2* transaction = bcos_sdk_create_transaction_struct_v2(decode_tx_data, 
-        signed_hash, transaction_data_hash, 0, extra_data);
-        // 9.2.4.2 encode tx to hex
-        const char* hex_tx = bcos_sdk_encode_transaction_struct_to_hex_v2(transaction);
-        printf(" [TxStructV2Test] tx_hex: %s\n", hex_tx);
-        // 9.2.4.3 decode hex to tx
-        struct bcos_sdk_c_transaction_v2* decode_tx = bcos_sdk_decode_transaction_struct_from_hex_v2(hex_tx);
-        // 9.2.4.4 encode tx to json
-        const char* json_tx = bcos_sdk_encode_transaction_struct_to_json_v2(decode_tx);
-        printf(" [TxStructV2Test] tx_json: %s\n", json_tx);
-        // 9.2.4.5 decode json to tx
-        decode_tx = bcos_sdk_decode_transaction_struct_from_json_v2(json_tx);
-        const char* hex_tx2 = bcos_sdk_encode_transaction_struct_to_hex_v2(decode_tx);
 
-        printf(" [TxStructV2Test] signed_tx: %s\n", signed_tx);
-        printf(" [TxStructV2Test] hex_tx: %s\n", hex_tx);
-        printf(" [TxStructV2Test] hex_tx2: %s\n", hex_tx2);
+        // 9.2.4 create signed transaction
+        const char* signed_tx = bcos_sdk_create_encoded_transaction_v1(
+            decode_tx_data, signed_hash, transaction_data_hash, 0, extra_data);
+
+        // 9.2.4.1 create transaction struct
+        struct bcos_sdk_c_transaction_v1* transaction = bcos_sdk_create_transaction_struct_v1(
+            decode_tx_data, signed_hash, transaction_data_hash, 0, extra_data);
+        // 9.2.4.2 encode tx to hex
+        const char* hex_tx = bcos_sdk_encode_transaction_struct_to_hex_v1(transaction);
+        printf(" [TxStructv1Test] tx_hex: %s\n", hex_tx);
+        // 9.2.4.3 decode hex to tx
+        struct bcos_sdk_c_transaction_v1* decode_tx =
+            bcos_sdk_decode_transaction_struct_from_hex_v1(hex_tx);
+        // 9.2.4.4 encode tx to json
+        const char* json_tx = bcos_sdk_encode_transaction_struct_to_json_v1(decode_tx);
+        printf(" [TxStructv1Test] tx_json: %s\n", json_tx);
+        // 9.2.4.5 decode json to tx
+        decode_tx = bcos_sdk_decode_transaction_struct_from_json_v1(json_tx);
+        const char* hex_tx2 = bcos_sdk_encode_transaction_struct_to_hex_v1(decode_tx);
+
+        printf(" [TxStructv1Test] signed_tx: %s\n", signed_tx);
+        printf(" [TxStructv1Test] hex_tx: %s\n", hex_tx);
+        printf(" [TxStructv1Test] hex_tx2: %s\n", hex_tx2);
 
         // 9.3 call rpc interface, sendTransaction
         bcos_rpc_send_transaction(sdk, group_id, "", signed_tx, 0, on_send_tx_resp_callback, NULL);
@@ -443,10 +469,10 @@ int main(int argc, char** argv)
         {
             bcos_sdk_c_free(input_bytes->buffer);
         }
-        bcos_sdk_destroy_transaction_data_struct_v2(transaction_data_v2);
-        bcos_sdk_destroy_transaction_data_struct_v2(decode_tx_data);
-        bcos_sdk_destroy_transaction_struct_v2(transaction);
-        bcos_sdk_destroy_transaction_struct_v2(decode_tx);
+        bcos_sdk_destroy_transaction_data_struct_v1(transaction_data_v1);
+        bcos_sdk_destroy_transaction_data_struct_v1(decode_tx_data);
+        bcos_sdk_destroy_transaction_struct_v1(transaction);
+        bcos_sdk_destroy_transaction_struct_v1(decode_tx);
         bcos_sdk_c_free((void*)transaction_data_hash);
         bcos_sdk_c_free((void*)signed_hash);
         bcos_sdk_c_free((void*)signed_tx);

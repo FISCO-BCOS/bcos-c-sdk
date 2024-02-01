@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- * @file bcos_sdk_c_uti_tx_v2.h
+ * @file bcos_sdk_c_uti_tx_v1.h
  * @author: kyonGuo
  * @date 2023/11/28
  */
 
-#ifndef BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V2_H
-#define BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V2_H
+#ifndef BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V1_H
+#define BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V1_H
 
 #include "bcos_sdk_c_common.h"
 
@@ -54,7 +54,7 @@ enum transaction_version
  * @param gas_limit gas limit
  * @return void* transaction data pointer, you should release it after use
  */
-void* bcos_sdk_create_transaction_v2_data(const char* group_id, const char* chain_id,
+void* bcos_sdk_create_transaction_v1_data(const char* group_id, const char* chain_id,
     const char* to, const char* nonce, const unsigned char* input, long inputSize, const char* abi,
     int64_t block_limit, const char* value, const char* gas_price, int64_t gas_limit);
 
@@ -211,4 +211,4 @@ void bcos_sdk_create_signed_eip1559_transaction_with_full_fields(void* key_pair,
 #ifdef __cplusplus
 }
 #endif
-#endif  // BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V2_H
+#endif  // BCOS_C_SDK_BCOS_SDK_C_UTI_TX_V1_H

@@ -1,6 +1,6 @@
 package org.fisco.bcos.sdk.jni.utilities.tx;
 
-public class TransactionDataV2 extends TransactionData {
+public class TransactionDataV1 extends TransactionData {
   protected String value;
   protected String gasPrice;
   protected long gasLimit;
