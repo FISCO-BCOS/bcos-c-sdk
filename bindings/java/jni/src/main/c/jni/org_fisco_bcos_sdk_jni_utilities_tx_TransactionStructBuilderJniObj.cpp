@@ -292,12 +292,12 @@ jobject convert_to_tx_v1_data_jobject(
         return NULL;
     }
 
-    jclass txDataClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1");
+    jclass txDataClass = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1");
     if (txDataClass == NULL)
     {
         env->FatalError(
             "No such class, className: "
-            "org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1");
+            "org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1");
     }
     jmethodID txDataMtd = env->GetMethodID(txDataClass, "<init>", "()V");
     if (txDataMtd == NULL)
@@ -769,7 +769,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
     }
     const char* tx_data_hex = nullptr;
     if (env->IsInstanceOf(jTransactionDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_data_v1* tx_data_struct =
             convert_to_tx_v1_data_struct(env, jTransactionDataObj);
@@ -833,7 +833,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
     }
     const char* tx_data_json = nullptr;
     if (env->IsInstanceOf(jTransactionDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_data_v1* tx_data_struct =
             convert_to_tx_v1_data_struct(env, jTransactionDataObj);
@@ -919,7 +919,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTr
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
  * Method:    decodeTransactionDataStructv1
- * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1;
+ * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1;
  */
 JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionDataStructV1(
@@ -970,7 +970,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_calcTran
     const char* tx_data_hash = nullptr;
     int crypto_type = jCrytpTyte;
     if (env->IsInstanceOf(jTransactionDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_data_v1* tx_data_struct =
             convert_to_tx_v1_data_struct(env, jTransactionDataObj);
@@ -1040,7 +1040,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_createEn
     int attribute = jAttribute;
     const char* extra_data = env->GetStringUTFChars(jExtraData, NULL);
     if (env->IsInstanceOf(jTxDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_data_v1* tx_data_struct =
             convert_to_tx_v1_data_struct(env, jTxDataObj);
@@ -1113,7 +1113,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
     CHECK_OBJECT_NOT_NULL(env, javaTxDataObj, nullptr);
     const char* tx_hex = nullptr;
     if (env->IsInstanceOf(javaTxDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_v1* tx_struct = convert_to_tx_v1_struct(env, jTransactionObj);
         if (tx_struct == NULL)
@@ -1176,7 +1176,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_encodeTr
     CHECK_OBJECT_NOT_NULL(env, javaTxDataObj, nullptr);
     const char* tx_json = nullptr;
     if (env->IsInstanceOf(javaTxDataObj,
-            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDatav1")) == JNI_TRUE)
+            env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TransactionDataV1")) == JNI_TRUE)
     {
         bcos_sdk_c_transaction_v1* tx_struct = convert_to_tx_v1_struct(env, jTransactionObj);
         if (tx_struct == NULL)
