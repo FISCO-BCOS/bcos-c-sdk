@@ -1,6 +1,7 @@
 #include "org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
+#include "org_fisco_bcos_sdk_common.h"
 #include "org_fisco_bcos_sdk_exception.h"
 #include <tuple>
 
@@ -19,6 +20,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I(
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(keypair);
@@ -29,9 +31,11 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I(
  * Method:    createHsmKeyPair
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair__Ljava_lang_String_2
-  (JNIEnv* env, jclass, jstring jhsm_lib_path)
- {
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair__Ljava_lang_String_2(
+    JNIEnv* env, jclass, jstring jhsm_lib_path)
+{
+    CHECK_OBJECT_NOT_NULL(env, jhsm_lib_path, 0);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     void* keypair = bcos_sdk_create_hsm_keypair(hsm_lib_path);
 
@@ -40,10 +44,11 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJni
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(keypair);
- }
+}
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj
@@ -54,6 +59,7 @@ JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_3B(
     JNIEnv* env, jclass, jint jcrypto_type, jbyteArray jdata)
 {
+    CHECK_OBJECT_NOT_NULL(env, jdata, 0);
     int crypto_type = (int)jcrypto_type;
     jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
     jsize len = env->GetArrayLength(jdata);
@@ -62,6 +68,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(keypair);
@@ -72,9 +79,12 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_
  * Method:    createHsmKeyPair
  * Signature: ([BLjava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair___3BLjava_lang_String_2
-  (JNIEnv* env, jclass, jbyteArray jdata, jstring jhsm_lib_path)
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createHsmKeyPair___3BLjava_lang_String_2(
+    JNIEnv* env, jclass, jbyteArray jdata, jstring jhsm_lib_path)
 {
+    CHECK_OBJECT_NOT_NULL(env, jhsm_lib_path, 0);
+    CHECK_OBJECT_NOT_NULL(env, jdata, 0);
     jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
     jsize len = env->GetArrayLength(jdata);
@@ -85,6 +95,7 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJni
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(keypair);
@@ -95,12 +106,15 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJni
  * Method:    useHsmKeyPair
  * Signature: (ILjava/lang/String;Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_useHsmKeyPair
-  (JNIEnv* env, jclass, jint jkey_index, jstring jpass_word, jstring jhsm_lib_path)
+JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_useHsmKeyPair(
+    JNIEnv* env, jclass, jint jkey_index, jstring jpass_word, jstring jhsm_lib_path)
 {
+    CHECK_OBJECT_NOT_NULL(env, jpass_word, 0);
+    CHECK_OBJECT_NOT_NULL(env, jhsm_lib_path, 0);
     const char* password = env->GetStringUTFChars(jpass_word, NULL);
     const char* hsm_lib_path = env->GetStringUTFChars(jhsm_lib_path, NULL);
-    void* keypair = bcos_sdk_use_hsm_keypair_by_keyindex_and_password((unsigned int)jkey_index, password, hsm_lib_path);
+    void* keypair = bcos_sdk_use_hsm_keypair_by_keyindex_and_password(
+        (unsigned int)jkey_index, password, hsm_lib_path);
 
     env->ReleaseStringUTFChars(jpass_word, password);
     env->ReleaseStringUTFChars(jhsm_lib_path, hsm_lib_path);
@@ -108,6 +122,7 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJni
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(keypair);
@@ -128,6 +143,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_getJniKeyPairAddress
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring result = env->NewStringUTF(addr);
@@ -150,6 +166,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_getJniKeyPairPubKey(
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring result = env->NewStringUTF(pub);
@@ -172,6 +189,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_getJniKeyPairPrivate
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring result = env->NewStringUTF(pri);

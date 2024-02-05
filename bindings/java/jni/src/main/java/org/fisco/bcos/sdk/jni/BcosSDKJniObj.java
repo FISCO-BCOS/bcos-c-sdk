@@ -42,7 +42,7 @@ public class BcosSDKJniObj {
   }
 
   /**
-   * desctroy interface
+   * destroy interface
    *
    * @param nativePointer
    */
@@ -64,6 +64,18 @@ public class BcosSDKJniObj {
     this.nativePointer = nativePointer;
   }
 
+  public static int localProtocolInfo(long nativePointer) {
+    BcosSDKJniObj bcosSDKJniObj = new BcosSDKJniObj();
+    bcosSDKJniObj.setNativePointer(nativePointer);
+    return bcosSDKJniObj.localProtocolInfo();
+  }
+
+  public static int negotiatedProtocolInfo(long nativePointer) {
+    BcosSDKJniObj bcosSDKJniObj = new BcosSDKJniObj();
+    bcosSDKJniObj.setNativePointer(nativePointer);
+    return bcosSDKJniObj.negotiatedProtocolInfo();
+  }
+
   // ------------------------native method list-------------------------------------------
 
   public static native long create(JniConfig config);
@@ -73,6 +85,10 @@ public class BcosSDKJniObj {
   public native void stop();
 
   public native void destroy();
+
+  public native int localProtocolInfo();
+
+  public native int negotiatedProtocolInfo();
 
   // -------------------------native method end-------------------------------------------
 

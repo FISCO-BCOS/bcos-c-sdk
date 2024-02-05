@@ -121,16 +121,19 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcServiceJniObj_sendT
     JNIEnv* env, jclass, jlong jsdk, jlong jkeypair, jstring jgroup, jstring jnode, jstring jto,
     jbyteArray jdata, jstring jabi, jint jatti, jstring jextra_data, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL(env, jgroup, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
+
     void* sdk = reinterpret_cast<void*>(jsdk);
     void* keypair = reinterpret_cast<void*>(jkeypair);
     const char* group = env->GetStringUTFChars(jgroup, NULL);
-    const char* node = env->GetStringUTFChars(jnode, NULL);
-    const char* to = env->GetStringUTFChars(jto, NULL);
+    const char* node = jnode ? env->GetStringUTFChars(jnode, NULL) : NULL;
+    const char* to = jto ? env->GetStringUTFChars(jto, NULL) : NULL;
     jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
     jsize len = env->GetArrayLength(jdata);
-    const char* abi = env->GetStringUTFChars(jabi, NULL);
+    const char* abi = jabi ? env->GetStringUTFChars(jabi, NULL) : NULL;
     int attr = jatti;
-    const char* extra_data = env->GetStringUTFChars(jextra_data, NULL);
+    const char* extra_data = jextra_data ? env->GetStringUTFChars(jextra_data, NULL) : NULL;
 
     // Note: The JNIEnv pointer, passed as the first argument to every native method, can only be
     // used in the thread with which it is associated. It is wrong to cache the JNIEnv interface
@@ -158,6 +161,7 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_rpc_RpcServiceJniObj_sendT
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtx_hash = env->NewStringUTF(tx_hash);

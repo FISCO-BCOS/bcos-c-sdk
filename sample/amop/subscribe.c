@@ -29,7 +29,7 @@
 #include <unistd.h>
 
 //------------------------------------------------------------------------------
-void usage()
+void usage(void)
 {
     printf("Desc: subscribe amop topic by command params\n");
     printf("Usage: subscribe <config> <topic>\n");
@@ -92,12 +92,10 @@ int main(int argc, char** argv)
 
     bcos_amop_subscribe_topic_with_cb(sdk, topic, on_recv_amop_subscribe_resp, sdk);
 
-    int i = 0;
     while (1)
     {
         printf(" Main thread running \n");
         sleep(10);
-        i++;
     }
 
     return EXIT_SUCCESS;

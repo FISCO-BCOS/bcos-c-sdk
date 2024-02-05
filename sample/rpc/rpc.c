@@ -30,7 +30,7 @@
 
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-void usage()
+void usage(void)
 {
     printf("Desc: rpc methods call test\n");
     printf("Usage: rpc <host> <port> <ssl type> <group_id>\n");

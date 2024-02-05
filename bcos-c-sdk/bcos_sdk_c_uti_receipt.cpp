@@ -80,8 +80,7 @@ void* bcos_sdk_create_receipt_data_with_json(const char* json)
     {
         std::string errorMsg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_receipt_data") << LOG_DESC("exception")
-                          << LOG_KV("json", json)
-                          << LOG_KV("error", errorMsg);
+                          << LOG_KV("json", json) << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
 
@@ -164,6 +163,35 @@ const char* bcos_sdk_calc_receipt_data_hash(int crypto_type, void* _receiptData)
         BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_calc_transaction_data_hash")
                           << LOG_DESC("exception") << LOG_KV("crypto_type", crypto_type)
                           << LOG_KV("_receiptData", _receiptData) << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+    return NULL;
+}
+
+const char* bcos_sdk_calc_receipt_data_hash_with_json(int crypto_type, const char* json)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(json, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
+
+    try
+    {
+        ReceiptBuilder builder;
+        auto transactionDataHash = builder.calculateReceiptDataHashWithJson(
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
+            std::string(json));
+        return strdup(bcos::toHexStringWithPrefix(transactionDataHash).c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_calc_transaction_data_hash_with_json")
+                          << LOG_DESC("exception") << LOG_KV("crypto_type", crypto_type)
+                          << LOG_KV("json", json) << LOG_KV("error", errorMsg);
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
     }
     return NULL;

@@ -22,8 +22,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransact
  * Method:    createTransactionDataWithJson
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransactionDataWithJson
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransactionDataWithJson(
+    JNIEnv*, jclass, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
@@ -48,8 +49,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_encodeTransact
  * Method:    decodeTransactionDataToJsonObj
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionDataToJsonObj
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionDataToJsonObj(
+    JNIEnv*, jclass, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
@@ -59,6 +61,33 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBu
 JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_calcTransactionDataHash(
     JNIEnv*, jclass, jint, jlong);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransaction
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransaction(
+    JNIEnv*, jclass, jstring);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransactionToJsonObj
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionToJsonObj(
+    JNIEnv*, jclass, jstring);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    destroyTransaction
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_destroyTransaction(
+    JNIEnv*, jclass, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj

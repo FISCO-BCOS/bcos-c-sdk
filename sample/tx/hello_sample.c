@@ -127,7 +127,7 @@ const char* g_hw_abi =
 }
 */
 
-void usage()
+void usage(void)
 {
     printf("Desc: HelloWorld contract sample\n");
     printf("Usage: hello_sample <config> <group_id>\n");

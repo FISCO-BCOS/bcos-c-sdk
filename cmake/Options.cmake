@@ -56,6 +56,8 @@ macro(configure_project)
         set(MARCH_TYPE "-march=native -mtune=native")
     endif()
 
+    # build jni
+    default_option(BUILD_JNI OFF)
     # unit tests
     default_option(TESTS OFF)
     # code coverage
@@ -84,6 +86,7 @@ macro(print_config NAME)
     message("-- CMAKE_BUILD_TYPE   Build type                   ${CMAKE_BUILD_TYPE}")
     message("-- TARGET_PLATFORM    Target platform              ${CMAKE_SYSTEM_NAME} ${ARCHITECTURE}")
     message("-- BUILD_STATIC       Build static                 ${BUILD_STATIC}")
+    message("-- BUILD_JNI          Build jni                    ${BUILD_JNI}")
     message("-- COVERAGE           Build code coverage          ${COVERAGE}")
     message("-- TESTS              Build tests                  ${TESTS}")
     message("-- ARCH_NATIVE        Enable native code           ${ARCH_NATIVE}")

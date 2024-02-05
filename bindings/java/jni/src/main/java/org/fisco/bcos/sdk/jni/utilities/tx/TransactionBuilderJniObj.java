@@ -57,6 +57,25 @@ public class TransactionBuilderJniObj {
       throws JniException;
 
   /**
+   * Decode transaction hex string to Transaction object raw pointer
+   *
+   * @param transactionHex encoded transaction hex string
+   * @return Transaction object pointer
+   */
+  public static native long decodeTransaction(String transactionHex) throws JniException;
+
+  /**
+   * Decode transaction hex string to Transaction object json string
+   *
+   * @param transactionHex encoded transaction hex string
+   * @return Transaction object json string
+   */
+  public static native String decodeTransactionToJsonObj(String transactionHex) throws JniException;
+
+  /** @param transaction Transaction pointer */
+  public static native void destroyTransaction(long transaction) throws JniException;
+
+  /**
    * @param keyPair KeyPair pointer
    * @param transactionDataHash transaction data hash hex string
    * @return signed tx string
