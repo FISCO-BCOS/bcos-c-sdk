@@ -52,6 +52,8 @@ void bcos_sdk_destroy_receipt_data(void* transaction_data);
 
 const char* bcos_sdk_calc_receipt_data_hash(int crypto_type, void* _receiptData);
 
+const char* bcos_sdk_calc_receipt_data_hash_with_json(int crypto_type, const char* json);
+
 const char* bcos_sdk_encode_receipt_data(void* receipt_data);
 
 const char* bcos_sdk_decode_receipt_data(const char* receipt_bytes);

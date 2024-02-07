@@ -37,7 +37,7 @@ extern "C" {
  *
  * @return const char*
  */
-const char* bcos_sdk_version();
+const char* bcos_sdk_version(void);
 
 /**
  * @brief: create bcos sdk object by config object
@@ -115,6 +115,10 @@ void bcos_sdk_get_group_wasm_and_crypto(void* sdk, const char* group, int* wasm,
  * @return const char* : chain id
  */
 const char* bcos_sdk_get_group_chain_id(void* sdk, const char* group);
+
+uint32_t bcos_sdk_get_local_protocol_info(void* sdk);
+
+uint32_t bcos_sdk_get_negotiated_protocol_info(void* sdk);
 // --------------------------------------------------------------------
 
 #ifdef __cplusplus

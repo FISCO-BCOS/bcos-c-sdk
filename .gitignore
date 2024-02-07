@@ -36,9 +36,12 @@ deps
 *.out
 *.app
 .cache
-build
+build**
 deps
 .gradle
 .vscode/
 .idea/
 .DS_Store
+vcpkg_installed**
+
+conf**

@@ -181,6 +181,8 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_amop_AmopRequestCallback_2(
     JNIEnv* env, jobject self, jstring jtopic, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopic);
+
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -212,6 +214,7 @@ Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2L
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_util_Set_2(
     JNIEnv* env, jobject self, jobject jtopics)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopics);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     jclass setClass = env->GetObjectClass(jtopics);
@@ -261,6 +264,7 @@ JNIEXPORT void JNICALL
 Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2Lorg_fisco_bcos_sdk_jni_amop_AmopJniObjRequestCallback_2(
     JNIEnv* env, jobject self, jstring jtopic, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopic);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -292,6 +296,7 @@ Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_subscribeTopic__Ljava_lang_String_2L
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_unsubscribeTopic(
     JNIEnv* env, jobject self, jobject jtopics)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopics);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     jclass setClass = env->GetObjectClass(jtopics);
@@ -363,6 +368,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_setCallback(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendAmopMsg(
     JNIEnv* env, jobject self, jstring jtopic, jbyteArray jdata, jint jtimeout, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopic);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     // Note: The JNIEnv pointer, passed as the first argument to every native method, can only be
@@ -399,6 +406,8 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendAmopMsg(
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_broadcastAmopMsg(
     JNIEnv* env, jobject self, jstring jtopic, jbyteArray jdata)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jtopic);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* topic = env->GetStringUTFChars(jtopic, 0);
@@ -419,6 +428,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_broadcastAmop
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_amop_AmopJniObj_sendResponse(
     JNIEnv* env, jobject self, jstring jendpoint, jstring jseq, jbyteArray jdata)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jendpoint);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jseq);
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jdata);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
 
     const char* endpoint = env->GetStringUTFChars(jendpoint, 0);

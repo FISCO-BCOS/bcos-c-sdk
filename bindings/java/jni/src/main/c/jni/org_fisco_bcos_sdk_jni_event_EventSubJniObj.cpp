@@ -130,6 +130,9 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_event_EventSubJniObj_stop(
 JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_event_EventSubJniObj_subscribeEvent(
     JNIEnv* env, jobject self, jstring jgroup, jstring jparams, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL(env, jgroup, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jparams, NULL);
+
     void* sdk = bcos_sdk_get_native_pointer(env, self);
     const char* group = env->GetStringUTFChars(jgroup, 0);
     const char* params = env->GetStringUTFChars(jparams, 0);
@@ -168,6 +171,7 @@ JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_event_EventSubJniObj_subsc
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_event_EventSubJniObj_unsubscribeEvent(
     JNIEnv* env, jobject self, jstring jeventId)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jeventId);
     void* sdk = bcos_sdk_get_native_pointer(env, self);
     const char* eventid = env->GetStringUTFChars(jeventId, 0);
 

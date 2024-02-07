@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Top-level CMake file for ut of bcos-c-sdk
+# Top-level CMake file for ut of bcos-rpc
 # ------------------------------------------------------------------------------
 # Copyright (C) 2021 FISCO BCOS.
 # SPDX-License-Identifier: Apache-2.0
@@ -15,14 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-file(GLOB_RECURSE SOURCES "unittests/*.cpp" "unittests/*.h" "unittests/*.sol")
+
+file(GLOB_RECURSE SOURCES "*.cpp" "*.h")
 
 # cmake settings
 include(SearchTestCases)
-set(TEST_BINARY_NAME test-bcos-rpc)
-config_test_cases("" "${SOURCES}" bin/${TEST_BINARY_NAME} "")
+set(TEST_BINARY_NAME test-bcos-c-sdk)
+config_test_cases("" "${SOURCES}" ${TEST_BINARY_NAME} "")
 
-# ut
-# add_executable(${TEST_BINARY_NAME} ${SOURCES})
-# target_include_directories(${TEST_BINARY_NAME} PRIVATE .)
-# target_link_libraries(${TEST_BINARY_NAME})
+add_executable(${TEST_BINARY_NAME} ${SOURCES})
+target_include_directories(${TEST_BINARY_NAME} PRIVATE . ${CMAKE_SOURCE_DIR})
+
+if(BUILD_SHARED_LIBS)
+    target_link_libraries(${TEST_BINARY_NAME} ${BCOS_C_SDK_TARGET} Boost::log Boost::unit_test_framework)
+else ()
+    target_link_libraries(${TEST_BINARY_NAME} ${BCOS_C_SDK_STATIC_TARGET} Boost::log Boost::unit_test_framework)
+endif ()

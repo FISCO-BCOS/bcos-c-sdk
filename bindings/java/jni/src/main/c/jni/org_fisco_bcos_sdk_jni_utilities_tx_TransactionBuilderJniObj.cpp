@@ -2,6 +2,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
+#include "org_fisco_bcos_sdk_common.h"
 #include "org_fisco_bcos_sdk_exception.h"
 #include <tuple>
 
@@ -16,16 +17,20 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransact
     jclass, jstring jgroup_id, jstring jchain_id, jstring jto, jstring jdata, jstring jabi,
     jlong jblock_limit)
 {
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, 0);
+    CHECK_OBJECT_NOT_NULL(env, jdata, 0);
+
     // group id
     const char* group_id = env->GetStringUTFChars(jgroup_id, NULL);
     // chain id
     const char* chain_id = env->GetStringUTFChars(jchain_id, NULL);
-    // code
-    const char* to = env->GetStringUTFChars(jto, NULL);
+    // to
+    const char* to = (jto == NULL) ? NULL : env->GetStringUTFChars(jto, NULL);
     // data
     const char* data = env->GetStringUTFChars(jdata, NULL);
     // abi
-    const char* abi = env->GetStringUTFChars(jabi, NULL);
+    const char* abi = (jabi == NULL) ? NULL : env->GetStringUTFChars(jabi, NULL);
     // block limit
     int64_t block_limit = (int64_t)jblock_limit;
 
@@ -41,6 +46,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransact
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(transaction_data);
@@ -55,6 +61,7 @@ JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransactionDataWithJson(
     JNIEnv* env, jclass, jstring jjson)
 {
+    CHECK_OBJECT_NOT_NULL(env, jjson, 0);
     const char* json = env->GetStringUTFChars(jjson, NULL);
     void* transaction_data = bcos_sdk_create_transaction_data_with_json(json);
 
@@ -62,6 +69,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createTransact
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
     }
 
     return reinterpret_cast<jlong>(transaction_data);
@@ -97,6 +105,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_encodeTransact
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jencoded_transaction_data = env->NewStringUTF(encoded_transaction_data);
@@ -119,6 +128,8 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionDataToJsonObj(
     JNIEnv* env, jclass, jstring jtransaction_bytes)
 {
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, NULL);
+
     const char* transaction_data = env->GetStringUTFChars(jtransaction_bytes, NULL);
     const char* transaction_data_json = bcos_sdk_decode_transaction_data(transaction_data);
 
@@ -126,6 +137,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransact
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtransaction_data_json = env->NewStringUTF(transaction_data_json);
@@ -153,6 +165,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_calcTransactio
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtransaction_data_hash = env->NewStringUTF(transaction_data_hash);
@@ -168,6 +181,67 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_calcTransactio
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransaction
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransaction(
+    JNIEnv* env, jclass, jstring jtransaction_bytes)
+{
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, 0);
+    const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
+    void* transaction_data = bcos_sdk_decode_transaction(transaction);
+    env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return 0;
+    }
+    return reinterpret_cast<jlong>(transaction_data);
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    decodeTransactionToJsonObj
+ * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_decodeTransactionToJsonObj(
+    JNIEnv* env, jclass, jstring jtransaction_bytes)
+{
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_bytes, NULL);
+    const char* transaction = env->GetStringUTFChars(jtransaction_bytes, NULL);
+    const char* transaction_json = bcos_sdk_decode_transaction_to_json_obj(transaction);
+    env->ReleaseStringUTFChars(jtransaction_bytes, transaction);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
+    }
+    jstring jtransaction_json = env->NewStringUTF(transaction_json);
+    if (transaction_json)
+    {
+        free((void*)transaction_json);
+        transaction_json = NULL;
+    }
+    return jtransaction_json;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    destroyTransaction
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_destroyTransaction(
+    JNIEnv*, jclass, jlong jtransaction)
+{
+    void* transaction = reinterpret_cast<void*>(jtransaction);
+    bcos_sdk_destroy_transaction(transaction);
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
  * Method:    signTransactionDataHash
  * Signature: (JLjava/lang/String;)Ljava/lang/String;
  */
@@ -175,7 +249,8 @@ JNIEXPORT jstring JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_signTransactionDataHash(
     JNIEnv* env, jclass, jlong jkeypair, jstring jtransaction_data_hash)
 {
-    //
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
+
     void* keypair = reinterpret_cast<void*>(jkeypair);
     // transaction_data_hash
     const char* transaction_data_hash = env->GetStringUTFChars(jtransaction_data_hash, NULL);
@@ -187,6 +262,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_signTransactio
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jsigned_data = env->NewStringUTF(signed_data);
@@ -210,6 +286,8 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jtransaction_data, jstring jtransaction_data_signed_data,
     jstring jtransaction_data_hash, jint jattr)
 {
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_signed_data, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
     void* transaction_data = reinterpret_cast<void*>(jtransaction_data);
 
     const char* transaction_data_signed_data =
@@ -227,6 +305,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jsigned_tx = env->NewStringUTF(signed_tx);
@@ -250,6 +329,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jtransaction_data, jstring jtransaction_data_signed_data,
     jstring jtransaction_data_hash, jint jattr, jstring jextra_data)
 {
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_signed_data, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jtransaction_data_hash, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jextra_data, NULL);
+
     void* transaction_data = reinterpret_cast<void*>(jtransaction_data);
 
     const char* transaction_data_signed_data =
@@ -269,6 +352,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jsigned_tx = env->NewStringUTF(signed_tx);
@@ -293,6 +377,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jkeypair, jstring jgroup_id, jstring jchain_id, jstring jto,
     jstring jdata, jstring jabi, jlong jblock_limit, jint jattr)
 {
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
+
     // keypair
     void* keypair = reinterpret_cast<void*>(jkeypair);
     // group id
@@ -300,11 +388,11 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     // chain id
     const char* chain_id = env->GetStringUTFChars(jchain_id, NULL);
     // to
-    const char* to = env->GetStringUTFChars(jto, NULL);
+    const char* to = jto ? env->GetStringUTFChars(jto, NULL) : NULL;
     // data
     const char* data = env->GetStringUTFChars(jdata, NULL);
     // abi
-    const char* abi = env->GetStringUTFChars(jabi, NULL);
+    const char* abi = jabi ? env->GetStringUTFChars(jabi, NULL) : NULL;
     // block limit
     int64_t block_limit = (int64_t)jblock_limit;
     // attr
@@ -317,6 +405,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtx_hash = env->NewStringUTF(tx_hash);
@@ -375,6 +464,10 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     JNIEnv* env, jclass, jlong jkeypair, jstring jgroup_id, jstring jchain_id, jstring jto,
     jstring jdata, jstring jabi, jlong jblock_limit, jint jattr, jstring jextra_data)
 {
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, NULL);
+    CHECK_OBJECT_NOT_NULL(env, jdata, NULL);
+
     // keypair
     void* keypair = reinterpret_cast<void*>(jkeypair);
     // group id
@@ -382,17 +475,17 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     // chain id
     const char* chain_id = env->GetStringUTFChars(jchain_id, NULL);
     // to
-    const char* to = env->GetStringUTFChars(jto, NULL);
+    const char* to = jto ? env->GetStringUTFChars(jto, NULL) : NULL;
     // data
     const char* data = env->GetStringUTFChars(jdata, NULL);
     // abi
-    const char* abi = env->GetStringUTFChars(jabi, NULL);
+    const char* abi = jabi ? env->GetStringUTFChars(jabi, NULL) : NULL;
     // block limit
     int64_t block_limit = (int64_t)jblock_limit;
     // attr
     int attr = (int64_t)jattr;
     // extra data
-    const char* extra_data = env->GetStringUTFChars(jextra_data, NULL);
+    const char* extra_data = jextra_data ? env->GetStringUTFChars(jextra_data, NULL) : NULL;
 
     char* tx_hash = NULL;
     char* signed_tx = NULL;
@@ -401,6 +494,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
     }
 
     jstring jtx_hash = env->NewStringUTF(tx_hash);

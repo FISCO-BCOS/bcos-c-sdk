@@ -12,36 +12,56 @@ extern "C" {
  * Method:    create
  * Signature: (Lorg/fisco/bcos/sdk/jni/common/JniConfig;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_create(JNIEnv*, jclass, jobject);
+JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_create
+  (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    start
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_start(JNIEnv*, jobject);
+JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_start
+  (JNIEnv *, jobject);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    stop
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_stop(JNIEnv*, jobject);
+JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_stop
+  (JNIEnv *, jobject);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    destroy
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_destroy(JNIEnv*, jobject);
+JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_destroy
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    localProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_localProtocolInfo
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    negotiatedProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_negotiatedProtocolInfo
+  (JNIEnv *, jobject);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    registerBlockNotifier
  * Signature: (Ljava/lang/String;Lorg/fisco/bcos/sdk/jni/BlockNotifier;)V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNotifier(
-    JNIEnv*, jobject, jstring, jobject);
+JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNotifier
+  (JNIEnv *, jobject, jstring, jobject);
 
 #ifdef __cplusplus
 }

@@ -59,6 +59,10 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 
 char* my_strdup(const char* s)
 {
+    if (s == NULL)
+    {
+        return NULL;
+    }
     size_t len = strlen(s) + 1;
     char* result = (char*)malloc(len);
     if (result == (char*)0)
@@ -228,6 +232,7 @@ void bcos_sdk_c_handle_response(
     if (errorPtr && errorPtr->errorCode() != 0)
     {
         resp->error = errorPtr->errorCode();
+        // not copy here because cpp sdk will release the errorPtr
         resp->desc = (char*)errorPtr->errorMessage().c_str();
         resp->data = NULL;
         resp->size = 0;

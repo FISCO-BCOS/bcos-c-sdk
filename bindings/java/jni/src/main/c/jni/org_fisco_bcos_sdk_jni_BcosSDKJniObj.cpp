@@ -14,6 +14,7 @@
 JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_create(
     JNIEnv* env, jclass self, jobject jconfig)
 {
+    CHECK_OBJECT_NOT_NULL(env, jconfig, 0);
     (void)self;
     // config
     struct bcos_sdk_c_config* config = create_config_from_java_obj(env, jconfig);
@@ -128,6 +129,33 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     // env->DeleteGlobalRef(jcallback);
 }
 
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    localProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_localProtocolInfo(
+    JNIEnv* env, jobject self)
+{
+    void* sdk = bcos_sdk_get_native_pointer(env, self);
+    uint32_t info = bcos_sdk_get_local_protocol_info(sdk);
+    return (jint)info;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
+ * Method:    negotiatedProtocolInfo
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_negotiatedProtocolInfo(
+    JNIEnv* env, jobject self)
+{
+    void* sdk = bcos_sdk_get_native_pointer(env, self);
+    uint32_t info = bcos_sdk_get_negotiated_protocol_info(sdk);
+    return (jint)info;
+}
+
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
  * Method:    registerBlockNotifier
@@ -136,6 +164,8 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
 JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNotifier(
     JNIEnv* env, jobject self, jstring jgroup, jobject jcallback)
 {
+    CHECK_OBJECT_NOT_NULL_RET_VOID(env, jgroup);
+
     void* sdk = bcos_sdk_get_native_pointer(env, self);
     if (!sdk)
     {
