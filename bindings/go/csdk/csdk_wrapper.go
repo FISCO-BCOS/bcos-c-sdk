@@ -116,11 +116,16 @@ func on_callback_once(resp *C.struct_bcos_sdk_c_struct_response) {
 	if chanData == nil {
 		panic("callback channel is nil")
 	}
+	var respData Response
 	if int(resp.error) != 0 {
-		chanData.Data <- Response{nil, fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))}
+		respData.Err = fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))
 	} else {
-		data := C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
-		chanData.Data <- Response{data, nil}
+		respData.Result = C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
+	}
+	if chanData.Data != nil {
+		chanData.Data <- respData
+	} else {
+		go chanData.Handler.(func([]byte, error))(respData.Result.([]byte), respData.Err)
 	}
 }
 
