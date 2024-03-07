@@ -18,6 +18,7 @@
  * @date 2023-09-12
  */
 
+#include <tup/Tars.h>
 #include "bcos-c-sdk/bcos_sdk_c.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_abi.h"
