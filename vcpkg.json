@@ -113,6 +113,10 @@
     {
       "name": "fisco-bcos-cpp-sdk",
       "version": "3.7.0"
+    },
+    {
+      "name": "wedprcrypto",
+      "version": "1.0.0"
     }
   ]
 }
