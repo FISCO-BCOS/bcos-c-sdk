@@ -24,7 +24,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
-#include <utilities/tx/Transaction.h>
+#include <bcos-tars-protocol/tars/Transaction.h>
 
 #include <boost/test/tools/old/interface.hpp>
 #include <boost/test/unit_test.hpp>

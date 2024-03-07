@@ -17,21 +17,22 @@ targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://oss.sonatype.org/service/local/staging/deploy/maven2" }
 }
 
 dependencies {
     api ('org.slf4j:slf4j-api:1.7.36')
     api ('com.fasterxml.jackson.core:jackson-databind:2.14.2')
-
+    implementation 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.1'
     testCompile ('org.slf4j:slf4j-log4j12:1.7.36')
     testCompile ('junit:junit:4.13.2')
 }
 
 archivesBaseName = 'bcos-sdk-jni'
 group = 'org.fisco-bcos'
-version = '3.6.0'
+version = '3.7.0-SNAPSHOT'
 
 // Additional attribute definition
 ext {

@@ -808,7 +808,7 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxStruct)
     // encode tx to json success
     encodedTxJson = bcos_sdk_encode_transaction_struct_to_json(txStruct);
     jsonSuccess = bcos_sdk_is_last_opr_success();
-
+    std::cout << std::string(encodedTxJson) << std::endl;
     BOOST_TEST(jsonSuccess == true);
     BOOST_TEST(encodedTxJson != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);

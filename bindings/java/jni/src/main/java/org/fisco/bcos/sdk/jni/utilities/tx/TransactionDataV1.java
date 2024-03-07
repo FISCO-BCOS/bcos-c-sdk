@@ -15,12 +15,22 @@ public class TransactionDataV1 extends TransactionData {
     this.value = value;
   }
 
+  public TransactionDataV1 buildValue(String value) {
+    this.value = value;
+    return this;
+  }
+
   public String getGasPrice() {
     return gasPrice;
   }
 
   public void setGasPrice(String gasPrice) {
     this.gasPrice = gasPrice;
+  }
+
+  public TransactionDataV1 buildGasPrice(String gasPrice) {
+    this.gasPrice = gasPrice;
+    return this;
   }
 
   public long getGasLimit() {
@@ -31,6 +41,11 @@ public class TransactionDataV1 extends TransactionData {
     this.gasLimit = gasLimit;
   }
 
+  public TransactionDataV1 buildGasLimit(long gasLimit) {
+    this.gasLimit = gasLimit;
+    return this;
+  }
+
   public String getMaxFeePerGas() {
     return maxFeePerGas;
   }
@@ -39,11 +54,21 @@ public class TransactionDataV1 extends TransactionData {
     this.maxFeePerGas = maxFeePerGas;
   }
 
+  public TransactionDataV1 buildMaxFeePerGas(String maxFeePerGas) {
+    this.maxFeePerGas = maxFeePerGas;
+    return this;
+  }
+
   public String getMaxPriorityFeePerGas() {
     return maxPriorityFeePerGas;
   }
 
   public void setMaxPriorityFeePerGas(String maxPriorityFeePerGas) {
     this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+  }
+
+  public TransactionDataV1 buildMaxPriorityFeePerGas(String maxPriorityFeePerGas) {
+    this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+    return this;
   }
 }

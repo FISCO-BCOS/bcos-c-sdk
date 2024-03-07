@@ -24,7 +24,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_uti_abi.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
-#include "bcos-c-sdk/bcos_sdk_c_uti_tx_struct.h"
+#include "bcos-c-sdk/bcos_sdk_c_uti_tx_struct_v1.h"
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <boost/test/tools/old/interface.hpp>
 #include <boost/test/unit_test.hpp>
@@ -96,14 +96,14 @@ void compareTxStruct(struct bcos_sdk_c_transaction_v1* txStruct,
 {
     // transaction_data
     BOOST_TEST(txStruct != nullptr);
-    BOOST_TEST(txStruct->transaction_data->version == txDataStruct->version);
-    BOOST_TEST(txStruct->transaction_data->block_limit == txDataStruct->block_limit);
-    BOOST_TEST(txStruct->transaction_data->chain_id == txDataStruct->chain_id);
-    BOOST_TEST(txStruct->transaction_data->version == txDataStruct->version);
-    BOOST_TEST(txStruct->transaction_data->group_id == txDataStruct->group_id);
-    BOOST_TEST(txStruct->transaction_data->nonce == txDataStruct->nonce);
-    BOOST_TEST(txStruct->transaction_data->to == txDataStruct->to);
-    BOOST_TEST(txStruct->transaction_data->abi == txDataStruct->abi);
+    BOOST_TEST(txStruct->transaction_data->base.version == txDataStruct->base.version);
+    BOOST_TEST(txStruct->transaction_data->base.block_limit == txDataStruct->base.block_limit);
+    BOOST_TEST(txStruct->transaction_data->base.chain_id == txDataStruct->base.chain_id);
+    BOOST_TEST(txStruct->transaction_data->base.version == txDataStruct->base.version);
+    BOOST_TEST(txStruct->transaction_data->base.group_id == txDataStruct->base.group_id);
+    BOOST_TEST(txStruct->transaction_data->base.nonce == txDataStruct->base.nonce);
+    BOOST_TEST(txStruct->transaction_data->base.to == txDataStruct->base.to);
+    BOOST_TEST(txStruct->transaction_data->base.abi == txDataStruct->base.abi);
     BOOST_TEST(txStruct->transaction_data->value == txDataStruct->value);
     BOOST_TEST(txStruct->transaction_data->gas_price == txDataStruct->gas_price);
     BOOST_TEST(txStruct->transaction_data->gas_limit == txDataStruct->gas_limit);
@@ -111,9 +111,9 @@ void compareTxStruct(struct bcos_sdk_c_transaction_v1* txStruct,
     BOOST_TEST(txStruct->transaction_data->max_priority_fee_per_gas ==
                txDataStruct->max_priority_fee_per_gas);
     std::string txDataInputString(
-        reinterpret_cast<char*>(txDataStruct->input->buffer), txDataStruct->input->length);
-    std::string txInputString(reinterpret_cast<char*>(txStruct->transaction_data->input->buffer),
-        txStruct->transaction_data->input->length);
+        reinterpret_cast<char*>(txDataStruct->base.input->buffer), txDataStruct->base.input->length);
+    std::string txInputString(reinterpret_cast<char*>(txStruct->transaction_data->base.input->buffer),
+        txStruct->transaction_data->base.input->length);
     BOOST_TEST(txDataInputString == txInputString);
 
     // signature
@@ -179,11 +179,11 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithHexInputv1)
     success = bcos_sdk_is_last_opr_success();
     BOOST_TEST(success == true);
     BOOST_TEST(txData != nullptr);
-    BOOST_TEST(txData->group_id == group_id);
-    BOOST_TEST(txData->chain_id == chain_id);
-    BOOST_TEST(txData->to == to);
-    BOOST_TEST(txData->abi == abi);
-    BOOST_TEST(txData->block_limit == block_limit);
+    BOOST_TEST(txData->base.group_id == group_id);
+    BOOST_TEST(txData->base.chain_id == chain_id);
+    BOOST_TEST(txData->base.to == to);
+    BOOST_TEST(txData->base.abi == abi);
+    BOOST_TEST(txData->base.block_limit == block_limit);
     BOOST_TEST(txData->value == value);
     BOOST_TEST(txData->gas_price == gas_price);
     BOOST_TEST(txData->gas_limit == gas_limit);
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithHexInputv1)
     auto bytesInput = fromHexString(input);
     std::string fromInputHexString(bytesInput->begin(), bytesInput->end());
     std::string txDataInputString(
-        reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
+        reinterpret_cast<char*>(txData->base.input->buffer), txData->base.input->length);
     BOOST_TEST(txDataInputString == fromInputHexString);
 
     bcos_sdk_destroy_transaction_data_struct_v1(txData);
@@ -257,11 +257,11 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
 
     BOOST_TEST(success == true);
     BOOST_TEST(txData != nullptr);
-    BOOST_TEST(txData->group_id == group_id);
-    BOOST_TEST(txData->chain_id == chain_id);
-    BOOST_TEST(txData->to == to);
-    BOOST_TEST(txData->abi == abi);
-    BOOST_TEST(txData->block_limit == block_limit);
+    BOOST_TEST(txData->base.group_id == group_id);
+    BOOST_TEST(txData->base.chain_id == chain_id);
+    BOOST_TEST(txData->base.to == to);
+    BOOST_TEST(txData->base.abi == abi);
+    BOOST_TEST(txData->base.block_limit == block_limit);
     BOOST_TEST(txData->value == value);
     BOOST_TEST(txData->gas_price == gas_price);
     BOOST_TEST(txData->gas_limit == gas_limit);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
     BOOST_TEST(txData->max_priority_fee_per_gas == max_priority_fee_per_gas);
     std::string fromInputHexString1(bytesInput->begin(), bytesInput->end());
     std::string txDataInputString1(
-        reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
+        reinterpret_cast<char*>(txData->base.input->buffer), txData->base.input->length);
     BOOST_TEST(txDataInputString1 == fromInputHexString1);
 
     // create transaction_data_struct_v1 failed (chain_id = NULL)
@@ -292,11 +292,11 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
 
     BOOST_TEST(success == true);
     BOOST_TEST(txData != nullptr);
-    BOOST_TEST(txData->group_id == group_id);
-    BOOST_TEST(txData->chain_id == chain_id);
-    BOOST_TEST(txData->to == to);
-    BOOST_TEST(txData->abi == abi);
-    BOOST_TEST(txData->block_limit == block_limit);
+    BOOST_TEST(txData->base.group_id == group_id);
+    BOOST_TEST(txData->base.chain_id == chain_id);
+    BOOST_TEST(txData->base.to == to);
+    BOOST_TEST(txData->base.abi == abi);
+    BOOST_TEST(txData->base.block_limit == block_limit);
     BOOST_TEST(txData->value == value);
     BOOST_TEST(txData->gas_price == gas_price);
     BOOST_TEST(txData->gas_limit == gas_limit);
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
     BOOST_TEST(txData->max_priority_fee_per_gas == max_priority_fee_per_gas);
     std::string fromInputHexString2(bytesInput->begin(), bytesInput->end());
     std::string txDataInputString2(
-        reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
+        reinterpret_cast<char*>(txData->base.input->buffer), txData->base.input->length);
     BOOST_TEST(txDataInputString2 == fromInputHexString2);
 
     // create transaction_data_struct_v1 success (abi has Chinese characters)
@@ -316,11 +316,11 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
 
     BOOST_TEST(success == true);
     BOOST_TEST(txData != nullptr);
-    BOOST_TEST(txData->group_id == group_id);
-    BOOST_TEST(txData->chain_id == chain_id);
-    BOOST_TEST(txData->to == to);
-    BOOST_TEST(txData->abi == abi_with_chinese);
-    BOOST_TEST(txData->block_limit == block_limit);
+    BOOST_TEST(txData->base.group_id == group_id);
+    BOOST_TEST(txData->base.chain_id == chain_id);
+    BOOST_TEST(txData->base.to == to);
+    BOOST_TEST(txData->base.abi == abi_with_chinese);
+    BOOST_TEST(txData->base.block_limit == block_limit);
     BOOST_TEST(txData->value == value);
     BOOST_TEST(txData->gas_price == gas_price);
     BOOST_TEST(txData->gas_limit == gas_limit);
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
     BOOST_TEST(txData->max_priority_fee_per_gas == max_priority_fee_per_gas);
     std::string fromInputHexString3(bytesInput->begin(), bytesInput->end());
     std::string txDataInputString3(
-        reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
+        reinterpret_cast<char*>(txData->base.input->buffer), txData->base.input->length);
     BOOST_TEST(txDataInputString3 == fromInputHexString3);
 
     // create transaction_data_struct_v1 failed (gas_limit <0)
@@ -350,11 +350,11 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
 
     BOOST_TEST(success == true);
     BOOST_TEST(txData != nullptr);
-    BOOST_TEST(txData->group_id == group_id);
-    BOOST_TEST(txData->chain_id == chain_id);
-    BOOST_TEST(txData->to == to);
-    BOOST_TEST(txData->abi == abi);
-    BOOST_TEST(txData->block_limit == block_limit);
+    BOOST_TEST(txData->base.group_id == group_id);
+    BOOST_TEST(txData->base.chain_id == chain_id);
+    BOOST_TEST(txData->base.to == to);
+    BOOST_TEST(txData->base.abi == abi);
+    BOOST_TEST(txData->base.block_limit == block_limit);
     BOOST_TEST(txData->value == value);
     BOOST_TEST(txData->gas_price == gas_price);
     BOOST_TEST(txData->gas_limit == gas_limit);
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE(testCreateTxDataStructWithByteInputv1)
     BOOST_TEST(txData->max_priority_fee_per_gas == max_priority_fee_per_gas);
     std::string fromInputHexString(bytesInput->begin(), bytesInput->end());
     std::string txDataInputString(
-        reinterpret_cast<char*>(txData->input->buffer), txData->input->length);
+        reinterpret_cast<char*>(txData->base.input->buffer), txData->base.input->length);
     BOOST_TEST(txDataInputString == fromInputHexString);
 
     bcos_sdk_destroy_transaction_data_struct_v1(txData);
@@ -432,13 +432,13 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructv1)
     BOOST_TEST(hexSuccess == true);
     BOOST_TEST(decodedTxDataHex != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
-    BOOST_TEST(decodedTxDataHex->version == txDataWithBytes->version);
-    BOOST_TEST(decodedTxDataHex->group_id == txDataWithBytes->group_id);
-    BOOST_TEST(decodedTxDataHex->chain_id == txDataWithBytes->chain_id);
-    BOOST_TEST(decodedTxDataHex->to == txDataWithBytes->to);
-    BOOST_TEST(decodedTxDataHex->abi == txDataWithBytes->abi);
-    BOOST_TEST(decodedTxDataHex->block_limit == txDataWithBytes->block_limit);
-    BOOST_TEST(decodedTxDataHex->nonce == txDataWithBytes->nonce);
+    BOOST_TEST(decodedTxDataHex->base.version == txDataWithBytes->base.version);
+    BOOST_TEST(decodedTxDataHex->base.group_id == txDataWithBytes->base.group_id);
+    BOOST_TEST(decodedTxDataHex->base.chain_id == txDataWithBytes->base.chain_id);
+    BOOST_TEST(decodedTxDataHex->base.to == txDataWithBytes->base.to);
+    BOOST_TEST(decodedTxDataHex->base.abi == txDataWithBytes->base.abi);
+    BOOST_TEST(decodedTxDataHex->base.block_limit == txDataWithBytes->base.block_limit);
+    BOOST_TEST(decodedTxDataHex->base.nonce == txDataWithBytes->base.nonce);
     BOOST_TEST(decodedTxDataHex->value == txDataWithBytes->value);
     BOOST_TEST(decodedTxDataHex->gas_price == txDataWithBytes->gas_price);
     BOOST_TEST(decodedTxDataHex->gas_limit == txDataWithBytes->gas_limit);
@@ -446,9 +446,9 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructv1)
     BOOST_TEST(
         decodedTxDataHex->max_priority_fee_per_gas == txDataWithBytes->max_priority_fee_per_gas);
     std::string txDataInputString(
-        reinterpret_cast<char*>(txDataWithBytes->input->buffer), txDataWithBytes->input->length);
+        reinterpret_cast<char*>(txDataWithBytes->base.input->buffer), txDataWithBytes->base.input->length);
     std::string decodedHexTxDataInputString(
-        reinterpret_cast<char*>(decodedTxDataHex->input->buffer), decodedTxDataHex->input->length);
+        reinterpret_cast<char*>(decodedTxDataHex->base.input->buffer), decodedTxDataHex->base.input->length);
     BOOST_TEST(txDataInputString == decodedHexTxDataInputString);
 
     // 2. test tx data encode decode json
@@ -500,13 +500,13 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructv1)
     BOOST_TEST(jsonSuccess == true);
     BOOST_TEST(decodedTxDataJson != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
-    BOOST_TEST(decodedTxDataJson->version == txDataWithBytes->version);
-    BOOST_TEST(decodedTxDataJson->group_id == txDataWithBytes->group_id);
-    BOOST_TEST(decodedTxDataJson->chain_id == txDataWithBytes->chain_id);
-    BOOST_TEST(decodedTxDataJson->to == txDataWithBytes->to);
-    BOOST_TEST(decodedTxDataJson->abi == txDataWithBytes->abi);
-    BOOST_TEST(decodedTxDataJson->block_limit == txDataWithBytes->block_limit);
-    BOOST_TEST(decodedTxDataJson->nonce == txDataWithBytes->nonce);
+    BOOST_TEST(decodedTxDataJson->base.version == txDataWithBytes->base.version);
+    BOOST_TEST(decodedTxDataJson->base.group_id == txDataWithBytes->base.group_id);
+    BOOST_TEST(decodedTxDataJson->base.chain_id == txDataWithBytes->base.chain_id);
+    BOOST_TEST(decodedTxDataJson->base.to == txDataWithBytes->base.to);
+    BOOST_TEST(decodedTxDataJson->base.abi == txDataWithBytes->base.abi);
+    BOOST_TEST(decodedTxDataJson->base.block_limit == txDataWithBytes->base.block_limit);
+    BOOST_TEST(decodedTxDataJson->base.nonce == txDataWithBytes->base.nonce);
     BOOST_TEST(decodedTxDataHex->value == txDataWithBytes->value);
     BOOST_TEST(decodedTxDataHex->gas_price == txDataWithBytes->gas_price);
     BOOST_TEST(decodedTxDataHex->gas_limit == txDataWithBytes->gas_limit);
@@ -514,8 +514,8 @@ BOOST_AUTO_TEST_CASE(testEncodeDecodeTxDataStructv1)
     BOOST_TEST(
         decodedTxDataHex->max_priority_fee_per_gas == txDataWithBytes->max_priority_fee_per_gas);
     std::string decodedJsonTxDataInputJson(
-        reinterpret_cast<char*>(decodedTxDataJson->input->buffer),
-        decodedTxDataJson->input->length);
+        reinterpret_cast<char*>(decodedTxDataJson->base.input->buffer),
+        decodedTxDataJson->base.input->length);
     BOOST_TEST(txDataInputString == decodedJsonTxDataInputJson);
 
     bcos_sdk_destroy_transaction_data_struct_v1(txDataWithHex);
