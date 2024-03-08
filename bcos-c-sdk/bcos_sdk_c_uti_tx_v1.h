@@ -27,16 +27,6 @@
 extern "C" {
 #endif
 
-enum transaction_version
-{
-    TRANSACTION_VERSION_0 = 0,
-    /*
-     * @brief enable (value,gasPrice,gasLimit,maxFeePerGas,maxPriorityFeePerGas) fields
-     * @note version 1 transaction only supported in FISCO BCOS 3.6.0 and later
-     */
-    TRANSACTION_VERSION_1 = 1,
-};
-
 /**
  * @brief create transaction data with version 1 by default
  * @note version 1 transaction only supported in FISCO BCOS 3.6.0 and later

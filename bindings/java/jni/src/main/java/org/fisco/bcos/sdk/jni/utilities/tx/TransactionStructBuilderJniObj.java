@@ -13,6 +13,7 @@ public class TransactionStructBuilderJniObj {
    * @param transactionData Transaction Data struct
    * @return Hexed Transaction Data
    */
+  @Deprecated
   public static native String encodeTransactionDataStruct(TransactionData transactionData)
       throws JniException;
 
@@ -20,6 +21,7 @@ public class TransactionStructBuilderJniObj {
    * @param transactionData Transaction Data struct
    * @return Json Transaction Data
    */
+  @Deprecated
   public static native String encodeTransactionDataStructToJson(TransactionData transactionData)
       throws JniException;
 
@@ -27,6 +29,7 @@ public class TransactionStructBuilderJniObj {
    * @param transactionDataHex transactionData hex string
    * @return TxData
    */
+  @Deprecated
   public static native TransactionData decodeTransactionDataStruct(String transactionDataHex)
       throws JniException;
 
@@ -34,6 +37,7 @@ public class TransactionStructBuilderJniObj {
    * @param transactionDataHex transactionData hex string
    * @return TxData
    */
+  @Deprecated
   public static native TransactionDataV1 decodeTransactionDataStructV1(String transactionDataHex)
       throws JniException;
 
@@ -86,5 +90,12 @@ public class TransactionStructBuilderJniObj {
    * @return Tx
    */
   public static native Transaction decodeTransactionStructV1(String transactionHex)
+      throws JniException;
+
+  /**
+   * @param transactionHex transaction hex string
+   * @return Tx
+   */
+  public static native Transaction decodeTransactionStructV2(String transactionHex)
       throws JniException;
 }

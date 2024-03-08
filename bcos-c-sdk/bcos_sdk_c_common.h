@@ -97,6 +97,20 @@ struct bcos_sdk_c_config
     struct bcos_sdk_c_sm_cert_config* sm_cert_config;
 };
 
+enum transaction_version
+{
+    TRANSACTION_VERSION_0 = 0,
+    /*
+     * @brief enable (value,gasPrice,gasLimit,maxFeePerGas,maxPriorityFeePerGas) fields
+     * @note version 1 transaction only supported in FISCO BCOS 3.6.0 and later
+     */
+    TRANSACTION_VERSION_1 = 1,
+    /*
+     * @brief enable (extension) fields
+     * @note version 2 transaction only supported in FISCO BCOS 3.7.0 and later
+     */
+    TRANSACTION_VERSION_2 = 2,
+};
 /**
  * @brief create bcos_sdk_c_config in default value
  * @return struct bcos_sdk_c_config*
@@ -124,6 +138,9 @@ void bcos_sdk_c_config_destroy(void* p);
 
 void bcos_sdk_c_cert_config_destroy(void* p);
 void bcos_sdk_c_sm_cert_config_destroy(void* p);
+
+struct bcos_sdk_c_bytes* create_bytes_struct(uint32_t field_size, const char* field_data);
+struct bcos_sdk_c_bytes* bytes_struct_copy(const struct bcos_sdk_c_bytes* bytes_struct_src);
 
 //--------------- config items end ------------------------------
 
@@ -211,19 +228,18 @@ struct bcos_sdk_c_transaction_data
 
 struct bcos_sdk_c_transaction_data_v1
 {
-    int32_t version;
-    int64_t block_limit;
-    char* chain_id;
-    char* group_id;
-    char* nonce;
-    char* to;
-    char* abi;
-    struct bcos_sdk_c_bytes* input;
+    struct bcos_sdk_c_transaction_data base;
     char* value;
     char* gas_price;
     int64_t gas_limit;
     char* max_fee_per_gas;
     char* max_priority_fee_per_gas;
+};
+
+struct bcos_sdk_c_transaction_data_v2
+{
+    struct bcos_sdk_c_transaction_data_v1 base_v1;
+    struct bcos_sdk_c_bytes* extension;
 };
 
 /**
@@ -244,6 +260,17 @@ struct bcos_sdk_c_transaction
 struct bcos_sdk_c_transaction_v1
 {
     struct bcos_sdk_c_transaction_data_v1* transaction_data;
+    struct bcos_sdk_c_bytes* data_hash;
+    struct bcos_sdk_c_bytes* signature;
+    struct bcos_sdk_c_bytes* sender;
+    int64_t import_time;
+    int32_t attribute;
+    char* extra_data;
+};
+
+struct bcos_sdk_c_transaction_v2
+{
+    struct bcos_sdk_c_transaction_data_v2* transaction_data;
     struct bcos_sdk_c_bytes* data_hash;
     struct bcos_sdk_c_bytes* signature;
     struct bcos_sdk_c_bytes* sender;

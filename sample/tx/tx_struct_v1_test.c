@@ -24,6 +24,7 @@
 #include <bcos-c-sdk/bcos_sdk_c.h>
 #include <bcos-c-sdk/bcos_sdk_c_uti_tx.h>
 #include <bcos-c-sdk/bcos_sdk_c_uti_tx_struct.h>
+#include <bcos-c-sdk/bcos_sdk_c_uti_tx_struct_v1.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

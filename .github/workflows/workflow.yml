@@ -23,17 +23,17 @@ jobs:
       matrix:
         os: [ macos-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 5
       - name: Nightly default
         run: rustup default nightly
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: |
-            /usr/local/share/vcpkg
-            ccache
+            /usr/local/share/vcpkg/buildtrees
+            /usr/local/share/vcpkg/packages
           key: vcpkg-clang-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
           restore-keys: |
             vcpkg-clang-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
@@ -57,12 +57,15 @@ jobs:
       - name: strip libbcos-c-sdk.dylib
         run: strip build/libbcos-c-sdk.dylib || strip -x build/libbcos-c-sdk.dylib
       - name: strip libbcos-sdk-jni.dylib
-        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
-      - uses: actions/upload-artifact@v2
+        run: |
+          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib 
+          strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk.dylib.zip
           path: build/libbcos-c-sdk.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni.dylib.zip
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
@@ -73,15 +76,15 @@ jobs:
       matrix:
         os: [ ubuntu-20.04 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 5
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: |
-            /usr/local/share/vcpkg
-            ccache
+            /usr/local/share/vcpkg/buildtrees
+            /usr/local/share/vcpkg/packages
           key: vcpkg-gcc-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
           restore-keys: |
             vcpkg-gcc-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
@@ -121,7 +124,7 @@ jobs:
       volumes:
         - /usr/local/share/vcpkg:/usr/local/share/vcpkg
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 5
       - name: install rust language
@@ -133,8 +136,8 @@ jobs:
         id: cache
         with:
           path: |
-            /usr/local/share/vcpkg
-            ccache
+            /usr/local/share/vcpkg/buildtrees
+            /usr/local/share/vcpkg/packages
           key: vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
           restore-keys: |
             vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
@@ -170,9 +173,15 @@ jobs:
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - name: strip libbcos-c-sdk.so
-        run: strip build/libbcos-c-sdk.so || strip -x build/libbcos-c-sdk.so
+        run: |
+          ls -h build/libbcos-c-sdk.so
+          strip build/libbcos-c-sdk.so || strip -x build/libbcos-c-sdk.so
+          ls -h build/libbcos-c-sdk.so
       - name: strip libbcos-sdk-jni.so
-        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
+        run: |
+          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
+          strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
+          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - uses: actions/upload-artifact@v2
         with:
           name: libbcos-c-sdk.so.zip
@@ -188,15 +197,15 @@ jobs:
       matrix:
         os: [ windows-2019 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 5
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: |
-            C:\vcpkg
-            ccache
+            C:\vcpkg\buildtrees
+            C:\vcpkg\packages
           key: vcpkg-msvc-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
           restore-keys: |
             vcpkg-msvc-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
