@@ -11,47 +11,47 @@ import org.slf4j.LoggerFactory;
 
 public class Sub {
 
-  private static final Logger logger = LoggerFactory.getLogger(Sub.class);
+    private static final Logger logger = LoggerFactory.getLogger(Sub.class);
 
-  public static void usage() {
-    System.out.println("\tUsage: ");
-    System.out.println(
-        "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.amop.Sub ip:port topic");
-    System.out.println("\tExample:");
-    System.out.println(
-        "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.amop.Sub 127.0.0.1:20201 topic");
-    System.exit(0);
-  }
-
-  public static void main(String[] args) throws InterruptedException, JniException {
-    if (args.length < 2) {
-      usage();
+    public static void usage() {
+        System.out.println("\tUsage: ");
+        System.out.println(
+                "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.amop.Sub ip:port topic");
+        System.out.println("\tExample:");
+        System.out.println(
+                "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.amop.Sub 127.0.0.1:20201 topic");
+        System.exit(0);
     }
 
-    String peer = args[0];
-    String topic = args[1];
+    public static void main(String[] args) throws InterruptedException, JniException {
+        if (args.length < 2) {
+            usage();
+        }
 
-    JniConfig jniConfig = Utility.newJniConfig(Arrays.asList(peer));
-    jniConfig.setDisableSsl(true);
-    BcosSDKJniObj bcosSDKJni = BcosSDKJniObj.build(jniConfig);
-    System.out.println("BcosSDK build");
-    AmopJniObj amop = AmopJniObj.build(bcosSDKJni.getNativePointer());
-    amop.start();
+        String peer = args[0];
+        String topic = args[1];
 
-    amop.subscribeTopic(
-        topic,
-        (endpoint, seq, data) -> {
-          System.out.println(" ==> receive message from client");
-          System.out.println(" \t==> endpoint: " + endpoint);
-          System.out.println(" \t==> seq: " + seq);
-          System.out.println(" \t==> data: " + new String(data));
+        JniConfig jniConfig = Utility.newJniConfig(Arrays.asList(peer));
+        jniConfig.setDisableSsl(true);
+        BcosSDKJniObj bcosSDKJni = BcosSDKJniObj.build(jniConfig);
+        System.out.println("BcosSDK build");
+        AmopJniObj amop = AmopJniObj.build(bcosSDKJni.getNativePointer());
+        amop.start();
 
-          amop.sendResponse(endpoint, seq, data);
-        });
+        amop.subscribeTopic(
+                topic,
+                (endpoint, seq, data) -> {
+                    System.out.println(" ==> receive message from client");
+                    System.out.println(" \t==> endpoint: " + endpoint);
+                    System.out.println(" \t==> seq: " + seq);
+                    System.out.println(" \t==> data: " + new String(data));
 
-    while (true) {
+                    amop.sendResponse(endpoint, seq, data);
+                });
 
-      Thread.sleep(10000);
+        while (true) {
+
+            Thread.sleep(10000);
+        }
     }
-  }
 }

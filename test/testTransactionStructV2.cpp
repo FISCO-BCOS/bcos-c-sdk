@@ -25,6 +25,7 @@
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx_struct_v2.h"
+#include "bcos_sdk_c_uti_tx_struct_v1.h"
 
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
 #include <bcos_sdk_c_uti_tx_struct_v2.h>
@@ -232,6 +233,24 @@ BOOST_AUTO_TEST_CASE(testCalculateTxDataHashv2)
     BOOST_TEST(txDataHash != nullptr);
     BOOST_TEST(bcos_sdk_get_last_error() == 0);
 
+    std::cout << std::string(txDataHash) << std::endl;
+
+
+    txDataWithByte->extension->buffer = nullptr;
+    txDataWithByte->extension->length = 0;
+
+    auto txDataHash2 = bcos_sdk_calc_transaction_data_struct_hash_v2(cryptoType, txDataWithByte);
+    success = bcos_sdk_is_last_opr_success();
+    BOOST_TEST(success == true);
+    BOOST_TEST(txDataHash2 != nullptr);
+    BOOST_TEST(bcos_sdk_get_last_error() == 0);
+
+    std::cout << std::string(txDataHash2) << std::endl;
+
+    auto txDataV1Hash = bcos_sdk_calc_transaction_data_struct_hash_v1(cryptoType, &txDataWithByte->base_v1);
+    std::cout << std::string(txDataV1Hash) << std::endl;
+
+    BOOST_CHECK(std::string(txDataHash2) == std::string(txDataV1Hash));
     bcos_sdk_destroy_transaction_data_struct_v2(txDataWithByte);
 }
 

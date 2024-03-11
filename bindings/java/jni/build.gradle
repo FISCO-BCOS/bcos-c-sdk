@@ -13,6 +13,13 @@ println("Notice: current gradle version is " + gradle.gradleVersion)
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+googleJavaFormat {
+    toolVersion = '1.7'
+    options style: 'AOSP'
+    source = sourceSets*.allJava
+    include '**/*.java'
+}
+
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
 repositories {
@@ -25,7 +32,6 @@ repositories {
 dependencies {
     api ('org.slf4j:slf4j-api:1.7.36')
     api ('com.fasterxml.jackson.core:jackson-databind:2.14.2')
-    implementation 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.1'
     testCompile ('org.slf4j:slf4j-log4j12:1.7.36')
     testCompile ('junit:junit:4.13.2')
 }

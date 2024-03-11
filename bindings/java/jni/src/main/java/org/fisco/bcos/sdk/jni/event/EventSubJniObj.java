@@ -22,44 +22,44 @@ import org.slf4j.LoggerFactory;
 
 public class EventSubJniObj {
 
-  private static final Logger logger = LoggerFactory.getLogger(EventSubJniObj.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventSubJniObj.class);
 
-  /**
-   * @param nativePointer
-   * @return
-   * @throws JniException
-   */
-  public static EventSubJniObj build(long nativePointer) throws JniException {
-    EventSubJniObj subscribe = new EventSubJniObj();
-    subscribe.setNativePointer(nativePointer);
+    /**
+     * @param nativePointer
+     * @return
+     * @throws JniException
+     */
+    public static EventSubJniObj build(long nativePointer) throws JniException {
+        EventSubJniObj subscribe = new EventSubJniObj();
+        subscribe.setNativePointer(nativePointer);
 
-    logger.info("nativePointer: {}", nativePointer);
-    return subscribe;
-  }
+        logger.info("nativePointer: {}", nativePointer);
+        return subscribe;
+    }
 
-  private EventSubJniObj() {}
+    private EventSubJniObj() {}
 
-  private long nativePointer = 0L;
+    private long nativePointer = 0L;
 
-  public long getNativePointer() {
-    return nativePointer;
-  }
+    public long getNativePointer() {
+        return nativePointer;
+    }
 
-  private void setNativePointer(long nativePointer) {
-    this.nativePointer = nativePointer;
-  }
+    private void setNativePointer(long nativePointer) {
+        this.nativePointer = nativePointer;
+    }
 
-  // ----------------------------- EventSub interface begin --------------------------------------
+    // ----------------------------- EventSub interface begin --------------------------------------
 
-  public native void start();
+    public native void start();
 
-  public native void stop();
+    public native void stop();
 
-  public native String subscribeEvent(String group, String params, EventSubCallback callback);
+    public native String subscribeEvent(String group, String params, EventSubCallback callback);
 
-  public native void unsubscribeEvent(String eventID);
+    public native void unsubscribeEvent(String eventID);
 
-  public native Set<String> getAllSubscribedEvents();
+    public native Set<String> getAllSubscribedEvents();
 
-  // ----------------------------- EventSub interface begin --------------------------------------
+    // ----------------------------- EventSub interface begin --------------------------------------
 }
