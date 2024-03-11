@@ -1,6 +1,12 @@
 package org.fisco.bcos.sdk.jni.test.tx;
 
-import org.fisco.bcos.sdk.crypto.hash.Keccak256;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import org.fisco.bcos.sdk.jni.BcosSDKJniObj;
 import org.fisco.bcos.sdk.jni.common.JniConfig;
 import org.fisco.bcos.sdk.jni.common.JniException;
@@ -9,16 +15,7 @@ import org.fisco.bcos.sdk.jni.rpc.RpcJniObj;
 import org.fisco.bcos.sdk.jni.test.Utility;
 import org.fisco.bcos.sdk.jni.utilities.keypair.KeyPairJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.*;
-import org.fisco.bcos.sdk.utils.Hex;
 import org.junit.Assert;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class TestTxStructV2 {
 
@@ -89,7 +86,7 @@ public class TestTxStructV2 {
         // blockLimit
         byteArrayOutputStream.write(toBytesPadded(BigInteger.valueOf(data.getBlockLimit()), 8));
         // nonce
-        byteArrayOutputStream.write(fromHex(data.getNonce()));
+        byteArrayOutputStream.write(data.getNonce().getBytes());
         // to
         byteArrayOutputStream.write(data.getTo().getBytes());
         // input
@@ -97,7 +94,7 @@ public class TestTxStructV2 {
         // abi
         byteArrayOutputStream.write(data.getAbi().getBytes());
 
-        if (data.getVersion() == TransactionVersion.V1.getValue()) {
+        if (data.getVersion() >= TransactionVersion.V1.getValue()) {
             byteArrayOutputStream.write(data.getValue().getBytes());
             byteArrayOutputStream.write(data.getGasPrice().getBytes());
             byteArrayOutputStream.write(toBytesPadded(BigInteger.valueOf(data.getGasLimit()), 8));
@@ -105,7 +102,7 @@ public class TestTxStructV2 {
             byteArrayOutputStream.write(data.getMaxPriorityFeePerGas().getBytes());
         }
 
-        if (data.getVersion() == TransactionVersion.V2.getValue()) {
+        if (data.getVersion() >= TransactionVersion.V2.getValue()) {
             if (data.getExtension() != null) {
                 byteArrayOutputStream.write(data.getExtension());
             }
@@ -205,9 +202,10 @@ public class TestTxStructV2 {
         String maxPriorityFeePerGas = "0x22";
         byte[] bytesInput = fromHex(data);
         // construct TransactionDataV2
+        String nonce = generateNonce();
         TransactionData transactionDataStructV2 =
                 new TransactionDataV2()
-                        //                        .buildExtension("HelloWorld".getBytes())
+                        .buildExtension("HelloWorld".getBytes())
                         .buildValue(value)
                         .buildGasPrice(gasPrice)
                         .buildGasLimit(gasLimit)
@@ -219,7 +217,24 @@ public class TestTxStructV2 {
                         .buildTo("")
                         .buildAbi("")
                         .buildVersion(2)
-                        .buildNonce(generateNonce())
+                        .buildNonce(nonce)
+                        .buildBlockLimit(blockLimit)
+                        .buildInput(bytesInput);
+
+        TransactionData transactionDataV1 =
+                new TransactionDataV1()
+                        .buildValue(value)
+                        .buildGasPrice(gasPrice)
+                        .buildGasLimit(gasLimit)
+                        .buildGasLimit(gasLimit)
+                        .buildMaxFeePerGas(maxFeePerGas)
+                        .buildMaxPriorityFeePerGas(maxPriorityFeePerGas)
+                        .buildGroupId(groupID)
+                        .buildChainId(chainID)
+                        .buildTo("")
+                        .buildAbi("")
+                        .buildVersion(2)
+                        .buildNonce(nonce)
                         .buildBlockLimit(blockLimit)
                         .buildInput(bytesInput);
 
@@ -227,13 +242,11 @@ public class TestTxStructV2 {
         String txDataHash =
                 TransactionStructBuilderJniObj.calcTransactionDataStructHash(
                         smCrypto ? 1 : 0, transactionDataStructV2);
-        org.fisco.bcos.sdk.crypto.hash.Keccak256 keccak256 = new Keccak256();
 
-        String hexString =
-                Hex.toHexString(
-                        keccak256.hash(
-                                encodeTransactionData(
-                                        (TransactionDataV2) transactionDataStructV2)));
+        String txDataHash2 =
+                TransactionStructBuilderJniObj.calcTransactionDataStructHash(
+                        smCrypto ? 1 : 0, transactionDataV1);
+
         System.out.printf(" [test Tx Struct V2] txDataHash: %s\n", txDataHash);
         // signature tx data hash
         String signature = TransactionBuilderJniObj.signTransactionDataHash(keyPair, txDataHash);
@@ -303,6 +316,12 @@ public class TestTxStructV2 {
         System.out.println("response error code: ==>>> " + response.getErrorCode());
         String dataStr = new String(response.getData());
         System.out.println("response data: ==>>> " + dataStr);
+        CompletableFuture<Response> future2 = new CompletableFuture<>();
+        rpcJniObj.getTransaction(group, node, txDataHash, true, future2::complete);
+        Response response1 = future2.get();
+        System.out.println("getTx response error code: ==>>> " + response1.getErrorCode());
+        String dataStr1 = new String(response1.getData());
+        System.out.println("Tx data: ==>>> " + dataStr1);
         rpcJniObj.stop();
         System.out.println(" [test Tx Struct V2] finish !! ");
     }

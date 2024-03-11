@@ -20,11 +20,11 @@ import org.fisco.bcos.sdk.jni.common.Response;
 /** Event callback */
 public interface EventSubCallback {
 
-  /**
-   * onReceiveLog called when sdk receive any response of the target subscription. logs will be
-   * parsed by the user through the ABI module.
-   *
-   * @param response
-   */
-  void onResponse(Response response);
+    /**
+     * onReceiveLog called when sdk receive any response of the target subscription. logs will be
+     * parsed by the user through the ABI module.
+     *
+     * @param response
+     */
+    void onResponse(Response response);
 }
