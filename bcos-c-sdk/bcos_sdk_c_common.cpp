@@ -44,10 +44,10 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 {
     struct bcos_sdk_c_config* config =
         (struct bcos_sdk_c_config*)malloc(sizeof(struct bcos_sdk_c_config));
-    config->thread_pool_size = -1;
-    config->message_timeout_ms = -1;
-    config->heartbeat_period_ms = -1;
-    config->reconnect_period_ms = -1;
+    config->thread_pool_size = 0;
+    config->message_timeout_ms = 0;
+    config->heartbeat_period_ms = 0;
+    config->reconnect_period_ms = 0;
     config->disable_ssl = 0;
     config->send_rpc_request_to_highest_block_node = 1;
     config->cert_config = NULL;
