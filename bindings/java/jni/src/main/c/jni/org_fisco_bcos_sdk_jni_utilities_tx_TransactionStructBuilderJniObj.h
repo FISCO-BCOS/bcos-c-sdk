@@ -98,6 +98,15 @@ JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStructV1(
     JNIEnv*, jclass, jstring);
 
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj
+ * Method:    decodeTransactionStructV2
+ * Signature: (Ljava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/Transaction;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionStructBuilderJniObj_decodeTransactionStructV2(
+    JNIEnv*, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif

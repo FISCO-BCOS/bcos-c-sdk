@@ -16,13 +16,13 @@
 package org.fisco.bcos.sdk.jni.amop;
 
 public interface AmopRequestCallback {
-  /**
-   * recieve amop request message
-   *
-   * @param endpoint
-   * @param seq
-   * @param data
-   * @return void
-   */
-  void onRequest(String endpoint, String seq, byte[] data);
+    /**
+     * recieve amop request message
+     *
+     * @param endpoint
+     * @param seq
+     * @param data
+     * @return void
+     */
+    void onRequest(String endpoint, String seq, byte[] data);
 }

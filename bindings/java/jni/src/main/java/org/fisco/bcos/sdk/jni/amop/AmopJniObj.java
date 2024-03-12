@@ -21,55 +21,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AmopJniObj {
-  private static final Logger logger = LoggerFactory.getLogger(AmopJniObj.class);
+    private static final Logger logger = LoggerFactory.getLogger(AmopJniObj.class);
 
-  /**
-   * @param nativePointer
-   * @return
-   * @throws JniException
-   */
-  public static AmopJniObj build(long nativePointer) {
-    AmopJniObj amop = new AmopJniObj();
-    amop.setNativePointer(nativePointer);
+    /**
+     * @param nativePointer
+     * @return
+     * @throws JniException
+     */
+    public static AmopJniObj build(long nativePointer) {
+        AmopJniObj amop = new AmopJniObj();
+        amop.setNativePointer(nativePointer);
 
-    logger.info(" nativePointer: {}", nativePointer);
-    return amop;
-  }
+        logger.info(" nativePointer: {}", nativePointer);
+        return amop;
+    }
 
-  private AmopJniObj() {}
+    private AmopJniObj() {}
 
-  private long nativePointer = 0L;
+    private long nativePointer = 0L;
 
-  public long getNativePointer() {
-    return nativePointer;
-  }
+    public long getNativePointer() {
+        return nativePointer;
+    }
 
-  private void setNativePointer(long nativePointer) {
-    this.nativePointer = nativePointer;
-  }
+    private void setNativePointer(long nativePointer) {
+        this.nativePointer = nativePointer;
+    }
 
-  // ----------------------------- Amop interface begin --------------------------------------
+    // ----------------------------- Amop interface begin --------------------------------------
 
-  public native void start();
+    public native void start();
 
-  public native void stop();
+    public native void stop();
 
-  public native void subscribeTopic(Set<String> topicsName);
+    public native void subscribeTopic(Set<String> topicsName);
 
-  public native void subscribeTopic(String topicName, AmopRequestCallback callback);
+    public native void subscribeTopic(String topicName, AmopRequestCallback callback);
 
-  public native void unsubscribeTopic(Set<String> topicsName);
+    public native void unsubscribeTopic(Set<String> topicsName);
 
-  public native void setCallback(AmopRequestCallback cb);
+    public native void setCallback(AmopRequestCallback cb);
 
-  public native void sendAmopMsg(
-      String topic, byte[] data, int timeout, AmopResponseCallback callback);
+    public native void sendAmopMsg(
+            String topic, byte[] data, int timeout, AmopResponseCallback callback);
 
-  public native void broadcastAmopMsg(String topic, byte[] data);
+    public native void broadcastAmopMsg(String topic, byte[] data);
 
-  public native void sendResponse(String endPoint, String seq, byte[] data);
+    public native void sendResponse(String endPoint, String seq, byte[] data);
 
-  public native Set<String> getSubTopics();
+    public native Set<String> getSubTopics();
 
-  // ----------------------------- Amop interface end --------------------------------------
+    // ----------------------------- Amop interface end --------------------------------------
 }

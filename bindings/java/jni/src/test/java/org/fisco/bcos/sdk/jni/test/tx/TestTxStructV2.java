@@ -1,5 +1,8 @@
 package org.fisco.bcos.sdk.jni.test.tx;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -14,12 +17,10 @@ import org.fisco.bcos.sdk.jni.utilities.keypair.KeyPairJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.*;
 import org.junit.Assert;
 
-public class TestTxStruct {
+public class TestTxStructV2 {
 
     // ------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------
-
-    // HelloWorld Source Code:
 
     // HelloWorld Source Code:
     /**
@@ -51,6 +52,65 @@ public class TestTxStruct {
     }
     */
 
+    public static byte[] toBytesPadded(BigInteger value, int length) {
+        byte[] result = new byte[length];
+        byte[] bytes = value.toByteArray();
+
+        int bytesLength;
+        int srcOffset;
+        if (bytes[0] == 0) {
+            bytesLength = bytes.length - 1;
+            srcOffset = 1;
+        } else {
+            bytesLength = bytes.length;
+            srcOffset = 0;
+        }
+
+        if (bytesLength > length) {
+            throw new RuntimeException("Input is too large to put in byte array of size " + length);
+        }
+
+        int destOffset = length - bytesLength;
+        System.arraycopy(bytes, srcOffset, result, destOffset, bytesLength);
+        return result;
+    }
+
+    public static byte[] encodeTransactionData(TransactionDataV2 data) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        // version
+        byteArrayOutputStream.write(toBytesPadded(BigInteger.valueOf(data.getVersion()), 4));
+        // chainId
+        byteArrayOutputStream.write(data.getChainId().getBytes());
+        // groupId
+        byteArrayOutputStream.write(data.getGroupId().getBytes());
+        // blockLimit
+        byteArrayOutputStream.write(toBytesPadded(BigInteger.valueOf(data.getBlockLimit()), 8));
+        // nonce
+        byteArrayOutputStream.write(data.getNonce().getBytes());
+        // to
+        byteArrayOutputStream.write(data.getTo().getBytes());
+        // input
+        byteArrayOutputStream.write(data.getInput());
+        // abi
+        byteArrayOutputStream.write(data.getAbi().getBytes());
+
+        if (data.getVersion() >= TransactionVersion.V1.getValue()) {
+            byteArrayOutputStream.write(data.getValue().getBytes());
+            byteArrayOutputStream.write(data.getGasPrice().getBytes());
+            byteArrayOutputStream.write(toBytesPadded(BigInteger.valueOf(data.getGasLimit()), 8));
+            byteArrayOutputStream.write(data.getMaxFeePerGas().getBytes());
+            byteArrayOutputStream.write(data.getMaxPriorityFeePerGas().getBytes());
+        }
+
+        if (data.getVersion() >= TransactionVersion.V2.getValue()) {
+            if (data.getExtension() != null) {
+                byteArrayOutputStream.write(data.getExtension());
+            }
+        }
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
     public static byte[] fromHex(String hexString) {
         if (hexString.startsWith("0x")) {
             hexString = hexString.substring(2);
@@ -71,6 +131,22 @@ public class TestTxStruct {
         return bytes;
     }
 
+    public static String toHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (src == null || src.length == 0) {
+            return null;
+        }
+        for (byte b : src) {
+            int v = b & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                stringBuilder.append(0);
+            }
+            stringBuilder.append(hv);
+        }
+        return stringBuilder.toString();
+    }
+
     public static String generateNonce() {
         byte[] nonceBytes = new byte[16];
         SecureRandom secureRandom = new SecureRandom();
@@ -87,14 +163,14 @@ public class TestTxStruct {
     }
 
     public static void Usage() {
-        System.out.println("Desc: test transaction struct [HelloWorld set]");
+        System.out.println("Desc: test transaction struct V2 [HelloWorld set]");
         System.out.println(
-                "Usage: java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.jni.test.tx.TestTxStruct");
+                "Usage: java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.jni.test.tx.TestTxStructV2");
         System.exit(0);
     }
 
     public static void main(String[] args)
-            throws JniException, InterruptedException, ExecutionException {
+            throws JniException, InterruptedException, ExecutionException, IOException {
         if (args.length > 1) {
             Usage();
         }
@@ -108,122 +184,131 @@ public class TestTxStruct {
         RpcJniObj rpcJniObj = RpcJniObj.build(bcosSDKJni.getNativePointer());
         System.out.println("build Rpc");
         rpcJniObj.start();
+        long blockLimit = rpcJniObj.getBlockLimit(group);
 
         boolean smCrypto = false;
 
         long keyPair = KeyPairJniObj.createJniKeyPair(smCrypto ? 1 : 0);
         String jniKeyPairAddress = KeyPairJniObj.getJniKeyPairAddress(keyPair);
+        System.out.printf(" [test Tx Struct V2] new account, address: %s\n", jniKeyPairAddress);
 
-        long blockLimit = 1111;
         String groupID = "group0";
         String chainID = "chain0";
         String data = getBinary(smCrypto);
-        System.out.printf(" [test Tx Struct] new account, address: %s\n", jniKeyPairAddress);
-
-        // construct TransactionData
-        TransactionData transactionDataStruct = new TransactionData();
-        transactionDataStruct.setGroupId(groupID);
-        transactionDataStruct.setChainId(chainID);
-        transactionDataStruct.setTo("");
-        transactionDataStruct.setAbi("");
-        transactionDataStruct.setVersion(0);
-        transactionDataStruct.setNonce(generateNonce());
-        transactionDataStruct.setBlockLimit(blockLimit);
-        // input
+        String value = "0x11";
+        String gasPrice = "0x10";
+        long gasLimit = 0;
+        String maxFeePerGas = "0x11";
+        String maxPriorityFeePerGas = "0x22";
         byte[] bytesInput = fromHex(data);
-        transactionDataStruct.setInput(bytesInput);
+        // construct TransactionDataV2
+        String nonce = generateNonce();
+        TransactionData transactionDataStructV2 =
+                new TransactionDataV2()
+                        .buildExtension("HelloWorld".getBytes())
+                        .buildValue(value)
+                        .buildGasPrice(gasPrice)
+                        .buildGasLimit(gasLimit)
+                        .buildGasLimit(gasLimit)
+                        .buildMaxFeePerGas(maxFeePerGas)
+                        .buildMaxPriorityFeePerGas(maxPriorityFeePerGas)
+                        .buildGroupId(groupID)
+                        .buildChainId(chainID)
+                        .buildTo("")
+                        .buildAbi("")
+                        .buildVersion(2)
+                        .buildNonce(nonce)
+                        .buildBlockLimit(blockLimit)
+                        .buildInput(bytesInput);
 
-        // encode TxData to hex tx data
-        String txDataHex =
-                TransactionStructBuilderJniObj.encodeTransactionDataStruct(transactionDataStruct);
-        // decode hex tx data to TxData
-        TransactionData decodeTransactionDataStructHex =
-                TransactionStructBuilderJniObj.decodeTransactionDataStruct(txDataHex);
-        // assert
-        Assert.assertEquals(
-                transactionDataStruct.getChainId(), decodeTransactionDataStructHex.getChainId());
-        Assert.assertEquals(
-                transactionDataStruct.getGroupId(), decodeTransactionDataStructHex.getGroupId());
-        Assert.assertEquals(
-                transactionDataStruct.getAbi(), decodeTransactionDataStructHex.getAbi());
-        Assert.assertEquals(
-                transactionDataStruct.getBlockLimit(),
-                decodeTransactionDataStructHex.getBlockLimit());
-
-        // encode TxData to json tx data
-        String txDataJson =
-                TransactionStructBuilderJniObj.encodeTransactionDataStructToJson(
-                        transactionDataStruct);
-        System.out.printf(" [test Tx Struct] txDataJson: %s\n", txDataJson);
+        TransactionData transactionDataV1 =
+                new TransactionDataV1()
+                        .buildValue(value)
+                        .buildGasPrice(gasPrice)
+                        .buildGasLimit(gasLimit)
+                        .buildGasLimit(gasLimit)
+                        .buildMaxFeePerGas(maxFeePerGas)
+                        .buildMaxPriorityFeePerGas(maxPriorityFeePerGas)
+                        .buildGroupId(groupID)
+                        .buildChainId(chainID)
+                        .buildTo("")
+                        .buildAbi("")
+                        .buildVersion(2)
+                        .buildNonce(nonce)
+                        .buildBlockLimit(blockLimit)
+                        .buildInput(bytesInput);
 
         // calc tx data hash
         String txDataHash =
                 TransactionStructBuilderJniObj.calcTransactionDataStructHash(
-                        smCrypto ? 1 : 0, decodeTransactionDataStructHex);
-        System.out.printf(" [test Tx Struct] txDataHash: %s\n", txDataHash);
+                        smCrypto ? 1 : 0, transactionDataStructV2);
+
+        String txDataHash2 =
+                TransactionStructBuilderJniObj.calcTransactionDataStructHash(
+                        smCrypto ? 1 : 0, transactionDataV1);
+
+        System.out.printf(" [test Tx Struct V2] txDataHash: %s\n", txDataHash);
         // signature tx data hash
         String signature = TransactionBuilderJniObj.signTransactionDataHash(keyPair, txDataHash);
-        System.out.printf(" [test Tx Struct] signature: %s\n", signature);
+        System.out.printf(" [test Tx Struct V2] signature: %s\n", signature);
 
         // construct tx
-        Transaction transactionStruct = new Transaction();
-        transactionStruct.setTransactionData(decodeTransactionDataStructHex);
-        transactionStruct.setDataHash(fromHex(txDataHash));
-        transactionStruct.setSignature(fromHex(signature));
-        transactionStruct.setSender(null);
-        transactionStruct.setImportTime(0);
-        transactionStruct.setAttribute(0);
-        transactionStruct.setExtraData("");
-        // assert
-        Assert.assertEquals(
-                transactionStruct.getTransactionData().getBlockLimit(),
-                decodeTransactionDataStructHex.getBlockLimit());
-        Assert.assertEquals(
-                transactionStruct.getTransactionData().getGroupId(),
-                decodeTransactionDataStructHex.getGroupId());
-        Assert.assertEquals(
-                transactionStruct.getTransactionData().getChainId(),
-                decodeTransactionDataStructHex.getChainId());
-        Assert.assertEquals(
-                transactionStruct.getTransactionData().getAbi(),
-                decodeTransactionDataStructHex.getAbi());
-        Assert.assertArrayEquals(transactionStruct.getDataHash(), fromHex(txDataHash));
-        Assert.assertArrayEquals(transactionStruct.getSignature(), fromHex(signature));
+        Transaction transactionStructV2 = new Transaction();
+        transactionStructV2.setTransactionData(transactionDataStructV2);
+        transactionStructV2.setDataHash(fromHex(txDataHash));
+        transactionStructV2.setSignature(fromHex(signature));
+        transactionStructV2.setSender(null);
+        transactionStructV2.setImportTime(0);
+        transactionStructV2.setAttribute(0);
+        transactionStructV2.setExtraData("");
 
         // encode Tx to hex tx
-        String txHex = TransactionStructBuilderJniObj.encodeTransactionStruct(transactionStruct);
+        String txHex = TransactionStructBuilderJniObj.encodeTransactionStruct(transactionStructV2);
         // decode hex tx to Tx
         Transaction decodeTransactionStructHex =
-                TransactionStructBuilderJniObj.decodeTransactionStruct(txHex);
+                TransactionStructBuilderJniObj.decodeTransactionStructV2(txHex);
+
         // assert
         Assert.assertEquals(
-                transactionStruct.getTransactionData().getBlockLimit(),
+                transactionStructV2.getTransactionData().getBlockLimit(),
                 decodeTransactionStructHex.getTransactionData().getBlockLimit());
         Assert.assertEquals(
-                transactionStruct.getTransactionData().getGroupId(),
+                transactionStructV2.getTransactionData().getGroupId(),
                 decodeTransactionStructHex.getTransactionData().getGroupId());
         Assert.assertEquals(
-                transactionStruct.getTransactionData().getChainId(),
+                transactionStructV2.getTransactionData().getChainId(),
                 decodeTransactionStructHex.getTransactionData().getChainId());
         Assert.assertEquals(
-                transactionStruct.getTransactionData().getAbi(),
+                transactionStructV2.getTransactionData().getAbi(),
                 decodeTransactionStructHex.getTransactionData().getAbi());
+        TransactionDataV2 transactionData =
+                (TransactionDataV2) transactionStructV2.getTransactionData();
+        TransactionDataV2 decodeTransactionData =
+                (TransactionDataV2) decodeTransactionStructHex.getTransactionData();
+        Assert.assertEquals(transactionData.getValue(), decodeTransactionData.getValue());
+        Assert.assertEquals(transactionData.getGasLimit(), decodeTransactionData.getGasLimit());
+        Assert.assertEquals(transactionData.getGasPrice(), decodeTransactionData.getGasPrice());
+        Assert.assertEquals(
+                transactionData.getMaxFeePerGas(), decodeTransactionData.getMaxFeePerGas());
+        Assert.assertEquals(
+                transactionData.getMaxPriorityFeePerGas(),
+                decodeTransactionData.getMaxPriorityFeePerGas());
         Assert.assertArrayEquals(
-                transactionStruct.getDataHash(), decodeTransactionStructHex.getDataHash());
+                transactionStructV2.getDataHash(), decodeTransactionStructHex.getDataHash());
         Assert.assertArrayEquals(
-                transactionStruct.getSignature(), decodeTransactionStructHex.getSignature());
+                transactionStructV2.getSignature(), decodeTransactionStructHex.getSignature());
 
         // encode Tx to json tx
         String txJson =
-                TransactionStructBuilderJniObj.encodeTransactionStructToJson(transactionStruct);
-        System.out.printf(" [test Tx Struct] txJson: %s\n", txJson);
+                TransactionStructBuilderJniObj.encodeTransactionStructToJson(transactionStructV2);
+        System.out.printf(" [test Tx Struct V2] txJson: %s\n", txJson);
         // create tx string
         String txString =
                 TransactionStructBuilderJniObj.createEncodedTransaction(
-                        decodeTransactionDataStructHex, signature, txDataHash, 0, "");
-        //        System.out.printf(" [test Tx Struct] txString: %s\n", txString);
-
+                        transactionDataStructV2, signature, txDataHash, 0, "");
+        //        System.out.printf(" [test Tx Struct V2] txString: %s\n", txString);
         CompletableFuture<Response> future = new CompletableFuture<>();
+
         // rpc send tx
         rpcJniObj.sendTransaction(group, node, txString, false, future::complete);
 
@@ -231,7 +316,13 @@ public class TestTxStruct {
         System.out.println("response error code: ==>>> " + response.getErrorCode());
         String dataStr = new String(response.getData());
         System.out.println("response data: ==>>> " + dataStr);
+        CompletableFuture<Response> future2 = new CompletableFuture<>();
+        rpcJniObj.getTransaction(group, node, txDataHash, true, future2::complete);
+        Response response1 = future2.get();
+        System.out.println("getTx response error code: ==>>> " + response1.getErrorCode());
+        String dataStr1 = new String(response1.getData());
+        System.out.println("Tx data: ==>>> " + dataStr1);
         rpcJniObj.stop();
-        System.out.println(" [test Tx Struct] finish !!");
+        System.out.println(" [test Tx Struct V2] finish !! ");
     }
 }
