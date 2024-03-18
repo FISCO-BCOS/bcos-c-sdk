@@ -22,6 +22,8 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest ]
+#    env:
+#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -40,14 +42,12 @@ jobs:
             vcpkg-clang-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-
             vcpkg-clang-v1-notest-${{ runner.temp }}-
       - name: install macOS dependencies
-        if: runner.os == 'macOS'
         run: brew install ccache lcov
       - name: configure
-        if: runner.os == 'macOS'
         run: |
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ 
           mkdir build && cd build 
-          cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
@@ -69,12 +69,20 @@ jobs:
         with:
           name: libbcos-sdk-jni.dylib.zip
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
   build_with_gcc:
     name: build_with_gcc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ ubuntu-20.04 ]
+#    env:
+#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -104,6 +112,12 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
       - name: run coverage
         run: cd build && make cov
       - name: upload coverage report
@@ -123,6 +137,8 @@ jobs:
       image: docker.io/centos:7
       volumes:
         - /usr/local/share/vcpkg:/usr/local/share/vcpkg
+#    env:
+#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -190,12 +206,20 @@ jobs:
         with:
           name: libbcos-sdk-jni.so.zip
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
   build_with_windows:
     name: build_with_windows
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ windows-2019 ]
+#    env:
+#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -236,3 +260,9 @@ jobs:
         with:
           name: bcos-sdk-jni.dll.zip
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');

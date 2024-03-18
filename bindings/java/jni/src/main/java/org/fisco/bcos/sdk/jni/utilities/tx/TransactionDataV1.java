@@ -7,6 +7,21 @@ public class TransactionDataV1 extends TransactionData {
     protected String maxFeePerGas;
     protected String maxPriorityFeePerGas;
 
+    public TransactionDataV1() {
+        super();
+    }
+
+    public TransactionDataV1(TransactionData data) {
+        this.version = data.version;
+        this.blockLimit = data.blockLimit;
+        this.chainId = data.chainId;
+        this.groupId = data.groupId;
+        this.nonce = data.nonce;
+        this.to = data.to;
+        this.abi = data.abi;
+        this.input = data.input;
+    }
+
     public String getValue() {
         return value;
     }

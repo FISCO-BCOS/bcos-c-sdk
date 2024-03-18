@@ -264,8 +264,10 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     jfieldID heartbeatPeriodMsFieldID = env->GetFieldID(configClass, "heartbeatPeriodMs", "I");
     int heartbeatPeriodMs = (int)env->GetIntField(jconfig, heartbeatPeriodMsFieldID);
 
-    jfieldID sendRpcRequestToHighestBlockNodeFieldID = env->GetFieldID(configClass, "sendRpcRequestToHighestBlockNode", "Z");
-    bool sendRpcRequestToHighestBlockNode = env->GetBooleanField(jconfig, sendRpcRequestToHighestBlockNodeFieldID);
+    jfieldID sendRpcRequestToHighestBlockNodeFieldID =
+        env->GetFieldID(configClass, "sendRpcRequestToHighestBlockNode", "Z");
+    bool sendRpcRequestToHighestBlockNode =
+        env->GetBooleanField(jconfig, sendRpcRequestToHighestBlockNodeFieldID);
 
     jfieldID messageTimeoutMsFieldID = env->GetFieldID(configClass, "messageTimeoutMs", "I");
     int messageTimeoutMs = (int)env->GetIntField(jconfig, messageTimeoutMsFieldID);
@@ -320,23 +322,20 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
         const char* peer = env->GetStringUTFChars(jpeer, NULL);
         bcos::boostssl::NodeIPEndpoint endPoint;
 
-        bcos::boostssl::ws::WsTools::stringToEndPoint(peer ? peer : "", endPoint);
-        // if (!result)
-        // {
-        //     BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
-        //                               ("the connected peer should be in host<ipv4/ipv6/domain "
-        //                                "name>:port:port string format, invalid value: " +
-        //                                   std::string(peer))
-        //                                   .c_str()));
-        //     continue;
-        // }
-        // else
-        // {
+        auto result = bcos::boostssl::ws::WsTools::hostAndPort2Endpoint(peer ? peer : "", endPoint);
+        if (!result)
+        {
+            BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
+                                      ("the connected peer should be in host<ipv4/ipv6/domain "
+                                       "name>:port:port string format, invalid value: " +
+                                          std::string(peer))
+                                          .c_str()));
+            continue;
+        }
         ep[i].host = strdup(endPoint.address().c_str());
         ep[i].port = endPoint.port();
-        // }
 
-        // env->ReleaseStringUTFChars(jpeer, peer);
+        env->ReleaseStringUTFChars(jpeer, peer);
     }
 
     jfieldID jdisableSsl = env->GetFieldID(configClass, "disableSsl", "Z");
