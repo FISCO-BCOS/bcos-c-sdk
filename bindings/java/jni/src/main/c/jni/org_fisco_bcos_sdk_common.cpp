@@ -14,20 +14,20 @@ using namespace bcos::boostssl;
 void* bcos_sdk_get_native_pointer(JNIEnv* env, jobject self)
 {
     jclass cls = env->GetObjectClass(self);
-    if (cls == NULL)
+    if (cls == nullptr)
     {
         env->FatalError("No such class, object class is null in acquire native class");
     }
 
     jfieldID nativeFieldID = env->GetFieldID(cls, "nativePointer", "J");
-    if (nativeFieldID == NULL)
+    if (nativeFieldID == nullptr)
     {
         env->FatalError("No such field, native field is null in acquire native field");
     }
 
     jlong nativePointer = env->GetLongField(self, nativeFieldID);
     void* native = reinterpret_cast<void*>(nativePointer);
-    if (native == NULL)
+    if (native == nullptr)
     {  // Note: native obj can be NULL when it is not initialized ???
         env->FatalError("No such long field, object obj is null in acquire native obj");
     }
@@ -47,56 +47,55 @@ static bcos_sdk_c_cert_config* create_bcos_sdk_c_cert_config(
     */
     std::string className = "org/fisco/bcos/sdk/jni/common/JniConfig$CertConfig";
     jfieldID caCertField = env->GetFieldID(certConfigClass, "caCert", "Ljava/lang/String;");
-    if (caCertField == NULL)
+    if (caCertField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: caCert").c_str());
     }
 
-    jstring jCaCert = (jstring)env->GetObjectField(jCertConfig, caCertField);
+    auto jCaCert = (jstring)env->GetObjectField(jCertConfig, caCertField);
     if (!jCaCert)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter()
                               << errinfo_comment("caCert has not been initialized, please set it"));
     }
 
-    const char* caCert = env->GetStringUTFChars(jCaCert, NULL);
+    const char* caCert = env->GetStringUTFChars(jCaCert, nullptr);
 
     jfieldID nodeKeyField = env->GetFieldID(certConfigClass, "nodeKey", "Ljava/lang/String;");
-    if (nodeKeyField == NULL)
+    if (nodeKeyField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: nodeKey")
                 .c_str());
     }
 
-    jstring jNodeKey = (jstring)env->GetObjectField(jCertConfig, nodeKeyField);
+    auto jNodeKey = (jstring)env->GetObjectField(jCertConfig, nodeKeyField);
     if (!jNodeKey)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
                                   "node key(nodeKey) has not been initialized, please set it"));
     }
 
-    const char* nodeKey = env->GetStringUTFChars(jNodeKey, NULL);
+    const char* nodeKey = env->GetStringUTFChars(jNodeKey, nullptr);
 
     jfieldID nodeCertField = env->GetFieldID(certConfigClass, "nodeCert", "Ljava/lang/String;");
-    if (nodeCertField == NULL)
+    if (nodeCertField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: nodeCert")
                 .c_str());
     }
 
-    jstring jNodeCert = (jstring)env->GetObjectField(jCertConfig, nodeCertField);
-    if (!jNodeKey)
+    auto jNodeCert = (jstring)env->GetObjectField(jCertConfig, nodeCertField);
+    if (!jNodeCert)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
                                   "node cert(nodeCert) has not been initialized, please set it"));
     }
 
-    const char* nodeCert = env->GetStringUTFChars(jNodeCert, NULL);
-    struct bcos_sdk_c_cert_config* config =
-        (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
+    const char* nodeCert = env->GetStringUTFChars(jNodeCert, nullptr);
+    auto* config = (struct bcos_sdk_c_cert_config*)malloc(sizeof(struct bcos_sdk_c_cert_config));
 
     config->ca_cert = strdup(caCert);
     config->node_cert = strdup(nodeCert);
@@ -137,65 +136,65 @@ static bcos_sdk_c_sm_cert_config* create_bcos_sdk_c_sm_cert_config(
     const std::string className = "org/fisco/bcos/sdk/jni/common/JniConfig$SMCertConfig";
     // caCert
     jfieldID caCertField = env->GetFieldID(smCertConfigClass, "caCert", "Ljava/lang/String;");
-    if (caCertField == NULL)
+    if (caCertField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: caCert").c_str());
     }
 
-    jstring jCaCert = (jstring)env->GetObjectField(jSmCertConfig, caCertField);
+    auto jCaCert = (jstring)env->GetObjectField(jSmCertConfig, caCertField);
     if (!jCaCert)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter()
                               << errinfo_comment("caCert has not been initialized, please set it"));
     }
 
-    const char* caCert = env->GetStringUTFChars(jCaCert, NULL);
+    const char* caCert = env->GetStringUTFChars(jCaCert, nullptr);
 
     // nodeCert
     jfieldID nodeCertField = env->GetFieldID(smCertConfigClass, "nodeCert", "Ljava/lang/String;");
-    if (nodeCertField == NULL)
+    if (nodeCertField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: nodeCert")
                 .c_str());
     }
-    jstring jNodeCert = (jstring)env->GetObjectField(jSmCertConfig, nodeCertField);
+    auto jNodeCert = (jstring)env->GetObjectField(jSmCertConfig, nodeCertField);
     if (!jNodeCert)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
                                   "nodeCert has not been initialized, please set it"));
     }
 
-    const char* nodeCert = env->GetStringUTFChars(jNodeCert, NULL);
+    const char* nodeCert = env->GetStringUTFChars(jNodeCert, nullptr);
 
     // nodeKey
     jfieldID nodeKeyField = env->GetFieldID(smCertConfigClass, "nodeKey", "Ljava/lang/String;");
-    if (nodeKeyField == NULL)
+    if (nodeKeyField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: nodeKey")
                 .c_str());
     }
-    jstring jNodeKey = (jstring)env->GetObjectField(jSmCertConfig, nodeKeyField);
+    auto jNodeKey = (jstring)env->GetObjectField(jSmCertConfig, nodeKeyField);
     if (!jNodeKey)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
                                   "nodeKey has not been initialized, please set it"));
     }
 
-    const char* nodeKey = jNodeKey ? env->GetStringUTFChars(jNodeKey, NULL) : NULL;
+    const char* nodeKey = env->GetStringUTFChars(jNodeKey, nullptr);
 
     // enNodeCert
     jfieldID enNodeCertField =
         env->GetFieldID(smCertConfigClass, "enNodeCert", "Ljava/lang/String;");
-    if (enNodeCertField == NULL)
+    if (enNodeCertField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: enNodeCert")
                 .c_str());
     }
-    jstring jEnNodeCert = (jstring)env->GetObjectField(jSmCertConfig, enNodeCertField);
+    auto jEnNodeCert = (jstring)env->GetObjectField(jSmCertConfig, enNodeCertField);
     if (!jEnNodeCert)
     {
         BOOST_THROW_EXCEPTION(
@@ -203,17 +202,17 @@ static bcos_sdk_c_sm_cert_config* create_bcos_sdk_c_sm_cert_config(
                 "encrypt node cert(enNodeCrt) has not been initialized, please set it"));
     }
 
-    const char* enNodeCert = env->GetStringUTFChars(jEnNodeCert, NULL);
+    const char* enNodeCert = env->GetStringUTFChars(jEnNodeCert, nullptr);
 
     // enNodeKey
     jfieldID enNodeKeyField = env->GetFieldID(smCertConfigClass, "enNodeKey", "Ljava/lang/String;");
-    if (enNodeKeyField == NULL)
+    if (enNodeKeyField == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + ",fieldName: enNodeKey")
                 .c_str());
     }
-    jstring jEnNodeKey = (jstring)env->GetObjectField(jSmCertConfig, enNodeKeyField);
+    auto jEnNodeKey = (jstring)env->GetObjectField(jSmCertConfig, enNodeKeyField);
     if (!jEnNodeKey)
     {
         BOOST_THROW_EXCEPTION(
@@ -221,9 +220,9 @@ static bcos_sdk_c_sm_cert_config* create_bcos_sdk_c_sm_cert_config(
                 "encrypt node key(enNodeKey) has not been initialized, please set it"));
     }
 
-    const char* enNodeKey = env->GetStringUTFChars(jEnNodeKey, NULL);
+    const char* enNodeKey = env->GetStringUTFChars(jEnNodeKey, nullptr);
 
-    struct bcos_sdk_c_sm_cert_config* config =
+    auto* config =
         (struct bcos_sdk_c_sm_cert_config*)malloc(sizeof(struct bcos_sdk_c_sm_cert_config));
 
     config->ca_cert = strdup(caCert);
@@ -274,7 +273,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
 
     jfieldID peersFieldID = env->GetFieldID(configClass, "peers", "Ljava/util/List;");
     jobject jpeersOjbect = env->GetObjectField(jconfig, peersFieldID);
-    if (jpeersOjbect == NULL)
+    if (jpeersOjbect == nullptr)
     {
         BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
                                   "the connected peers has not been initialized , please set it"));
@@ -282,21 +281,21 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
 
     // Find "java/util/List" Class (Standard JAVA Class).
     jclass listClass = env->FindClass("java/util/List");
-    if (listClass == NULL)
+    if (listClass == nullptr)
     {
         env->FatalError("No such class, className: java/util/List");
     }
 
     // Get "java.util.List.get(int location)" MethodID
     jmethodID listGetMethodID = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
-    if (listGetMethodID == NULL)
+    if (listGetMethodID == nullptr)
     {
         env->FatalError("No such method, className: java.util.List<String>, method: get()");
     }
 
     // Get "int java.util.List.size()" MethodID
     jmethodID listSizeMethodID = env->GetMethodID(listClass, "size", "()I");
-    if (listSizeMethodID == NULL)
+    if (listSizeMethodID == nullptr)
     {
         env->FatalError("No such method, className: java.util.List<String>, method: size()");
     }
@@ -305,13 +304,12 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     int listSize = (int)env->CallIntMethod(jpeersOjbect, listSizeMethodID);
 
     // Note: ep should be free after bcos_sdk_c_config out of use
-    struct bcos_sdk_c_endpoint* ep =
-        (struct bcos_sdk_c_endpoint*)malloc(listSize * sizeof(struct bcos_sdk_c_endpoint));
+    auto* ep = (struct bcos_sdk_c_endpoint*)malloc(listSize * sizeof(struct bcos_sdk_c_endpoint));
 
     for (int i = 0; i < listSize; ++i)
     {
         // String java.util.List.get
-        jstring jpeer = (jstring)env->CallObjectMethod(jpeersOjbect, listGetMethodID, i);
+        auto jpeer = (jstring)env->CallObjectMethod(jpeersOjbect, listGetMethodID, i);
         if (!jpeer)
         {
             BOOST_THROW_EXCEPTION(InvalidParameter() << errinfo_comment(
@@ -319,7 +317,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
                                       "host<ipv4/ipv6/domain name>:port string format"));
         }
 
-        const char* peer = env->GetStringUTFChars(jpeer, NULL);
+        const char* peer = env->GetStringUTFChars(jpeer, nullptr);
         bcos::boostssl::NodeIPEndpoint endPoint;
 
         auto result = bcos::boostssl::ws::WsTools::hostAndPort2Endpoint(peer ? peer : "", endPoint);
@@ -339,7 +337,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
     }
 
     jfieldID jdisableSsl = env->GetFieldID(configClass, "disableSsl", "Z");
-    if (jdisableSsl == NULL)
+    if (jdisableSsl == nullptr)
     {
         env->FatalError(
             ("No such field in the class, className: " + className + " ,field: disableSsl")
@@ -350,19 +348,19 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
 
     std::string strSslType;
 
-    bcos_sdk_c_cert_config* cert_config = NULL;
-    bcos_sdk_c_sm_cert_config* sm_cert_config = NULL;
+    bcos_sdk_c_cert_config* cert_config = nullptr;
+    bcos_sdk_c_sm_cert_config* sm_cert_config = nullptr;
     if (!disableSsl)
     {
         jfieldID sslTypeField = env->GetFieldID(configClass, "sslType", "Ljava/lang/String;");
-        if (sslTypeField == NULL)
+        if (sslTypeField == nullptr)
         {
             env->FatalError(
                 ("No such field in the class, className: " + className + " ,field: sslType")
                     .c_str());
         }
 
-        jstring jsslType = (jstring)env->GetObjectField(jconfig, sslTypeField);
+        auto jsslType = (jstring)env->GetObjectField(jconfig, sslTypeField);
         if (!jsslType)
         {
             BOOST_THROW_EXCEPTION(
@@ -370,7 +368,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
                     "sslType has not been initialized, it should be \"ssl\" or \"sm_ssl\""));
         }
 
-        const char* sslType = env->GetStringUTFChars(jsslType, NULL);
+        const char* sslType = env->GetStringUTFChars(jsslType, nullptr);
         strSslType = std::string(sslType);
         env->ReleaseStringUTFChars(jsslType, sslType);
         if (strSslType != "sm_ssl")
@@ -378,7 +376,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
             std::string className = "org/fisco/bcos/sdk/jni/common/JniConfig$CertConfig";
             jfieldID certConfigField = env->GetFieldID(
                 configClass, "certConfig", "Lorg/fisco/bcos/sdk/jni/common/JniConfig$CertConfig;");
-            if (certConfigField == NULL)
+            if (certConfigField == nullptr)
             {
                 env->FatalError(
                     ("No such field in the class, className: " + className + " ,field: certConfig")
@@ -402,7 +400,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
             std::string className = "org/fisco/bcos/sdk/jni/common/JniConfig$SMCertConfig";
             jfieldID smCertConfigField = env->GetFieldID(configClass, "smCertConfig",
                 "Lorg/fisco/bcos/sdk/jni/common/JniConfig$SMCertConfig;");
-            if (smCertConfigField == NULL)
+            if (smCertConfigField == nullptr)
             {
                 env->FatalError((
                     "No such field in the class, className: " + className + " ,field: smCertConfig")
