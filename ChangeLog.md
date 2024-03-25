@@ -1,3 +1,23 @@
+### 3.7.0
+
+(2024-03-25)
+
+**新增**
+
+- 新增 `v2` 版本的交易构造方法，并提供Jni层对应的实现方法。详情见：https://github.com/FISCO-BCOS/bcos-c-sdk/pull/219
+
+**更新**
+
+- 优化 `go-sdk-wrapper` 调用回调的方法，详情见：https://github.com/FISCO-BCOS/bcos-c-sdk/pull/218
+
+**修复**
+
+- 修复 `go-sdk-wrapper` 在初始化时WsConfig默认使用值有误导致CPU占用过高的问题，详情见：https://github.com/FISCO-BCOS/bcos-c-sdk/pull/222
+- 修复初始化读取配置时，因错误配置可能出现coredump的问题，详情见：https://github.com/FISCO-BCOS/bcos-c-sdk/pull/223
+- 修复在x86 macOS下退出时会输出stderr的问题，详情见：https://github.com/FISCO-BCOS/bcos-c-sdk/pull/223
+
+---
+
 ### 3.6.0
 
 (2024-02-08)

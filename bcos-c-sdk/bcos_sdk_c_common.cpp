@@ -25,6 +25,7 @@
 
 using namespace bcos;
 
+thread_local std::string errorMsg;
 /**
  * @brief free char* pointer
  * Note: The *p must be created by malloc or it should have serious bad effects
@@ -233,8 +234,8 @@ void bcos_sdk_c_handle_response(
     if (errorPtr && errorPtr->errorCode() != 0)
     {
         resp->error = errorPtr->errorCode();
-        // not copy here because cpp sdk will release the errorPtr
-        resp->desc = (char*)errorPtr->errorMessage().c_str();
+        errorMsg = errorPtr->errorMessage();
+        resp->desc = (char*)errorMsg.c_str();
         resp->data = NULL;
         resp->size = 0;
     }
