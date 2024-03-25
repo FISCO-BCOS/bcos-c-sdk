@@ -146,7 +146,7 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars_v2(
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->base_v1.base.group_id, nullptr);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->base_v1.base.chain_id, nullptr);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->base_v1.base.input, nullptr);
-    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->base_v1.value, nullptr);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction_data->base_v1.base.input->buffer, nullptr);
 
     try
     {
@@ -158,19 +158,29 @@ bcostars::TransactionDataUniquePtr convert_transaction_data_to_tars_v2(
                 static_cast<tars::Char>(transaction_data->base_v1.base.input->buffer[i]));
         }
         tars_transaction_data->version = (tars::Int32)transaction_data->base_v1.base.version;
-        tars_transaction_data->blockLimit = (tars::Int64)transaction_data->base_v1.base.block_limit;
-        tars_transaction_data->chainID = std::string(transaction_data->base_v1.base.chain_id);
-        tars_transaction_data->groupID = std::string(transaction_data->base_v1.base.group_id);
-        tars_transaction_data->nonce = std::string(transaction_data->base_v1.base.nonce);
-        tars_transaction_data->to = std::string(transaction_data->base_v1.base.to);
-        tars_transaction_data->abi = std::string(transaction_data->base_v1.base.abi);
-        tars_transaction_data->value = std::string(transaction_data->base_v1.value);
-        tars_transaction_data->gasPrice = std::string(transaction_data->base_v1.gas_price);
-        tars_transaction_data->gasLimit = (tars::Int64)transaction_data->base_v1.gas_limit;
-        tars_transaction_data->maxFeePerGas =
-            std::string(transaction_data->base_v1.max_fee_per_gas);
+        tars_transaction_data->blockLimit =
+            static_cast<tars::Int64>(transaction_data->base_v1.base.block_limit);
+        tars_transaction_data->chainID = transaction_data->base_v1.base.chain_id;
+        tars_transaction_data->groupID = transaction_data->base_v1.base.group_id;
+        tars_transaction_data->nonce =
+            transaction_data->base_v1.base.nonce ? transaction_data->base_v1.base.nonce : "";
+        tars_transaction_data->to =
+            transaction_data->base_v1.base.to ? transaction_data->base_v1.base.to : "";
+        tars_transaction_data->abi =
+            transaction_data->base_v1.base.abi ? transaction_data->base_v1.base.abi : "";
+        tars_transaction_data->value =
+            transaction_data->base_v1.value ? transaction_data->base_v1.value : "";
+        tars_transaction_data->gasPrice =
+            transaction_data->base_v1.gas_price ? transaction_data->base_v1.gas_price : "";
+        tars_transaction_data->gasLimit =
+            static_cast<tars::Int64>(transaction_data->base_v1.gas_limit);
+        tars_transaction_data->maxFeePerGas = transaction_data->base_v1.max_fee_per_gas ?
+                                                  transaction_data->base_v1.max_fee_per_gas :
+                                                  "";
         tars_transaction_data->maxPriorityFeePerGas =
-            std::string(transaction_data->base_v1.max_priority_fee_per_gas);
+            transaction_data->base_v1.max_priority_fee_per_gas ?
+                transaction_data->base_v1.max_priority_fee_per_gas :
+                "";
 
         if (transaction_data->extension && transaction_data->extension->buffer)
         {
@@ -202,7 +212,9 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars_v2(
     bcos_sdk_clear_last_error();
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction, nullptr);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction->data_hash, nullptr);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction->data_hash->buffer, nullptr);
     BCOS_SDK_C_PARAMS_VERIFICATION(transaction->signature, nullptr);
+    BCOS_SDK_C_PARAMS_VERIFICATION(transaction->signature->buffer, nullptr);
 
     try
     {
@@ -210,18 +222,21 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars_v2(
         auto TransactionDataUniquePtr =
             convert_transaction_data_to_tars_v2(transaction->transaction_data);
         tars_transaction->data = *TransactionDataUniquePtr;
+        tars_transaction->dataHash.reserve(transaction->data_hash->length);
         for (size_t i = 0; i < transaction->data_hash->length; ++i)
         {
             tars_transaction->dataHash.push_back(
                 static_cast<tars::Char>(transaction->data_hash->buffer[i]));
         }
+        tars_transaction->signature.reserve(transaction->signature->length);
         for (size_t i = 0; i < transaction->signature->length; ++i)
         {
             tars_transaction->signature.push_back(
                 static_cast<tars::Char>(transaction->signature->buffer[i]));
         }
-        if (transaction->sender)
+        if (transaction->sender && transaction->sender->buffer)
         {
+            tars_transaction->sender.reserve(transaction->sender->length);
             for (size_t i = 0; i < transaction->sender->length; ++i)
             {
                 tars_transaction->sender.push_back(
@@ -230,7 +245,7 @@ bcostars::TransactionUniquePtr convert_transaction_to_tars_v2(
         }
         tars_transaction->importTime = static_cast<tars::Int32>(transaction->import_time);
         tars_transaction->attribute = transaction->attribute;
-        tars_transaction->extraData = std::string(transaction->extra_data);
+        tars_transaction->extraData = transaction->extra_data ? transaction->extra_data : "";
 
         return tars_transaction;
     }
@@ -300,11 +315,6 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_v
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
         (bytes_input_length > 0), "bytes input length must > 0", nullptr);
     BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must > 0", nullptr);
-    BCOS_SDK_C_PARAMS_VERIFICATION(value, nullptr);
-    BCOS_SDK_C_PARAMS_VERIFICATION(gas_price, nullptr);
-    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((gas_limit >= 0), "gas limit must >= 0", nullptr);
-    BCOS_SDK_C_PARAMS_VERIFICATION(max_fee_per_gas, nullptr);
-    BCOS_SDK_C_PARAMS_VERIFICATION(max_priority_fee_per_gas, nullptr);
 
     try
     {
@@ -330,7 +340,7 @@ struct bcos_sdk_c_transaction_data_v2* bcos_sdk_create_transaction_data_struct_v
         transaction_data_struct_v2->base_v1.max_fee_per_gas = my_strdup(max_fee_per_gas);
         transaction_data_struct_v2->base_v1.max_priority_fee_per_gas =
             my_strdup(max_priority_fee_per_gas);
-        if(extension && extension_length > 0)
+        if (extension && extension_length > 0)
         {
             transaction_data_struct_v2->extension =
                 create_bytes_struct(extension_length, reinterpret_cast<const char*>(extension));
