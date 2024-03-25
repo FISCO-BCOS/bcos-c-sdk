@@ -59,7 +59,7 @@ if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif ()
 
 # project name
-project(bcos-c-sdk VERSION "3.6.0")
+project(bcos-c-sdk VERSION "3.7.0")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 if (NOT CMAKE_BUILD_TYPE)
