@@ -18,77 +18,79 @@ import org.slf4j.LoggerFactory;
 
 public class EventSub {
 
-  private static final Logger logger = LoggerFactory.getLogger(EventSub.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventSub.class);
 
-  public static void usage() {
-    System.out.println("\tUsage: ");
-    System.out.println(
-        "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.eventsub.EventSub ip:port group fromBlk toBlk");
-    System.out.println("\tExample:");
-    System.out.println(
-        "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.eventsub.EventSub 127.0.0.1:20201 group -1 -1");
-    System.exit(0);
-  }
-
-  public static void main(String[] args)
-      throws InterruptedException, JniException, JsonProcessingException {
-    if (args.length < 4) {
-      usage();
+    public static void usage() {
+        System.out.println("\tUsage: ");
+        System.out.println(
+                "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.eventsub.EventSub ip:port group fromBlk toBlk");
+        System.out.println("\tExample:");
+        System.out.println(
+                "\t\tjava -cp \"conf/:lib/*:apps/*\"  org.fisco.bcos.sdk.jni.test.eventsub.EventSub 127.0.0.1:20201 group -1 -1");
+        System.exit(0);
     }
 
-    String peer = args[0];
-    String group = args[1];
-    long fromBlk = Long.valueOf(args[2]);
-    long toBlk = Long.valueOf(args[3]);
+    public static void main(String[] args)
+            throws InterruptedException, JniException, JsonProcessingException {
+        if (args.length < 4) {
+            usage();
+        }
 
-    System.out.println("EventSub sample: ");
-    System.out.println("\t group: " + group);
-    System.out.println("\t fromBlk: " + fromBlk);
-    System.out.println("\t toBlk: " + toBlk);
+        String peer = args[0];
+        String group = args[1];
+        long fromBlk = Long.valueOf(args[2]);
+        long toBlk = Long.valueOf(args[3]);
 
-    JniConfig jniConfig = Utility.newJniConfig(Arrays.asList(peer));
-    jniConfig.setDisableSsl(true);
-    BcosSDKJniObj bcosSDKJni = BcosSDKJniObj.build(jniConfig);
-    bcosSDKJni.registerBlockNotifier(
-        group,
-        new BlockNotifier() {
-          @Override
-          public void onResponse(String groupId, BigInteger blockNumber) {
-            System.out.println("BlockNotifier ==>>> ");
-            System.out.println("\t group: " + groupId);
-            System.out.println("\t blockNumber: " + blockNumber);
-          }
-        });
-    EventSubJniObj eventSubscribe = EventSubJniObj.build(bcosSDKJni.getNativePointer());
+        System.out.println("EventSub sample: ");
+        System.out.println("\t group: " + group);
+        System.out.println("\t fromBlk: " + fromBlk);
+        System.out.println("\t toBlk: " + toBlk);
 
-    EventSubParams params = new EventSubParams();
-    params.setFromBlock(fromBlk);
-    params.setToBlock(toBlk);
+        JniConfig jniConfig = Utility.newJniConfig(Arrays.asList(peer));
+        jniConfig.setDisableSsl(true);
+        BcosSDKJniObj bcosSDKJni = BcosSDKJniObj.build(jniConfig);
+        bcosSDKJni.registerBlockNotifier(
+                group,
+                new BlockNotifier() {
+                    @Override
+                    public void onResponse(String groupId, BigInteger blockNumber) {
+                        System.out.println("BlockNotifier ==>>> ");
+                        System.out.println("\t group: " + groupId);
+                        System.out.println("\t blockNumber: " + blockNumber);
+                    }
+                });
+        EventSubJniObj eventSubscribe = EventSubJniObj.build(bcosSDKJni.getNativePointer());
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    String strParams = objectMapper.writeValueAsString(params);
+        EventSubParams params = new EventSubParams();
+        params.setFromBlock(fromBlk);
+        params.setToBlock(toBlk);
 
-    System.out.println("\t params: " + strParams);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String strParams = objectMapper.writeValueAsString(params);
 
-    eventSubscribe.start();
-    String eventSubId =
-        eventSubscribe.subscribeEvent(
-            group,
-            objectMapper.writeValueAsString(params),
-            new EventSubCallback() {
-              @Override
-              public void onResponse(Response response) {
-                System.out.println("subscribeEvent ==>>> " + response.getErrorCode());
-                System.out.println("\t errorCode: " + response.getErrorCode());
-                System.out.println("\t errorMessage: " + response.getErrorMessage());
-                System.out.println("\t data: " + new String(response.getData()));
-              }
-            });
+        System.out.println("\t params: " + strParams);
 
-    System.out.println("EventSubId = " + eventSubId);
+        eventSubscribe.start();
+        String eventSubId =
+                eventSubscribe.subscribeEvent(
+                        group,
+                        objectMapper.writeValueAsString(params),
+                        new EventSubCallback() {
+                            @Override
+                            public void onResponse(Response response) {
+                                System.out.println(
+                                        "subscribeEvent ==>>> " + response.getErrorCode());
+                                System.out.println("\t errorCode: " + response.getErrorCode());
+                                System.out.println(
+                                        "\t errorMessage: " + response.getErrorMessage());
+                                System.out.println("\t data: " + new String(response.getData()));
+                            }
+                        });
 
-    while (true) {
-      Thread.sleep(10000);
+        System.out.println("EventSubId = " + eventSubId);
+
+        while (true) {
+            Thread.sleep(10000);
+        }
     }
-  }
 }

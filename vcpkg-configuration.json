@@ -3,7 +3,7 @@
     {
       "kind": "git",
       "repository": "https://github.com/FISCO-BCOS/registry",
-      "baseline": "87805d2845731a26b5e9a80beff1cdf83331279e",
+      "baseline": "65ff70452098d1f8457446f2a7dcbf5c71e76848",
       "packages": [
         "openssl",
         "hsm-crypto",
@@ -11,7 +11,8 @@
         "wedprcrypto",
         "secp256k1",
         "boost-uuid",
-        "boost-beast"
+        "boost-beast",
+        "tarscpp"
       ]
     }
   ]

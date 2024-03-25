@@ -19,6 +19,7 @@
  */
 
 #include "bcos_sdk_c_common.h"
+#include "bcos_sdk_c_error.h"
 #include <bcos-utilities/Common.h>
 #include <bcos-utilities/Error.h>
 
@@ -43,10 +44,10 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 {
     struct bcos_sdk_c_config* config =
         (struct bcos_sdk_c_config*)malloc(sizeof(struct bcos_sdk_c_config));
-    config->thread_pool_size = -1;
-    config->message_timeout_ms = -1;
-    config->heartbeat_period_ms = -1;
-    config->reconnect_period_ms = -1;
+    config->thread_pool_size = 0;
+    config->message_timeout_ms = 0;
+    config->heartbeat_period_ms = 0;
+    config->reconnect_period_ms = 0;
     config->disable_ssl = 0;
     config->send_rpc_request_to_highest_block_node = 1;
     config->cert_config = NULL;
@@ -59,14 +60,14 @@ struct bcos_sdk_c_config* bcos_sdk_c_config_create_empty()
 
 char* my_strdup(const char* s)
 {
-    if (s == NULL)
+    if (s == nullptr)
     {
-        return NULL;
+        return nullptr;
     }
     size_t len = strlen(s) + 1;
     char* result = (char*)malloc(len);
-    if (result == (char*)0)
-        return (char*)0;
+    if (result == nullptr)
+        return nullptr;
     return (char*)memcpy(result, s, len);
 }
 
@@ -246,4 +247,65 @@ void bcos_sdk_c_handle_response(
     }
 
     callback(resp);
+}
+
+struct bcos_sdk_c_bytes* create_bytes_struct(uint32_t field_size, const char* field_data)
+{
+    bcos_sdk_clear_last_error();
+    if (field_size <= 0)
+    {
+        return nullptr;
+    }
+
+    try
+    {
+        struct bcos_sdk_c_bytes* field_bytes =
+            (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+        uint32_t length = field_size;
+        uint8_t* buffer = (uint8_t*)malloc(length);
+        memcpy(buffer, field_data, length);
+        field_bytes->buffer = buffer;
+        field_bytes->length = length;
+
+        return field_bytes;
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("create_bytes_struct") << LOG_DESC("exception")
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return nullptr;
+}
+
+struct bcos_sdk_c_bytes* bytes_struct_copy(const struct bcos_sdk_c_bytes* bytes_struct_src)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(bytes_struct_src, nullptr);
+
+    try
+    {
+        struct bcos_sdk_c_bytes* bytes_struct =
+            (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
+
+        uint32_t length = bytes_struct_src->length;
+        uint8_t* buffer = (uint8_t*)malloc(length);
+        memcpy(buffer, bytes_struct_src->buffer, length);
+        bytes_struct->buffer = buffer;
+        bytes_struct->length = length;
+
+        return bytes_struct;
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bytes_struct_copy") << LOG_DESC("exception")
+                          << LOG_KV("bytes_struct_src", bytes_struct_src)
+                          << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+
+    return nullptr;
 }

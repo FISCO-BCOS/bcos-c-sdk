@@ -4,7 +4,6 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "jni/org_fisco_bcos_sdk_common.h"
 #include <string>
-#include <tuple>
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_BcosSDKJniObj
@@ -17,15 +16,24 @@ JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_create(
     CHECK_OBJECT_NOT_NULL(env, jconfig, 0);
     (void)self;
     // config
-    struct bcos_sdk_c_config* config = create_config_from_java_obj(env, jconfig);
-    // create sdk obj
-    void* sdk = bcos_sdk_create(config);
-    // destroy config
-    bcos_sdk_c_config_destroy(config);
-    if (bcos_sdk_get_last_error() == 0)
+    try
     {
-        return reinterpret_cast<jlong>(sdk);
+        struct bcos_sdk_c_config* config = create_config_from_java_obj(env, jconfig);
+        // create sdk obj
+        void* sdk = bcos_sdk_create(config);
+        // destroy config
+        bcos_sdk_c_config_destroy(config);
+        if (bcos_sdk_get_last_error() == 0)
+        {
+            return reinterpret_cast<jlong>(sdk);
+        }
     }
+    catch (std::exception const& e)
+    {
+        auto msg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, msg.c_str());
+    }
+
 
     // throw exception in java
     THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -77,7 +85,7 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_destroy(JNIEnv*
 
 static void on_receive_block_notifier(const char* group, int64_t block_number, void* ctx)
 {
-    cb_context* context = (cb_context*)ctx;
+    auto* context = (cb_context*)ctx;
 
     jobject jcallback = context->jcallback;
     JavaVM* jvm = context->jvm;
@@ -85,7 +93,7 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     // delete context;
 
     JNIEnv* env;
-    jvm->AttachCurrentThread((void**)&env, NULL);
+    jvm->AttachCurrentThread((void**)&env, nullptr);
 
     std::string className = "org/fisco/bcos/sdk/jni/BlockNotifier";
 
@@ -93,7 +101,7 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     // void onResponse(String groupId, BigInteger blockNumber)
     jmethodID onReqMethodID =
         env->GetMethodID(cbClass, "onResponse", "(Ljava/lang/String;Ljava/math/BigInteger;)V");
-    if (onReqMethodID == NULL)
+    if (onReqMethodID == nullptr)
     {
         env->FatalError(
             ("No such method in the class, className: " + className + " ,method: onResponse")
@@ -104,7 +112,7 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     jclass bigClass = bcos_sdk_c_find_jclass(env, bigClassName.c_str());
 
     jmethodID mid = env->GetMethodID(bigClass, "<init>", "(Ljava/lang/String;)V");
-    if (mid == NULL)
+    if (mid == nullptr)
     {
         env->FatalError(("No such constructor method in the class, className: " + bigClassName +
                          " ,method: constructor")
@@ -179,11 +187,11 @@ JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_BcosSDKJniObj_registerBlockNo
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
 
-    cb_context* context = new cb_context();
+    auto* context = new cb_context();
     context->jcallback = env->NewGlobalRef(jcallback);
     context->jvm = jvm;
 
-    const char* group = env->GetStringUTFChars(jgroup, 0);
+    const char* group = env->GetStringUTFChars(jgroup, nullptr);
 
     std::string className = "org/fisco/bcos/sdk/jni/BlockNotifier";
     bcos_sdk_c_find_jclass(env, className.c_str());
