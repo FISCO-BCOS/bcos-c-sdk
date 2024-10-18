@@ -188,7 +188,7 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk-withSymbol.so.zip
           path: build/libbcos-c-sdk.so
@@ -202,11 +202,11 @@ jobs:
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk.so.zip
           path: build/libbcos-c-sdk.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni.so.zip
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
@@ -248,19 +248,19 @@ jobs:
           cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-c-sdk.lib.zip
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.lib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-c-sdk.dll.zip
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-sdk-jni.lib.zip
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.lib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-sdk-jni.dll.zip
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
