@@ -45,8 +45,8 @@ jobs:
         run: brew install ccache lcov
       - name: configure
         run: |
-          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ 
-          mkdir build && cd build 
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++
+          mkdir build && cd build
           cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
@@ -58,7 +58,7 @@ jobs:
         run: strip build/libbcos-c-sdk.dylib || strip -x build/libbcos-c-sdk.dylib
       - name: strip libbcos-sdk-jni.dylib
         run: |
-          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib 
+          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
           strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
       - uses: actions/upload-artifact@v4
@@ -103,8 +103,8 @@ jobs:
       - name: configure
         run: |
           export CC='gcc-10'; export CXX='g++-10'
-          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; 
-          mkdir -p build && cd build 
+          export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC";
+          mkdir -p build && cd build
           cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: compile
         run: cd build && make -j4
@@ -188,6 +188,10 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libbcos-c-sdk-withSymbol.so.zip
+          path: build/libbcos-c-sdk.so
       - name: strip libbcos-c-sdk.so
         run: |
           ls -h build/libbcos-c-sdk.so
@@ -240,7 +244,7 @@ jobs:
       - name: configure
         if: runner.os == 'Windows'
         run: |
-          mkdir -p build && cd build 
+          mkdir -p build && cd build
           cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
