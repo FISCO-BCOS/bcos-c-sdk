@@ -50,7 +50,7 @@ if ("${ARCHITECTURE}" MATCHES "aarch64")
     set(ARCH_NATIVE ON)
 endif ()
 
-set(VCPKG_BUILD_TYPE "Release")
+set(VCPKG_BUILD_TYPE "RelWithDebInfo")
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     find_package(Git REQUIRED)
     execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- vcpkg WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
