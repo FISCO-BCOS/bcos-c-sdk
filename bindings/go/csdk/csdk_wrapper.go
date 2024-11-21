@@ -119,6 +119,7 @@ func on_callback_once(resp *C.struct_bcos_sdk_c_struct_response) {
 	var respData Response
 	if int(resp.error) != 0 {
 		respData.Err = fmt.Errorf("something is wrong, error: %d, errorMessage: %s", resp.error, C.GoString(resp.desc))
+		respData.Result = []byte{}
 	} else {
 		respData.Result = C.GoBytes(unsafe.Pointer(resp.data), C.int(resp.size))
 	}
