@@ -11,9 +11,14 @@ public class KeyPairJniObj {
 
     public static native long createJniKeyPair(int cryptoType) throws JniException;
 
+    public static native JniKeyPair createRawKeyPair(int cryptoType) throws JniException;
+
     public static native long createHsmKeyPair(String hsmLibPath) throws JniException;
 
     public static native long createJniKeyPair(int cryptoType, byte[] priKeyBytes)
+            throws JniException;
+
+    public static native JniKeyPair createRawKeyPair(int cryptoType, byte[] priKeyBytes)
             throws JniException;
 
     public static native long createHsmKeyPair(byte[] priKeyBytes, String hsmLibPath)

@@ -136,6 +136,16 @@ JNIEXPORT jobject JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTransaction__JLjava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
     JNIEnv*, jclass, jlong, jstring, jstring, jstring, jstring, jstring, jlong, jint, jstring);
 
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    createSignedTransaction
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTransaction__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
+    JNIEnv*, jclass, jobject, jstring, jstring, jstring, jstring, jstring, jlong, jint, jstring);
+
 #ifdef __cplusplus
 }
 #endif

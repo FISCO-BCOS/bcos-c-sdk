@@ -253,7 +253,7 @@ void bcos_sdk_c_handle_response(
 struct bcos_sdk_c_bytes* create_bytes_struct(uint32_t field_size, const char* field_data)
 {
     bcos_sdk_clear_last_error();
-    if (field_size <= 0)
+    if (field_size <= 0 || field_data == nullptr)
     {
         return nullptr;
     }
@@ -264,7 +264,16 @@ struct bcos_sdk_c_bytes* create_bytes_struct(uint32_t field_size, const char* fi
             (struct bcos_sdk_c_bytes*)malloc(sizeof(struct bcos_sdk_c_bytes));
         uint32_t length = field_size;
         uint8_t* buffer = (uint8_t*)malloc(length);
-        memcpy(buffer, field_data, length);
+        if (field_bytes == nullptr || buffer == nullptr)
+        {
+            std::string msg = "malloc failed";
+            bcos_sdk_set_last_error_msg(-1, msg.c_str());
+            BCOS_LOG(WARNING) << LOG_BADGE("create_bytes_struct") << LOG_DESC("malloc failed")
+                              << LOG_KV("field_size", field_size)
+                              << LOG_KV("field_data", field_data);
+            return nullptr;
+        }
+        memmove(buffer, field_data, length);
         field_bytes->buffer = buffer;
         field_bytes->length = length;
 
@@ -272,10 +281,10 @@ struct bcos_sdk_c_bytes* create_bytes_struct(uint32_t field_size, const char* fi
     }
     catch (const std::exception& e)
     {
-        std::string errorMsg = boost::diagnostic_information(e);
+        std::string msg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("create_bytes_struct") << LOG_DESC("exception")
-                          << LOG_KV("error", errorMsg);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+                          << LOG_KV("error", msg);
+        bcos_sdk_set_last_error_msg(-1, msg.c_str());
     }
 
     return nullptr;
@@ -301,11 +310,10 @@ struct bcos_sdk_c_bytes* bytes_struct_copy(const struct bcos_sdk_c_bytes* bytes_
     }
     catch (const std::exception& e)
     {
-        std::string errorMsg = boost::diagnostic_information(e);
+        std::string msg = boost::diagnostic_information(e);
         BCOS_LOG(WARNING) << LOG_BADGE("bytes_struct_copy") << LOG_DESC("exception")
-                          << LOG_KV("bytes_struct_src", bytes_struct_src)
-                          << LOG_KV("error", errorMsg);
-        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+                          << LOG_KV("bytes_struct_src", bytes_struct_src) << LOG_KV("error", msg);
+        bcos_sdk_set_last_error_msg(-1, msg.c_str());
     }
 
     return nullptr;

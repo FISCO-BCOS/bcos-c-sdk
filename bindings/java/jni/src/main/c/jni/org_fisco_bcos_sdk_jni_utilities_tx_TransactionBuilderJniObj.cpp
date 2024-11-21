@@ -1,9 +1,11 @@
 #include "org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj.h"
+#include "Common.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_tx.h"
 #include "org_fisco_bcos_sdk_common.h"
 #include "org_fisco_bcos_sdk_exception.h"
+#include <bcos-cpp-sdk/utilities/crypto/KeyPairBuilder.h>
 #include <tuple>
 
 /*
@@ -539,6 +541,111 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTr
         free((void*)signed_tx);
         signed_tx = NULL;
     }
+
+    return txpair;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj
+ * Method:    createSignedTransaction
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderJniObj_createSignedTransaction__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
+    JNIEnv* env, jclass, jobject j_keypair_obj, jstring jgroup_id, jstring jchain_id, jstring jto,
+    jstring jdata, jstring jabi, jlong jblock_limit, jint jattr, jstring jextra_data)
+{
+    CHECK_OBJECT_NOT_NULL(env, jgroup_id, nullptr);
+    CHECK_OBJECT_NOT_NULL(env, jchain_id, nullptr);
+    CHECK_OBJECT_NOT_NULL(env, jdata, nullptr);
+
+    // keypair
+    auto* key_pair = (struct bcos_key_pair*)malloc(sizeof(struct bcos_key_pair));
+    if (key_pair == nullptr)
+    {
+        THROW_JNI_EXCEPTION(env, "exception in createSignedTransaction, malloc failed");
+        return nullptr;
+    }
+
+    convert_to_keypair(env, j_keypair_obj, key_pair);
+    // group id
+    const char* group_id = env->GetStringUTFChars(jgroup_id, nullptr);
+    // chain id
+    const char* chain_id = env->GetStringUTFChars(jchain_id, nullptr);
+    // to
+    const char* to = jto ? env->GetStringUTFChars(jto, nullptr) : nullptr;
+    // data
+    const char* data = env->GetStringUTFChars(jdata, nullptr);
+    // abi
+    const char* abi = jabi ? env->GetStringUTFChars(jabi, nullptr) : nullptr;
+    // block limit
+    auto block_limit = (int64_t)jblock_limit;
+    // attr
+    int attr = static_cast<int>(jattr);
+    // extra data
+    const char* extra_data = jextra_data ? env->GetStringUTFChars(jextra_data, nullptr) : nullptr;
+
+    char* tx_hash = nullptr;
+    char* signed_tx = nullptr;
+    bcos_sdk_create_signed_transaction_with_keypair_struct(key_pair, group_id, chain_id, to, data,
+        abi, block_limit, attr, extra_data, &tx_hash, &signed_tx);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        env->ReleaseStringUTFChars(jgroup_id, group_id);
+        env->ReleaseStringUTFChars(jchain_id, chain_id);
+        env->ReleaseStringUTFChars(jdata, data);
+        env->ReleaseStringUTFChars(jto, to);
+        env->ReleaseStringUTFChars(jabi, abi);
+        env->ReleaseStringUTFChars(jextra_data, extra_data);
+        JNI_FREE(key_pair->pri->buffer)
+        JNI_FREE(key_pair->pri)
+        JNI_FREE(key_pair->pub->buffer)
+        JNI_FREE(key_pair->pub)
+        JNI_FREE(key_pair)
+
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
+    }
+
+    jstring jtx_hash = env->NewStringUTF(tx_hash);
+    jstring jsigned_tx = env->NewStringUTF(signed_tx);
+
+    jclass jtxpair = env->FindClass("org/fisco/bcos/sdk/jni/utilities/tx/TxPair");
+    if (jtxpair == nullptr)
+    {
+        env->FatalError(
+            "No such class, className: "
+            "org/fisco/bcos/sdk/jni/utilities/tx/TxPair");
+    }
+
+    jmethodID txpair_mtd =
+        env->GetMethodID(jtxpair, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+    if (txpair_mtd == nullptr)
+    {
+        env->FatalError("No such constructor in TxPair, constructor(String, String)");
+    }
+
+    jobject txpair = env->NewObject(jtxpair, txpair_mtd, jtx_hash, jsigned_tx);
+
+    // release resource
+    env->ReleaseStringUTFChars(jgroup_id, group_id);
+    env->ReleaseStringUTFChars(jchain_id, chain_id);
+    env->ReleaseStringUTFChars(jdata, data);
+    env->ReleaseStringUTFChars(jto, to);
+    env->ReleaseStringUTFChars(jabi, abi);
+    env->ReleaseStringUTFChars(jextra_data, extra_data);
+
+    env->DeleteLocalRef(jtx_hash);
+    env->DeleteLocalRef(jsigned_tx);
+
+    JNI_FREE(tx_hash)
+    JNI_FREE(signed_tx)
+    JNI_FREE(key_pair->pri->buffer)
+    JNI_FREE(key_pair->pri)
+    JNI_FREE(key_pair->pub->buffer)
+    JNI_FREE(key_pair->pub)
+    JNI_FREE(key_pair)
 
     return txpair;
 }

@@ -24,6 +24,12 @@ extern "C" {
         THROW_JNI_EXCEPTION((env), "illegal NULL " #obj " parameter"); \
         return;                                                        \
     }
+#define JNI_FREE(p)     \
+    if ((p) != nullptr) \
+    {                   \
+        free(p);        \
+        (p) = nullptr;  \
+    }
 
 struct cb_context
 {

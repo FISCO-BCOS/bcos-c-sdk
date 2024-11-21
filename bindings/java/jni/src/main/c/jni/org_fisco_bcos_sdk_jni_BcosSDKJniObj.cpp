@@ -116,7 +116,7 @@ static void on_receive_block_notifier(const char* group, int64_t block_number, v
     {
         env->FatalError(("No such constructor method in the class, className: " + bigClassName +
                          " ,method: constructor")
-                            .c_str());
+                .c_str());
     }
 
     std::string strBlk = std::to_string(block_number);

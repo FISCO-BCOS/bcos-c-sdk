@@ -15,10 +15,24 @@
 
 package org.fisco.bcos.sdk.jni.rpc;
 
+import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
+
 public class RpcServiceJniObj {
     // ----------------------------- Tars RPC interface begin --------------------------------------
     public static native String sendTransaction(
             long sdk,
+            long keyPair,
+            String group,
+            String node,
+            String to,
+            byte[] data,
+            String abi,
+            int attribute,
+            String extraData,
+            RpcCallback callback);
+
+    public static native String sendTransaction(
+            JniKeyPair sdk,
             long keyPair,
             String group,
             String node,
