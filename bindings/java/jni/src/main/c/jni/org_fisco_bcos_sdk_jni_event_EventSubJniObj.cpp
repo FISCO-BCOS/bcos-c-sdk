@@ -27,7 +27,7 @@ static void on_receive_event_sub_response(struct bcos_sdk_c_struct_response* res
     {
         env->FatalError(("No such method in the class, className: " + className +
                          " ,method: onResponse ,signature: " + onRespSig)
-                            .c_str());
+                .c_str());
     }
 
     int error = resp->error;

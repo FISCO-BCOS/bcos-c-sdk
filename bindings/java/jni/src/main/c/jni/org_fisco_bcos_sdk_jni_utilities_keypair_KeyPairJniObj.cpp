@@ -1,4 +1,5 @@
 #include "org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj.h"
+#include "Common.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "org_fisco_bcos_sdk_common.h"
@@ -24,6 +25,27 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I(
     }
 
     return reinterpret_cast<jlong>(keypair);
+}
+
+
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createRawKeyPair__I(
+    JNIEnv* env, jclass, jint jcrypto_type)
+{
+    int crypto_type = (int)jcrypto_type;
+    struct bcos_key_pair* keypair = bcos_sdk_create_raw_keypair(crypto_type);
+    if (!bcos_sdk_is_last_opr_success())
+    {
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return NULL;
+    }
+    jobject j_key_pair_obj = convert_to_jni_keypair_jobject(env, keypair);
+    free(keypair->pri->buffer);
+    free(keypair->pri);
+    free(keypair->pub->buffer);
+    free(keypair->pub);
+    free(keypair);
+    return j_key_pair_obj;
 }
 
 /*
@@ -64,7 +86,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_
     jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
     jsize len = env->GetArrayLength(jdata);
     void* keypair = bcos_sdk_create_keypair_by_private_key(crypto_type, (void*)data, len);
-
+    env->ReleaseByteArrayElements(jdata, data, 0);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
@@ -72,6 +94,32 @@ Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createJniKeyPair__I_
     }
 
     return reinterpret_cast<jlong>(keypair);
+}
+
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_keypair_KeyPairJniObj_createRawKeyPair__I_3B(
+    JNIEnv* env, jclass, jint jcrypto_type, jbyteArray jdata)
+{
+    CHECK_OBJECT_NOT_NULL(env, jdata, 0);
+    int crypto_type = (int)jcrypto_type;
+    jbyte* data = (jbyte*)env->GetByteArrayElements(jdata, 0);
+    jsize len = env->GetArrayLength(jdata);
+    struct bcos_key_pair* keypair =
+        bcos_sdk_create_raw_keypair_by_private_key(crypto_type, (void*)data, len);
+    if (!bcos_sdk_is_last_opr_success() || keypair == nullptr)
+    {
+        env->ReleaseByteArrayElements(jdata, data, 0);
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
+    }
+    jobject j_key_pair_obj = convert_to_jni_keypair_jobject(env, keypair);
+    env->ReleaseByteArrayElements(jdata, data, 0);
+    free(keypair->pri->buffer);
+    free(keypair->pri);
+    free(keypair->pub->buffer);
+    free(keypair->pub);
+    free(keypair);
+    return j_key_pair_obj;
 }
 
 /*

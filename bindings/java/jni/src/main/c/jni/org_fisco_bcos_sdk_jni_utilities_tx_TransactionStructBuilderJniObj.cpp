@@ -460,6 +460,7 @@ jobject convert_to_tx_v1_data_jobject(
     if (txDataMtd == NULL)
     {
         env->FatalError("No such constructor in TransactionData, constructor()");
+        return nullptr;
     }
     jobject jTxDataObj = env->NewObject(txDataClass, txDataMtd);
 

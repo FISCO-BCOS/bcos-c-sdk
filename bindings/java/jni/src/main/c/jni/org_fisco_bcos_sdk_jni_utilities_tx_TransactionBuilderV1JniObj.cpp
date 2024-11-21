@@ -19,9 +19,9 @@
  */
 
 #include "org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj.h"
-#include "bcos-c-sdk/bcos_sdk_c_uti_tx_v1.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
+#include "bcos-c-sdk/bcos_sdk_c_uti_tx_v1.h"
 #include "org_fisco_bcos_sdk_common.h"
 #include <tuple>
 

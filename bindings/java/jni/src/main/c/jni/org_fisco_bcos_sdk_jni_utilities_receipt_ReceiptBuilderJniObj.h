@@ -12,56 +12,63 @@ extern "C" {
  * Method:    createReceiptData
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptData
-  (JNIEnv *, jclass, jstring, jstring, jstring, jlong);
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptData(
+    JNIEnv*, jclass, jstring, jstring, jstring, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    createReceiptDataWithJson
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptDataWithJson
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptDataWithJson(
+    JNIEnv*, jclass, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    destroyReceiptData
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_destroyReceiptData
-  (JNIEnv *, jclass, jlong);
+JNIEXPORT void JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_destroyReceiptData(
+    JNIEnv*, jclass, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    encodeReceiptData
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_encodeReceiptData
-  (JNIEnv *, jclass, jlong);
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_encodeReceiptData(
+    JNIEnv*, jclass, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    decodeReceiptDataToJsonObj
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_decodeReceiptDataToJsonObj
-  (JNIEnv *, jclass, jstring);
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_decodeReceiptDataToJsonObj(
+    JNIEnv*, jclass, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    calcReceiptDataHash
  * Signature: (IJ)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHash
-  (JNIEnv *, jclass, jint, jlong);
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHash(
+    JNIEnv*, jclass, jint, jlong);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj
  * Method:    calcReceiptDataHashWithJson
  * Signature: (ILjava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHashWithJson
-  (JNIEnv *, jclass, jint, jstring);
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDataHashWithJson(
+    JNIEnv*, jclass, jint, jstring);
 
 #ifdef __cplusplus
 }

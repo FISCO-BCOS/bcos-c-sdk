@@ -1,6 +1,7 @@
 package org.fisco.bcos.sdk.jni.perf;
 
 import org.fisco.bcos.sdk.jni.common.JniException;
+import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 import org.fisco.bcos.sdk.jni.utilities.keypair.KeyPairJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TxPair;
@@ -70,11 +71,6 @@ public class CreateSignedTx {
                 "[Create Signed Tx Perf Test] ===>>>> smCrypto: %d, durationMS: %d\n",
                 smCrypto ? 1 : 0, durationMS);
 
-        long keyPair = KeyPairJniObj.createJniKeyPair(smCrypto ? 1 : 0);
-        String jniKeyPairAddress = KeyPairJniObj.getJniKeyPairAddress(keyPair);
-        System.out.printf(
-                " [Create Signed Tx Perf Test] new account, address: %s\n", jniKeyPairAddress);
-
         long blockLimit = 111111;
         String groupID = "group0";
         String chainID = "chain0";
@@ -85,12 +81,12 @@ public class CreateSignedTx {
 
         long nTotalC = 0;
         long nLastSecC = 0;
-        String txHash = "";
         while (true) {
+            JniKeyPair rawKeyPair = KeyPairJniObj.createRawKeyPair(smCrypto ? 1 : 0);
             TxPair signedTransaction =
                     TransactionBuilderJniObj.createSignedTransaction(
-                            keyPair, groupID, chainID, "", data, "", blockLimit, 0);
-            txHash = signedTransaction.getSignedTx();
+                            rawKeyPair, groupID, chainID, "", data, "", blockLimit, 0, "");
+            String txHash = signedTransaction.getSignedTx();
 
             nTotalC++;
             nLastSecC++;

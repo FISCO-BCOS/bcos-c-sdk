@@ -23,6 +23,7 @@
 #include <bcos-c-sdk/bcos_sdk_c_common.h>
 #include <bcos-cpp-sdk/Sdk.h>
 #include <bcos-cpp-sdk/utilities/crypto/Common.h>
+#include <bcos-cpp-sdk/utilities/crypto/KeyPairBuilder.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilder.h>
 #include <bcos-cpp-sdk/utilities/tx/TransactionBuilderService.h>
 #include <cstring>
@@ -298,6 +299,51 @@ void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const cha
             std::string(group_id), std::string(chain_id), std::string(to ? to : ""), *bytesData,
             std::string(abi ? abi : ""), block_limit, attribute,
             extra_data ? std::string(extra_data) : std::string());
+
+        *tx_hash = strdup(r.first.c_str());
+        *signed_tx = strdup(r.second.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        BCOS_LOG(WARNING) << LOG_BADGE("bcos_sdk_create_signed_transaction_ver_extra_data")
+                          << LOG_DESC("exception") << LOG_KV("key_pair", key_pair)
+                          << LOG_KV("group_id", group_id) << LOG_KV("chain_id", chain_id)
+                          << LOG_KV("to", to) << LOG_KV("data", data) << LOG_KV("abi", abi)
+                          << LOG_KV("block_limit", block_limit) << LOG_KV("attribute", attribute)
+                          << LOG_KV("extra_data", extra_data) << LOG_KV("error", errorMsg);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+    }
+}
+
+void bcos_sdk_create_signed_transaction_with_keypair_struct(struct bcos_key_pair* key_pair,
+    const char* group_id, const char* chain_id, const char* to, const char* data, const char* abi,
+    int64_t block_limit, int32_t attribute, const char* extra_data, char** tx_hash,
+    char** signed_tx)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair->pri, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair->pri->buffer, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(group_id, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(chain_id, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(data, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(tx_hash, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(signed_tx, );
+
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION((block_limit > 0), "block limit must >= 0", );
+
+    try
+    {
+        auto bytesData = fromHexString(data);
+        TransactionBuilder builder{};
+
+        KeyPairBuilder keyPairBuilder{};
+        auto key = keyPairBuilder.genKeyPair(static_cast<crypto::KeyPairType>(key_pair->type),
+            bcos::bytesConstRef(key_pair->pri->buffer, key_pair->pri->length));
+        auto r = builder.createSignedTransaction(*key, std::string(group_id), std::string(chain_id),
+            std::string(to ? to : ""), *bytesData, std::string(abi ? abi : ""), block_limit,
+            attribute, extra_data ? std::string(extra_data) : std::string());
 
         *tx_hash = strdup(r.first.c_str());
         *signed_tx = strdup(r.second.c_str());

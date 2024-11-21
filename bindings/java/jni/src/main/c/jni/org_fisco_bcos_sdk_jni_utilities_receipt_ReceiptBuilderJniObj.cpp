@@ -2,8 +2,8 @@
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_receipt.h"
-#include "org_fisco_bcos_sdk_exception.h"
 #include "org_fisco_bcos_sdk_common.h"
+#include "org_fisco_bcos_sdk_exception.h"
 #include <tuple>
 
 /*
@@ -13,8 +13,7 @@
  */
 JNIEXPORT jlong JNICALL
 Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptData(JNIEnv* env,
-    jclass, jstring jgas_used, jstring jcontract_address, jstring jout_put,
-    jlong jblock_number)
+    jclass, jstring jgas_used, jstring jcontract_address, jstring jout_put, jlong jblock_number)
 {
     CHECK_OBJECT_NOT_NULL(env, jgas_used, 0);
     CHECK_OBJECT_NOT_NULL(env, jcontract_address, 0);
@@ -51,8 +50,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceipt
  * Method:    createReceiptDataWithJson
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptDataWithJson
-  (JNIEnv *env, jclass, jstring jjson)
+JNIEXPORT jlong JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_createReceiptDataWithJson(
+    JNIEnv* env, jclass, jstring jjson)
 {
     CHECK_OBJECT_NOT_NULL(env, jjson, 0);
     const char* json = env->GetStringUTFChars(jjson, NULL);
@@ -114,8 +114,9 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_encodeReceipt
  * Method:    decodeReceiptDataToJsonObj
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_decodeReceiptDataToJsonObj
-  (JNIEnv* env, jclass, jstring jreceipt_bytes)
+JNIEXPORT jstring JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_decodeReceiptDataToJsonObj(
+    JNIEnv* env, jclass, jstring jreceipt_bytes)
 {
     CHECK_OBJECT_NOT_NULL(env, jreceipt_bytes, NULL);
     const char* receipt_data = env->GetStringUTFChars(jreceipt_bytes, NULL);
@@ -148,8 +149,7 @@ Java_org_fisco_bcos_sdk_jni_utilities_receipt_ReceiptBuilderJniObj_calcReceiptDa
 {
     void* receipt_data = reinterpret_cast<void*>(jreceipt_data);
     int crypto_type = jcrypto_type;
-    const char* receipt_data_hash =
-        bcos_sdk_calc_receipt_data_hash(crypto_type, receipt_data);
+    const char* receipt_data_hash = bcos_sdk_calc_receipt_data_hash(crypto_type, receipt_data);
     if (!bcos_sdk_is_last_opr_success())
     {
         THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());

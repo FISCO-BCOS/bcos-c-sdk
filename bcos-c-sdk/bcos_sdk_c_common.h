@@ -214,6 +214,14 @@ struct bcos_sdk_c_bytes
  * @brief: transaction data
  *
  */
+
+struct bcos_key_pair
+{
+    struct bcos_sdk_c_bytes* pri;
+    struct bcos_sdk_c_bytes* pub;
+    uint8_t type;
+};
+
 struct bcos_sdk_c_transaction_data
 {
     int32_t version;
