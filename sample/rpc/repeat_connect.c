@@ -45,7 +45,7 @@ void* thread_function(void* arg)
         bcos_sdk_start(sdk);
 
         bcos_rpc_get_block_number(sdk, (char*)"group0", NULL, on_recv_resp_callback, sdk);
-        usleep(1000);
+        sleep(1);
 
         bcos_sdk_stop(sdk);
         bcos_sdk_destroy(sdk);

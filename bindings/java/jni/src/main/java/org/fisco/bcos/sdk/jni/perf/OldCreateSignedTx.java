@@ -1,7 +1,5 @@
 package org.fisco.bcos.sdk.jni.perf;
 
-import org.fisco.bcos.sdk.jni.common.JniException;
-import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 import org.fisco.bcos.sdk.jni.utilities.keypair.KeyPairJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TxPair;
@@ -78,9 +76,9 @@ public class OldCreateSignedTx {
     }
 
     public static void main(String[] args) throws Throwable {
-//        if (args.length < 2) {
-//            Usage();
-//        }
+        //        if (args.length < 2) {
+        //            Usage();
+        //        }
 
         boolean smCrypto = false;
         long durationMS = 1000000;
@@ -106,15 +104,7 @@ public class OldCreateSignedTx {
             keypairWrapper.finalize();
             TxPair signedTransaction =
                     TransactionBuilderJniObj.createSignedTransaction(
-                            keypair,
-                            groupID,
-                            chainID,
-                            "",
-                            data,
-                            "",
-                            blockLimit,
-                            0,
-                            "");
+                            keypair, groupID, chainID, "", data, "", blockLimit, 0, "");
             String txHash = signedTransaction.getSignedTx();
 
             nTotalC++;

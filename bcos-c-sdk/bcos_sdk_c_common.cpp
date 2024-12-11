@@ -22,6 +22,7 @@
 #include "bcos_sdk_c_error.h"
 #include <bcos-utilities/Common.h>
 #include <bcos-utilities/Error.h>
+#include <bcos-utilities/BoostLog.h>
 
 using namespace bcos;
 
