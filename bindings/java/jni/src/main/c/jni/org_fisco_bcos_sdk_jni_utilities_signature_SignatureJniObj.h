@@ -12,16 +12,26 @@ extern "C" {
  * Method:    sign
  * Signature: (JLjava/lang/String;Ljava/lang/String;)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign
-  (JNIEnv *, jclass, jlong, jstring, jstring);
+JNIEXPORT jbyteArray JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign__JLjava_lang_String_2Ljava_lang_String_2(
+    JNIEnv*, jclass, jlong, jstring, jstring);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj
+ * Method:    sign
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2(
+    JNIEnv*, jclass, jobject, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj
  * Method:    verify
  * Signature: (I[BLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
  */
-JNIEXPORT jboolean JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_verify
-  (JNIEnv *, jclass, jint, jbyteArray, jstring, jstring, jstring);
+JNIEXPORT jboolean JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_verify(
+    JNIEnv*, jclass, jint, jbyteArray, jstring, jstring, jstring);
 
 #ifdef __cplusplus
 }

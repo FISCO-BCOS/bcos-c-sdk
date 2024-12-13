@@ -90,8 +90,10 @@ struct bcos_sdk_c_transaction_data_v1* convert_tars_transaction_data_to_struct_v
         transaction_data_struct_v1->base.input = input_bytes;
         transaction_data_struct_v1->base.version = tars_transaction_data->version;
         transaction_data_struct_v1->base.block_limit = tars_transaction_data->blockLimit;
-        transaction_data_struct_v1->base.chain_id = my_strdup(tars_transaction_data->chainID.data());
-        transaction_data_struct_v1->base.group_id = my_strdup(tars_transaction_data->groupID.data());
+        transaction_data_struct_v1->base.chain_id =
+            my_strdup(tars_transaction_data->chainID.data());
+        transaction_data_struct_v1->base.group_id =
+            my_strdup(tars_transaction_data->groupID.data());
         transaction_data_struct_v1->base.nonce = my_strdup(tars_transaction_data->nonce.data());
         transaction_data_struct_v1->base.to = my_strdup(tars_transaction_data->to.data());
         transaction_data_struct_v1->base.abi = my_strdup(tars_transaction_data->abi.data());

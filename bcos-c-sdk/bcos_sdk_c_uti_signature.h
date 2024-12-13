@@ -41,6 +41,9 @@ extern "C" {
 struct bcos_sdk_c_signature_result bcos_sdk_sign(
     void* key_pair, const char* hash, const char* hsm_lib_path);
 
+void bcos_sdk_sign_with_keypair_struct(
+    struct bcos_key_pair* key_pair, const char* hash, struct bcos_sdk_c_signature_result*);
+
 /**
  * @brief : verify the signature data of transaction
  *

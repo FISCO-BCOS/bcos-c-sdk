@@ -135,6 +135,11 @@ void bcos_sdk_create_signed_transaction_ver_extra_data(void* key_pair, const cha
     const char* chain_id, const char* to, const char* data, const char* abi, int64_t block_limit,
     int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx);
 
+void bcos_sdk_create_signed_transaction_with_keypair_struct(struct bcos_key_pair* key_pair,
+    const char* group_id, const char* chain_id, const char* to, const char* data, const char* abi,
+    int64_t block_limit, int32_t attribute, const char* extra_data, char** tx_hash,
+    char** signed_tx);
+
 /**
  * @brief
  *

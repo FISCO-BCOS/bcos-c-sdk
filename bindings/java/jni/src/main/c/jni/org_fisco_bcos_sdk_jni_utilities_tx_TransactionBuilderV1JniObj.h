@@ -67,9 +67,20 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSigned
  * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedTransactionWithFullFields(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedTransactionWithFullFields__JLjava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2_3BLjava_lang_String_2JLjava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
     JNIEnv*, jclass, jlong, jstring, jstring, jstring, jstring, jbyteArray, jstring, jlong, jstring,
     jstring, jlong, jint, jstring);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
+ * Method:    createSignedTransactionWithFullFields
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedTransactionWithFullFields__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2_3BLjava_lang_String_2JLjava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
+    JNIEnv*, jclass, jobject, jstring, jstring, jstring, jstring, jbyteArray, jstring, jlong,
+    jstring, jstring, jlong, jint, jstring);
 
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
@@ -78,9 +89,20 @@ Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSigned
  * (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
  */
 JNIEXPORT jobject JNICALL
-Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedEIP1559TransactionWithFullFields(
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedEIP1559TransactionWithFullFields__JLjava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2_3BLjava_lang_String_2JLjava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
     JNIEnv*, jclass, jlong, jstring, jstring, jstring, jstring, jbyteArray, jstring, jlong, jstring,
     jstring, jstring, jlong, jint, jstring);
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj
+ * Method:    createSignedEIP1559TransactionWithFullFields
+ * Signature:
+ * (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BLjava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/String;)Lorg/fisco/bcos/sdk/jni/utilities/tx/TxPair;
+ */
+JNIEXPORT jobject JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_tx_TransactionBuilderV1JniObj_createSignedEIP1559TransactionWithFullFields__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2_3BLjava_lang_String_2JLjava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2JILjava_lang_String_2(
+    JNIEnv*, jclass, jobject, jstring, jstring, jstring, jstring, jbyteArray, jstring, jlong,
+    jstring, jstring, jstring, jlong, jint, jstring);
 
 #ifdef __cplusplus
 }

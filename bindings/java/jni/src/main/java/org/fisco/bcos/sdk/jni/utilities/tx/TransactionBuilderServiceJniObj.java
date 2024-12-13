@@ -2,6 +2,7 @@ package org.fisco.bcos.sdk.jni.utilities.tx;
 
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.common.JniLibLoader;
+import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 
 public class TransactionBuilderServiceJniObj {
 
@@ -48,5 +49,14 @@ public class TransactionBuilderServiceJniObj {
      */
     public static native TxPair createSignedTransaction(
             long txBuilderService, long keyPair, String to, String data, String abi, int attribute)
+            throws JniException;
+
+    public static native TxPair createSignedTransaction(
+            long txBuilderService,
+            JniKeyPair keyPair,
+            String to,
+            String data,
+            String abi,
+            int attribute)
             throws JniException;
 }

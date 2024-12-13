@@ -21,6 +21,8 @@
 #ifndef __INCLUDE_BCOS_SDK_C_UTIL_KEYPAIR__
 #define __INCLUDE_BCOS_SDK_C_UTIL_KEYPAIR__
 
+#include "bcos_sdk_c_common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +35,8 @@ extern "C" {
  * @return void*: key pair object pointer, return NULL on failure
  */
 void* bcos_sdk_create_keypair(int crypto_type);
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair(int crypto_type);
 
 /**
  * @brief : create hsm key pair used for transaction sign
@@ -53,6 +57,9 @@ void* bcos_sdk_create_hsm_keypair(const char* hsm_lib_path);
  * @return void*: key pair object pointer, return NULL on failure
  */
 void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key, unsigned length);
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair_by_private_key(
+    int crypto_type, void* private_key, unsigned length);
 
 /**
  * @brief : create hsm key pair used for transaction sign
@@ -75,6 +82,9 @@ void* bcos_sdk_create_hsm_keypair_by_private_key(
  * @return void*: key pair object pointer, return NULL on failure
  */
 void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* private_key);
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair_by_hex_private_key(
+    int crypto_type, const char* private_key);
 
 /**
  * @brief : create hsm key pair used for transaction sign

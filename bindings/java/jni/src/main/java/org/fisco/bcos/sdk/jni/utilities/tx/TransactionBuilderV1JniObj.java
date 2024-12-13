@@ -2,6 +2,7 @@ package org.fisco.bcos.sdk.jni.utilities.tx;
 
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.common.JniLibLoader;
+import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 
 public class TransactionBuilderV1JniObj extends TransactionBuilderJniObj {
 
@@ -203,6 +204,22 @@ public class TransactionBuilderV1JniObj extends TransactionBuilderJniObj {
             String extraData)
             throws JniException;
 
+    public static native TxPair createSignedTransactionWithFullFields(
+            JniKeyPair keyPair,
+            String groupID,
+            String chainID,
+            String to,
+            String nonce,
+            byte[] input,
+            String abi,
+            long blockLimit,
+            String value,
+            String gasPrice,
+            long gasLimit,
+            int attribute,
+            String extraData)
+            throws JniException;
+
     /**
      * create eip1559 transaction with full fields, with version 1 by default
      *
@@ -226,6 +243,23 @@ public class TransactionBuilderV1JniObj extends TransactionBuilderJniObj {
      */
     public static native TxPair createSignedEIP1559TransactionWithFullFields(
             long keyPair,
+            String groupID,
+            String chainID,
+            String to,
+            String nonce,
+            byte[] input,
+            String abi,
+            long blockLimit,
+            String value,
+            String maxFeePerGas,
+            String maxPriorityFeePerGas,
+            long gasLimit,
+            int attribute,
+            String extraData)
+            throws JniException;
+
+    public static native TxPair createSignedEIP1559TransactionWithFullFields(
+            JniKeyPair keyPair,
             String groupID,
             String chainID,
             String to,

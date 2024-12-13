@@ -1,4 +1,5 @@
 #include "org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj.h"
+#include "Common.h"
 #include "bcos-c-sdk/bcos_sdk_c_error.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
 #include "bcos-c-sdk/bcos_sdk_c_uti_signature.h"
@@ -9,9 +10,10 @@
 /*
  * Class:     org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj
  * Method:    sign
- * Signature: (JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign(
+JNIEXPORT jbyteArray JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign__JLjava_lang_String_2Ljava_lang_String_2(
     JNIEnv* env, jclass, jlong jkeypair, jstring jtx_data_hash, jstring jhsm_lib_path)
 {
     CHECK_OBJECT_NOT_NULL(env, jtx_data_hash, NULL);
@@ -40,6 +42,71 @@ JNIEXPORT jbyteArray JNICALL Java_org_fisco_bcos_sdk_jni_utilities_signature_Sig
     env->SetByteArrayRegion(jsigned_data, 32, 32, signed_data_s);
     env->SetByteArrayRegion(jsigned_data, 64, 512, signed_data_v);
 
+    return jsigned_data;
+}
+
+/*
+ * Class:     org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj
+ * Method:    sign
+ * Signature: (Lorg/fisco/bcos/sdk/jni/utilities/keypair/JniKeyPair;Ljava/lang/String;)[B
+ */
+JNIEXPORT jbyteArray JNICALL
+Java_org_fisco_bcos_sdk_jni_utilities_signature_SignatureJniObj_sign__Lorg_fisco_bcos_sdk_jni_utilities_keypair_JniKeyPair_2Ljava_lang_String_2(
+    JNIEnv* env, jclass, jobject j_keypair_obj, jstring jtx_data_hash)
+{
+    CHECK_OBJECT_NOT_NULL(env, jtx_data_hash, NULL);
+    CHECK_OBJECT_NOT_NULL(env, j_keypair_obj, NULL);
+    const char* tx_data_hash = env->GetStringUTFChars(jtx_data_hash, NULL);
+    auto* key_pair = (struct bcos_key_pair*)malloc(sizeof(struct bcos_key_pair));
+    if (key_pair == nullptr)
+    {
+        env->ReleaseStringUTFChars(jtx_data_hash, tx_data_hash);
+        THROW_JNI_EXCEPTION(env, "exception in sign, malloc failed");
+        return nullptr;
+    }
+
+    auto* sign_result =
+        (struct bcos_sdk_c_signature_result*)malloc(sizeof(struct bcos_sdk_c_signature_result));
+    if (sign_result == nullptr)
+    {
+        free(key_pair);
+        env->ReleaseStringUTFChars(jtx_data_hash, tx_data_hash);
+        THROW_JNI_EXCEPTION(env, "exception in sign, malloc failed");
+        return nullptr;
+    }
+
+    convert_to_keypair(env, j_keypair_obj, key_pair);
+
+    bcos_sdk_sign_with_keypair_struct(key_pair, tx_data_hash, sign_result);
+
+    env->ReleaseStringUTFChars(jtx_data_hash, tx_data_hash);
+
+    if (bcos_sdk_get_last_error() != BCOS_SDK_C_SUCCESS)
+    {
+        JNI_FREE(key_pair->pub->buffer)
+        JNI_FREE(key_pair->pub)
+        JNI_FREE(key_pair->pri->buffer)
+        JNI_FREE(key_pair->pri)
+        JNI_FREE(key_pair)
+        JNI_FREE(sign_result)
+        THROW_JNI_EXCEPTION(env, bcos_sdk_get_last_error_msg());
+        return nullptr;
+    }
+
+    auto* signed_data_r = (jbyte*)sign_result->r;
+    auto* signed_data_s = (jbyte*)sign_result->s;
+    auto* signed_data_v = (jbyte*)sign_result->v;
+    jbyteArray jsigned_data = env->NewByteArray(576);
+    env->SetByteArrayRegion(jsigned_data, 0, 32, signed_data_r);
+    env->SetByteArrayRegion(jsigned_data, 32, 32, signed_data_s);
+    env->SetByteArrayRegion(jsigned_data, 64, 512, signed_data_v);
+
+    JNI_FREE(key_pair->pub->buffer)
+    JNI_FREE(key_pair->pub)
+    JNI_FREE(key_pair->pri->buffer)
+    JNI_FREE(key_pair->pri)
+    JNI_FREE(key_pair)
+    JNI_FREE(sign_result)
     return jsigned_data;
 }
 

@@ -1,12 +1,10 @@
 package org.fisco.bcos.sdk.jni.perf;
 
-import org.fisco.bcos.sdk.jni.common.JniException;
-import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 import org.fisco.bcos.sdk.jni.utilities.keypair.KeyPairJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
 import org.fisco.bcos.sdk.jni.utilities.tx.TxPair;
 
-public class CreateSignedTx {
+public class OldCreateSignedTx {
 
     // ------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------
@@ -43,6 +41,24 @@ public class CreateSignedTx {
     }
     */
 
+    static class KeypairWrapper {
+        private long keypair;
+
+        public KeypairWrapper(long keypair) {
+            this.keypair = keypair;
+        }
+
+        public long getKeypair() {
+            return keypair;
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            KeyPairJniObj.destroyJniKeyPair(keypair);
+            super.finalize();
+        }
+    }
+
     public static String getBinary(boolean isSM) {
         return isSM ? hwSmBIN : hwBIN;
     }
@@ -50,22 +66,22 @@ public class CreateSignedTx {
     public static void Usage() {
         System.out.println("Desc: create signed transaction[HelloWorld set] perf test");
         System.out.println(
-                "Usage: java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.demo.perf.ParallelOkPerf smCrypto durationMS(MS)");
+                "Usage: java -cp 'conf/:lib/*:apps/*'  org.fisco.bcos.sdk.jni.perf.OldCreateSignedTx smCrypto durationMS(MS)");
         System.out.println("Example:");
         System.out.println(
-                "    java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.demo.perf.ParallelOkPerf true 10000\n");
+                "    java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.jni.perf.OldCreateSignedTx true 10000\n");
         System.out.println(
-                "    java -cp 'conf/:lib/*:apps/*' org.fisco.bcos.sdk.demo.perf.ParallelOkPerf false 10000\n");
+                "    java -cp 'conf/:lib/*:apps/*'  org.fisco.bcos.sdk.jni.perf.OldCreateSignedTx false 10000\n");
         System.exit(0);
     }
 
-    public static void main(String[] args) throws JniException {
-        if (args.length < 2) {
-            Usage();
-        }
+    public static void main(String[] args) throws Throwable {
+        //        if (args.length < 2) {
+        //            Usage();
+        //        }
 
-        boolean smCrypto = "true".equals(args[0]);
-        long durationMS = Long.parseLong(args[1]);
+        boolean smCrypto = false;
+        long durationMS = 1000000;
 
         System.out.printf(
                 "[Create Signed Tx Perf Test] ===>>>> smCrypto: %d, durationMS: %d\n",
@@ -82,10 +98,13 @@ public class CreateSignedTx {
         long nTotalC = 0;
         long nLastSecC = 0;
         while (true) {
-            JniKeyPair rawKeyPair = KeyPairJniObj.createRawKeyPair(smCrypto ? 1 : 0);
+            long keyPair = KeyPairJniObj.createJniKeyPair(smCrypto ? 1 : 0);
+            KeypairWrapper keypairWrapper = new KeypairWrapper(keyPair);
+            long keypair = keypairWrapper.getKeypair();
+            keypairWrapper.finalize();
             TxPair signedTransaction =
                     TransactionBuilderJniObj.createSignedTransaction(
-                            rawKeyPair, groupID, chainID, "", data, "", blockLimit, 0, "");
+                            keypair, groupID, chainID, "", data, "", blockLimit, 0, "");
             String txHash = signedTransaction.getSignedTx();
 
             nTotalC++;

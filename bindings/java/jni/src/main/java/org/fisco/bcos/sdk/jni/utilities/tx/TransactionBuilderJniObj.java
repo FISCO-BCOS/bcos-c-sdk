@@ -2,6 +2,7 @@ package org.fisco.bcos.sdk.jni.utilities.tx;
 
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.common.JniLibLoader;
+import org.fisco.bcos.sdk.jni.utilities.keypair.JniKeyPair;
 
 public class TransactionBuilderJniObj {
 
@@ -150,6 +151,18 @@ public class TransactionBuilderJniObj {
      */
     public static native TxPair createSignedTransaction(
             long keyPair,
+            String groupID,
+            String chainID,
+            String to,
+            String data,
+            String abi,
+            long blockLimit,
+            int attribute,
+            String extraData)
+            throws JniException;
+
+    public static native TxPair createSignedTransaction(
+            JniKeyPair keyPair,
             String groupID,
             String chainID,
             String to,

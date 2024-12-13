@@ -65,6 +65,47 @@ void* bcos_sdk_create_keypair(int crypto_type)
     }
 }
 
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair(int crypto_type)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
+    try
+    {
+        auto keyPairBuilder = std::make_shared<KeyPairBuilder>();
+        auto keyPair = keyPairBuilder->genKeyPair(
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2);
+        auto* bcosKeyPair = (struct bcos_key_pair*)malloc(sizeof(struct bcos_key_pair));
+        if (bcosKeyPair == nullptr)
+        {
+            std::string errorMsg = "malloc failed";
+            bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+            BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_raw_keypair")
+                            << LOG_KV("errorMsg", errorMsg);
+            return NULL;
+        }
+        struct bcos_sdk_c_bytes* pub_bytes = create_bytes_struct(
+            keyPair->publicKey()->data().size(), (const char*)keyPair->publicKey()->data().data());
+        struct bcos_sdk_c_bytes* pri_bytes = create_bytes_struct(
+            keyPair->secretKey()->data().size(), (const char*)keyPair->secretKey()->data().data());
+        bcosKeyPair->pub = pub_bytes;
+        bcosKeyPair->pri = pri_bytes;
+        bcosKeyPair->type = crypto_type;
+        return bcosKeyPair;
+    }
+    catch (const std::exception& e)
+    {
+        std::string msg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, msg.c_str());
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair") << LOG_KV("errorMsg", msg);
+        return NULL;
+    }
+}
+
 /**
  * @brief : create hsm key pair used for transaction sign
  *
@@ -124,6 +165,50 @@ void* bcos_sdk_create_keypair_by_private_key(int crypto_type, void* private_key,
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             bytesConstRef((byte*)private_key, len));
         return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_private_key")
+                        << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair_by_private_key(
+    int crypto_type, void* private_key, unsigned len)
+{
+    bcos_sdk_clear_last_error();
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (len > 0), "invalid private key length, it must greater than zero", NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
+        "invalid crypto type, it must be BCOS_C_SDK_ECDSA_TYPE(ecdsa crypto type) or "
+        "BCOS_C_SDK_SM_TYPE(sm crypto type)",
+        NULL);
+    try
+    {
+        auto priBytes = bcos::bytes((bcos::byte*)private_key, (bcos::byte*)private_key + len);
+        /*
+        ECDSA_TYPE  1,
+        SM_TYPE  2
+        */
+        KeyPairBuilder keyPairBuilder{};
+        auto keyPair = keyPairBuilder.genKeyPair(
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
+            bcos::ref(priBytes));
+        auto* bcosKeyPair = (struct bcos_key_pair*)malloc(sizeof(struct bcos_key_pair));
+        struct bcos_sdk_c_bytes* pub_bytes = create_bytes_struct(
+            keyPair->publicKey()->data().size(), (const char*)keyPair->publicKey()->data().data());
+        struct bcos_sdk_c_bytes* pri_bytes = create_bytes_struct(
+            keyPair->secretKey()->data().size(), (const char*)keyPair->secretKey()->data().data());
+        bcosKeyPair->pub = pub_bytes;
+        bcosKeyPair->pri = pri_bytes;
+        bcosKeyPair->type = crypto_type;
+        return bcosKeyPair;
     }
     catch (const std::exception& e)
     {
@@ -200,6 +285,47 @@ void* bcos_sdk_create_keypair_by_hex_private_key(int crypto_type, const char* pr
             crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
             bytesConstRef((byte*)priBytes->data(), priBytes->size()));
         return keyPair.release();
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_create_keypair_by_hex_private_key")
+                        << LOG_KV("crypto_type", crypto_type) << LOG_KV("errorMsg", errorMsg);
+        return NULL;
+    }
+}
+
+struct bcos_key_pair* bcos_sdk_create_raw_keypair_by_hex_private_key(
+    int crypto_type, const char* private_key)
+{
+    bcos_sdk_clear_last_error();
+
+    BCOS_SDK_C_PARAMS_VERIFICATION(private_key, NULL);
+    BCOS_SDK_C_PARAMS_VERIFY_CONDITION(
+        (crypto_type == BCOS_C_SDK_ECDSA_TYPE || crypto_type == BCOS_C_SDK_SM_TYPE),
+        "invalid crypto type, it must be 0(ecdsa crypto type) or 1(sm crypto type)", NULL)
+    try
+    {
+        auto priBytes = fromHexString(std::string(private_key));
+        /*
+        ECDSA_TYPE  1,
+        SM_TYPE  2
+        */
+        KeyPairBuilder keyPairBuilder{};
+        auto keyPair = keyPairBuilder.genKeyPair(
+            crypto_type == BCOS_C_SDK_ECDSA_TYPE ? CryptoType::Secp256K1 : CryptoType::SM2,
+            bytesConstRef((byte*)priBytes->data(), priBytes->size()));
+        auto* bcosKeyPair = (struct bcos_key_pair*)malloc(sizeof(struct bcos_key_pair));
+        struct bcos_sdk_c_bytes* pub_bytes = create_bytes_struct(
+            keyPair->publicKey()->data().size(), (const char*)keyPair->publicKey()->data().data());
+        struct bcos_sdk_c_bytes* pri_bytes = create_bytes_struct(
+            keyPair->secretKey()->data().size(), (const char*)keyPair->secretKey()->data().data());
+        bcosKeyPair->pub = pub_bytes;
+        bcosKeyPair->pri = pri_bytes;
+        bcosKeyPair->type = crypto_type;
+        return bcosKeyPair;
     }
     catch (const std::exception& e)
     {

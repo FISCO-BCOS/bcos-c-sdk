@@ -404,7 +404,7 @@ struct bcos_sdk_c_config* create_config_from_java_obj(JNIEnv* env, jobject jconf
             {
                 env->FatalError((
                     "No such field in the class, className: " + className + " ,field: smCertConfig")
-                                    .c_str());
+                        .c_str());
             }
             jobject jSmCertConfig = env->GetObjectField(jconfig, smCertConfigField);
             if (!jSmCertConfig)

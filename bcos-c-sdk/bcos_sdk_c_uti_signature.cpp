@@ -20,6 +20,7 @@
 
 #include "bcos_sdk_c_uti_signature.h"
 #include "bcos_sdk_c_error.h"
+#include <bcos-cpp-sdk/utilities/crypto/KeyPairBuilder.h>
 #include <bcos-cpp-sdk/utilities/crypto/Signature.h>
 #include <bcos-crypto/hash/SM3.h>
 #include <bcos-utilities/Common.h>
@@ -72,6 +73,38 @@ struct bcos_sdk_c_signature_result bcos_sdk_sign(
         bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
         BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_sign") << LOG_KV("errorMsg", errorMsg);
         return signatureResult;
+    }
+}
+
+void bcos_sdk_sign_with_keypair_struct(struct bcos_key_pair* key_pair, const char* hash,
+    struct bcos_sdk_c_signature_result* signatureResult)
+{
+    // if sign failed, return unassigned struct
+    // the function caller knows sign failed according to the function called
+    // bcos_sdk_get_last_error(if sign failed, return -1)
+    BCOS_SDK_C_PARAMS_VERIFICATION(key_pair, );
+    BCOS_SDK_C_PARAMS_VERIFICATION(hash, );
+
+    try
+    {
+        bcos::crypto::HashType hashType(hash);
+        bcos::cppsdk::utilities::Signature signature{};
+        KeyPairBuilder builder;
+        auto keyPair = builder.genKeyPair(static_cast<crypto::KeyPairType>(key_pair->type),
+            bcos::bytesConstRef(key_pair->pri->buffer, key_pair->pri->length));
+        auto signatureData = signature.sign(*keyPair, hashType);
+        memmove(signatureResult->r, signatureData->data(), 32);
+        memmove(signatureResult->s, signatureData->data() + 32, 32);
+        memmove(signatureResult->v, signatureData->data() + 64, signatureData->size() - 64);
+
+        return;
+    }
+    catch (const std::exception& e)
+    {
+        std::string errorMsg = boost::diagnostic_information(e);
+        bcos_sdk_set_last_error_msg(-1, errorMsg.c_str());
+        BCOS_LOG(ERROR) << LOG_BADGE("bcos_sdk_sign") << LOG_KV("errorMsg", errorMsg);
+        return;
     }
 }
 
