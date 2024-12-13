@@ -52,6 +52,11 @@ public class TransactionBuilderServiceJniObj {
             throws JniException;
 
     public static native TxPair createSignedTransaction(
-            long txBuilderService, JniKeyPair keyPair, String to, String data, String abi, int attribute)
+            long txBuilderService,
+            JniKeyPair keyPair,
+            String to,
+            String data,
+            String abi,
+            int attribute)
             throws JniException;
 }

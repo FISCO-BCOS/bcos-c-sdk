@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-12 ]
+        os: [ macos-13 ]
 #    env:
 #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
@@ -134,32 +134,47 @@ jobs:
   build_with_centos:
     name: build_with_centos
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - centos-7.9
     container:
       image: docker.io/centos:7
       volumes:
         - /usr/local/share/vcpkg:/usr/local/share/vcpkg
-#    env:
+        - /node20217:/node20217:rw,rshared
+        - ${{ matrix.container == 'centos-7.9' && '/node20217:/__e/node20:ro,rshared' || ' ' }}
+    #    env:
 #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
-      - uses: actions/checkout@v3
+      - name: install nodejs20glibc2.17
+        if: ${{ matrix.container == 'centos-7.9' }}
+        run: |
+          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
+          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: install rust language
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-06-17
+          toolchain: nightly-2022-07-28
           override: true
       - uses: actions/cache@v3
-        id: cache
+        id: deps_cache
         with:
           path: |
+            deps/
             /usr/local/share/vcpkg/buildtrees
             /usr/local/share/vcpkg/packages
-          key: vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
+            /home/runner/.ccache
+            /Users/runner/.ccache/
+          key: centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
           restore-keys: |
-            vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
-            vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-
-            vcpkg-centos-v1-notest-${{ runner.temp }}-
+            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
+            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-
+            centos-notest-all-${{ matrix.os }}-
       - name: install CentOS dependencies
         run: |
           rpm -ivh https://cbs.centos.org/kojifiles/packages/centos-release-scl-rh/2/3.el7.centos/noarch/centos-release-scl-rh-2-3.el7.centos.noarch.rpm
