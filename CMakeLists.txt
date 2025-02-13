@@ -50,7 +50,7 @@ if ("${ARCHITECTURE}" MATCHES "aarch64")
     set(ARCH_NATIVE ON)
 endif ()
 
-set(VCPKG_BUILD_TYPE "Release")
+set(VCPKG_BUILD_TYPE "RelWithDebInfo")
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     find_package(Git REQUIRED)
     execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- vcpkg WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -59,7 +59,7 @@ if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif ()
 
 # project name
-project(bcos-c-sdk VERSION "3.7.0")
+project(bcos-c-sdk VERSION "3.7.1")
 
 # Debug, Release, RelWithDebInfo, MinSizeRel
 if (NOT CMAKE_BUILD_TYPE)

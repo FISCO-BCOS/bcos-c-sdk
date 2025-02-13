@@ -11,9 +11,10 @@ on:
       - "Changelog.md"
       - "README.md"
   release:
-    types: [ published, created, edited ]
+    types: [published, created, edited]
 env:
   CCACHE_DIR: ${{ github.workspace }}/ccache
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   build_with_clang:
@@ -21,9 +22,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-latest ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        os: [macos-13]
+    #    env:
+    #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -63,11 +64,11 @@ jobs:
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: libbcos-c-sdk.dylib.zip
+          name: libbcos-c-sdk.dylib
           path: build/libbcos-c-sdk.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: libbcos-sdk-jni.dylib.zip
+          name: libbcos-sdk-jni.dylib
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -80,9 +81,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        os: [ubuntu-20.04]
+    #    env:
+    #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -133,37 +134,61 @@ jobs:
   build_with_centos:
     name: build_with_centos
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        container:
+          - centos-7.9
     container:
       image: docker.io/centos:7
       volumes:
         - /usr/local/share/vcpkg:/usr/local/share/vcpkg
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        - /node20217:/node20217:rw,rshared
+        - ${{ matrix.container == 'centos-7.9' && '/node20217:/__e/node20:ro,rshared' || ' ' }}
+    #    env:
+    #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
-      - uses: actions/checkout@v3
+      - name: install nodejs20glibc2.17
+        if: ${{ matrix.container == 'centos-7.9' }}
+        run: |
+          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
+          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: install rust language
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-06-17
+          toolchain: nightly-2022-07-28
           override: true
       - uses: actions/cache@v3
-        id: cache
+        id: deps_cache
         with:
           path: |
+            deps/
             /usr/local/share/vcpkg/buildtrees
             /usr/local/share/vcpkg/packages
-          key: vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
+            /home/runner/.ccache
+            /Users/runner/.ccache/
+          key: centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
           restore-keys: |
-            vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
-            vcpkg-centos-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-
-            vcpkg-centos-v1-notest-${{ runner.temp }}-
+            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
+            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-
+            centos-notest-all-${{ matrix.os }}-
       - name: install CentOS dependencies
         run: |
-          yum install -y epel-release centos-release-scl
+          rpm -ivh https://cbs.centos.org/kojifiles/packages/centos-release-scl-rh/2/3.el7.centos/noarch/centos-release-scl-rh-2-3.el7.centos.noarch.rpm
+          rpm -ivh https://cbs.centos.org/kojifiles/packages/centos-release-scl/2/3.el7.centos/noarch/centos-release-scl-2-3.el7.centos.noarch.rpm
+          sed -i s/mirror.centos.org/mirrors.aliyun.com/g /etc/yum.repos.d/*.repo
+          sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
+          sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
+          cat /etc/yum.repos.d/*.repo
+          yum clean all
+          yum makecache
+          yum update -y
+          yum install -y epel-release centos-release-scl centos-release-scl-rh
           yum install -y https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
-          yum install -y java-11-openjdk-devel wget git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison python-devel python3-devel
+          yum install -y java-11-openjdk-devel wget git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison
       - name: reinstall cmake
         run: |
           wget -c https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-linux-x86_64.tar.gz
@@ -171,6 +196,7 @@ jobs:
           ln -s /usr/local/cmake/bin/cmake /usr/bin/cmake
           cmake --version
           git --version
+          rm -rf cmake-3.27.8-linux-x86_64.tar.gz
       - name: configure
         run: |
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
@@ -182,29 +208,37 @@ jobs:
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
           mkdir -p build && cd build
-          cmake ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake ../ -DBUILD_JNI=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
           make -j4
       - name: run test
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-c-sdk-WithDebInfo.so
+          path: build/libbcos-c-sdk.so
       - name: strip libbcos-c-sdk.so
         run: |
           ls -h build/libbcos-c-sdk.so
           strip build/libbcos-c-sdk.so || strip -x build/libbcos-c-sdk.so
           ls -h build/libbcos-c-sdk.so
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-sdk-jni-WithDebInfo.so
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - name: strip libbcos-sdk-jni.so
         run: |
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: libbcos-c-sdk.so.zip
+          name: libbcos-c-sdk.so
           path: build/libbcos-c-sdk.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: libbcos-sdk-jni.so.zip
+          name: libbcos-sdk-jni.so
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
@@ -217,9 +251,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-2019 ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        os: [windows-2019]
+    #    env:
+    #      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -244,21 +278,21 @@ jobs:
           cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: bcos-c-sdk.lib.zip
+          name: bcos-c-sdk.lib
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.lib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: bcos-c-sdk.dll.zip
+          name: bcos-c-sdk.dll
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: bcos-sdk-jni.lib.zip
+          name: bcos-sdk-jni.lib
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.lib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: bcos-sdk-jni.dll.zip
+          name: bcos-sdk-jni.dll
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v6
