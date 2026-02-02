@@ -162,11 +162,17 @@ jobs:
       - name: install Rocky Linux dependencies
         run: |
           dnf install -y epel-release
-          dnf install -y git curl openssl openssl-devel cmake ccache gcc gcc-c++ make java-11-openjdk-devel wget zlib-devel libzstd-devel flex bison perl
-          dnf groupinstall -y "Development Tools"
+          dnf install -y git curl openssl openssl-devel cmake ccache make java-11-openjdk-devel wget zlib-devel libzstd-devel flex bison perl
+          # Install GCC 11 toolset (required for -fcoroutines support)
+          dnf install -y gcc-toolset-11 gcc-toolset-11-gcc gcc-toolset-11-gcc-c++
       - name: configure
         run: |
+          # Enable GCC 11 toolset
+          source /opt/rh/gcc-toolset-11/enable
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+          export CC=gcc
+          export CXX=g++
+          gcc --version
           java -version
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
