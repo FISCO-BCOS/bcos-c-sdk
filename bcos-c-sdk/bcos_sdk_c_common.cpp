@@ -216,6 +216,8 @@ void bcos_sdk_c_config_destroy(void* p)
     }
 
     bcos_sdk_c_free((void*)config->peers);
+    // 修复: 释放 ssl_type 字段，防止内存泄漏
+    bcos_sdk_c_free((void*)config->ssl_type);
     bcos_sdk_c_free((void*)config);
 }
 
