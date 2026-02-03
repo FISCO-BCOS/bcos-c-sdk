@@ -41,10 +41,18 @@ jobs:
             vcpkg-clang-v1-notest-${{ runner.temp }}-
       - name: install macOS dependencies
         run: brew install ccache lcov
+      - name: install vcpkg (macOS)
+        run: |
+          if [ ! -f /usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake ]; then
+            sudo mkdir -p /usr/local/share
+            git clone https://github.com/Microsoft/vcpkg.git /tmp/vcpkg
+            sudo cp -r /tmp/vcpkg /usr/local/share/vcpkg
+            (cd /usr/local/share/vcpkg && ./bootstrap-vcpkg.sh)
+          fi
       - name: configure
         run: |
-          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ 
-          mkdir build && cd build 
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++
+          mkdir build && cd build
           cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
