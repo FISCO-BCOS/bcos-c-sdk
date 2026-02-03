@@ -57,7 +57,7 @@ jobs:
           export CC=/usr/bin/clang
           export CXX=/usr/bin/clang++
           mkdir build && cd build
-          cmake ../ -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake ../ -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_PORTS=${{ github.workspace }}/overlay-ports
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test

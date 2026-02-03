@@ -1,0 +1,20 @@
+diff --git a/bcos-boostssl/bcos-boostssl/websocket/WsService.cpp b/bcos-boostssl/bcos-boostssl/websocket/WsService.cpp
+--- a/bcos-boostssl/bcos-boostssl/websocket/WsService.cpp
++++ b/bcos-boostssl/bcos-boostssl/websocket/WsService.cpp
+@@ -163,6 +163,16 @@
+         m_timerFactory.reset();
+     }
+ 
++    // 清理消息处理器，防止循环引用导致内存泄漏
++    {
++        UpgradableGuard l(x_msgTypeHandlers);
++        UpgradeGuard ul(l);
++        m_msgType2Method.clear();
++    }
++    // 清理连接和断开处理器
++    m_connectHandlers.clear();
++    m_disconnectHandlers.clear();
++
+     // WEBSOCKET_SERVICE(INFO) << LOG_DESC("stop websocket service successfully");
+ }
+ 
