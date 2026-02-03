@@ -221,7 +221,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-2022 ]
+        os: [ windows-2019 ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -238,12 +238,12 @@ jobs:
             vcpkg-msvc-v1-notest-${{ runner.temp }}-${{ github.base_ref }}-
             vcpkg-msvc-v1-notest-${{ runner.temp }}-
       - name: Add MSbuild to PATH
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v1.1
       - name: configure
         if: runner.os == 'Windows'
         run: |
           mkdir -p build && cd build 
-          cmake  -G "Visual Studio 17 2022" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
+          cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
       - uses: actions/upload-artifact@v4
