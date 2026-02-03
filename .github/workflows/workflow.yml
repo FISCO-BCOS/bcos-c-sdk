@@ -22,9 +22,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      # macos-15 (ARM) disabled: vcpkg install fails on zlib/arm64-osx (known vcpkg issue)
       matrix:
-        os: [ macos-15-intel ]
+        os: [ macos-15-intel, macos-15 ]
     steps:
       - uses: actions/checkout@v4
         with:
