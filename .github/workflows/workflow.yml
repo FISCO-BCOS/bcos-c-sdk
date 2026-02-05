@@ -21,12 +21,11 @@ jobs:
     name: build_with_clang
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ macos-13 ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        os: [ macos-15-intel, macos-15 ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: Nightly default
@@ -44,11 +43,23 @@ jobs:
             vcpkg-clang-v1-notest-${{ runner.temp }}-
       - name: install macOS dependencies
         run: brew install ccache lcov
+      - name: install vcpkg (macOS)
+        run: |
+          if [ ! -f /usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake ]; then
+            sudo mkdir -p /usr/local/share
+            git clone https://github.com/Microsoft/vcpkg.git /tmp/vcpkg
+            sudo cp -r /tmp/vcpkg /usr/local/share/vcpkg
+            (cd /usr/local/share/vcpkg && ./bootstrap-vcpkg.sh)
+          fi
       - name: configure
         run: |
-          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path) && CC=/usr/bin/clang CXX=/usr/bin/clang++ 
-          mkdir build && cd build 
-          cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          export CC=/usr/bin/clang
+          export CXX=/usr/bin/clang++
+          # Ensure make is found by CMake (avoids "CMAKE_MAKE_PROGRAM is not set" after vcpkg)
+          export PATH="/usr/bin:$PATH"
+          mkdir build && cd build
+          cmake ../ -G "Unix Makefiles" -DCMAKE_MAKE_PROGRAM=/usr/bin/make -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_OVERLAY_PORTS=${{ github.workspace }}/overlay-ports -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       - name: compile
         run: export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; cd build && make -j4
       - name: run test
@@ -56,36 +67,56 @@ jobs:
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - name: strip libbcos-c-sdk.dylib
-        run: strip build/libbcos-c-sdk.dylib || strip -x build/libbcos-c-sdk.dylib
+        if: matrix.os == 'macos-15-intel'
+        run: strip build/libbcos-c-sdk*.dylib || strip -x build/libbcos-c-sdk*.dylib
+      - name: strip libbcos-c-sdk-aarch64.dylib 
+        if: matrix.os == 'macos-15'
+        run: strip build/libbcos-c-sdk-aarch64.dylib || strip -x build/libbcos-c-sdk-aarch64.dylib
       - name: strip libbcos-sdk-jni.dylib
-        run: |
-          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib 
-          strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
-          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
-      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-15-intel'
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - name: strip bcos-sdk-jni-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib
+      - name: Upload libbcos-c-sdk.dylib
+        if: matrix.os == 'macos-15-intel'
+        uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk.dylib
           path: build/libbcos-c-sdk.dylib
-      - uses: actions/upload-artifact@v4
+      - name: Upload libbcos-c-sdk-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-c-sdk-aarch64.dylib
+          path: build/libbcos-c-sdk-aarch64.dylib
+      - name: Upload libbcos-sdk-jni.dylib
+        if: matrix.os == 'macos-15-intel'
+        uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni.dylib
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - name: Upload libbcos-sdk-jni-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-sdk-jni-aarch64.dylib
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib
       - name: Export GitHub Actions cache environment variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
   build_with_gcc:
     name: build_with_gcc
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        os: [ ubuntu-22.04 ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - uses: actions/cache@v4
@@ -103,7 +134,6 @@ jobs:
         run: sudo apt install -y git curl openssl build-essential cmake ccache lcov
       - name: configure
         run: |
-          export CC='gcc-10'; export CXX='g++-10'
           export CFLAGS="${CFLAGS} -fPIC";export CXXFLAGS="${CXXFLAGS} -fPIC"; 
           mkdir -p build && cd build 
           cmake  ../ -DBUILD_JNI=ON -DBUILD_SAMPLE=ON -DTESTS=ON -DCOVERAGE=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -114,7 +144,7 @@ jobs:
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - name: Export GitHub Actions cache environment variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
@@ -122,46 +152,36 @@ jobs:
       - name: run coverage
         run: cd build && make cov
       - name: upload coverage report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./build/coverage.info
-          version: "v0.1.15"
           flags: unittests
           name: c sdk coverage
           fail_ci_if_error: false
           verbose: true
-  build_with_centos:
-    name: build_with_centos
+
+  build_with_rocky:
+    name: build_with_rocky
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         container:
-          - centos-7.9
+          - rocky-8
     container:
-      image: docker.io/centos:7
+      image: rockylinux:8
       volumes:
         - /usr/local/share/vcpkg:/usr/local/share/vcpkg
-        - /node20217:/node20217:rw,rshared
-        - ${{ matrix.container == 'centos-7.9' && '/node20217:/__e/node20:ro,rshared' || ' ' }}
-    #    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
-      - name: install nodejs20glibc2.17
-        if: ${{ matrix.container == 'centos-7.9' }}
-        run: |
-          curl -LO https://unofficial-builds.nodejs.org/download/release/v20.9.0/node-v20.9.0-linux-x64-glibc-217.tar.xz
-          tar -xf node-v20.9.0-linux-x64-glibc-217.tar.xz --strip-components 1 -C /node20217
       - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: install rust language
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly-2022-07-28
-          override: true
-      - uses: actions/cache@v3
+          toolchain: nightly-2024-01-01
+      - uses: actions/cache@v4
         id: deps_cache
         with:
           path: |
@@ -169,41 +189,25 @@ jobs:
             /usr/local/share/vcpkg/buildtrees
             /usr/local/share/vcpkg/packages
             /home/runner/.ccache
-            /Users/runner/.ccache/
-          key: centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
+          key: rocky-notest-all-${{ matrix.container }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
           restore-keys: |
-            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/cpp_full_node_workflow.yml') }}
-            centos-notest-all-${{ matrix.os }}-${{ github.base_ref }}-
-            centos-notest-all-${{ matrix.os }}-
-      - name: install CentOS dependencies
+            rocky-notest-all-${{ matrix.container }}-${{ github.base_ref }}-${{ hashFiles('.github/workflows/workflow.yml') }}
+            rocky-notest-all-${{ matrix.container }}-${{ github.base_ref }}-
+            rocky-notest-all-${{ matrix.container }}-
+      - name: install Rocky Linux dependencies
         run: |
-          rpm -ivh https://cbs.centos.org/kojifiles/packages/centos-release-scl-rh/2/3.el7.centos/noarch/centos-release-scl-rh-2-3.el7.centos.noarch.rpm
-          rpm -ivh https://cbs.centos.org/kojifiles/packages/centos-release-scl/2/3.el7.centos/noarch/centos-release-scl-2-3.el7.centos.noarch.rpm
-          sed -i s/mirror.centos.org/mirrors.aliyun.com/g /etc/yum.repos.d/*.repo
-          sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo
-          sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
-          cat /etc/yum.repos.d/*.repo
-          yum clean all
-          yum makecache
-          yum update -y
-          yum install -y epel-release centos-release-scl centos-release-scl-rh
-          yum install -y https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
-          yum install -y java-11-openjdk-devel wget git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel ccache devtoolset-11 llvm-toolset-7.0 rh-perl530-perl libzstd-devel zlib-devel flex bison
-      - name: reinstall cmake
-        run: |
-          wget -c https://github.com/Kitware/CMake/releases/download/v3.27.8/cmake-3.27.8-linux-x86_64.tar.gz
-          tar -zxvf cmake-3.27.8-linux-x86_64.tar.gz && mkdir -p /usr/local/cmake && cd cmake-3.27.8-linux-x86_64 && cp -r * /usr/local/cmake
-          ln -s /usr/local/cmake/bin/cmake /usr/bin/cmake
-          cmake --version
-          git --version
-          rm -rf cmake-3.27.8-linux-x86_64.tar.gz
+          dnf install -y epel-release
+          dnf install -y git curl openssl openssl-devel cmake ccache make java-11-openjdk-devel wget zlib-devel libzstd-devel flex bison perl
+          # Install GCC 11 toolset (required for -fcoroutines support)
+          dnf install -y gcc-toolset-11 gcc-toolset-11-gcc gcc-toolset-11-gcc-c++
       - name: configure
         run: |
+          # Enable GCC 11 toolset
+          source /opt/rh/gcc-toolset-11/enable
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
-          . /opt/rh/devtoolset-11/enable
-          . /opt/rh/rh-perl530/enable
-          export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/lib64/
-          . /opt/rh/llvm-toolset-7.0/enable
+          export CC=gcc
+          export CXX=g++
+          gcc --version
           java -version
           export CFLAGS="${CFLAGS} -fPIC"
           export CXXFLAGS="${CXXFLAGS} -fPIC"
@@ -214,7 +218,7 @@ jobs:
         run: cd build && CTEST_OUTPUT_ON_FAILURE=TRUE make test
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk-WithDebInfo.so
           path: build/libbcos-c-sdk.so
@@ -223,7 +227,7 @@ jobs:
           ls -h build/libbcos-c-sdk.so
           strip build/libbcos-c-sdk.so || strip -x build/libbcos-c-sdk.so
           ls -h build/libbcos-c-sdk.so
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni-WithDebInfo.so
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
@@ -232,30 +236,29 @@ jobs:
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
           ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk.so
           path: build/libbcos-c-sdk.so
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni.so
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.so
       - name: Export GitHub Actions cache environment variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
   build_with_windows:
     name: build_with_windows
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ windows-2019 ]
-#    env:
-#      VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - uses: actions/cache@v4
@@ -278,24 +281,24 @@ jobs:
           cmake  -G "Visual Studio 16 2019" -A x64 ../ -DCMAKE_BUILD_TYPE=Release -DBOOST_USE_WINAPI_VERSION=BOOST_WINAPI_VERSION_WIN7 -D_WIN32_WINNT=0x0601 -DTESTS=ON -DBUILD_JNI=ON -DVCPKG_TARGET_TRIPLET='x64-windows-static' -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake || cat C:\vcpkg\buildtrees\fisco-bcos-cpp-sdk\build-x64-windows-static-dbg-out.log
       - name: compile
         run: cd build && MSBuild bcos-c-sdk.sln /p:Configuration=Release /p:Platform=x64
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-c-sdk.lib
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.lib
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-c-sdk.dll
           path: D:\a\bcos-c-sdk\bcos-c-sdk\build\Release\bcos-c-sdk.dll
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-sdk-jni.lib
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.lib
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: bcos-sdk-jni.dll
           path: D:\a\bcos-c-sdk\bcos-c-sdk\bindings\java\jni\src\main\resources\META-INF\native\Release\bcos-sdk-jni.dll
       - name: Export GitHub Actions cache environment variables
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
