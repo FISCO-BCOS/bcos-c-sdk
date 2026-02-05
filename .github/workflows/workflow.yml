@@ -67,20 +67,41 @@ jobs:
       - name: print link.txt
         run: cat build/CMakeFiles/bcos-c-sdk*.dir/link.txt
       - name: strip libbcos-c-sdk.dylib
-        run: strip build/libbcos-c-sdk.dylib || strip -x build/libbcos-c-sdk.dylib
+        if: matrix.os == 'macos-15-intel'
+        run: strip build/libbcos-c-sdk*.dylib || strip -x build/libbcos-c-sdk*.dylib
+      - name: strip libbcos-c-sdk-aarch64.dylib 
+        if: matrix.os == 'macos-15'
+        run: strip build/libbcos-c-sdk-aarch64.dylib || strip -x build/libbcos-c-sdk-aarch64.dylib
       - name: strip libbcos-sdk-jni.dylib
-        run: |
-          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib 
-          strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
-          ls -h bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
-      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-15-intel'
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - name: strip bcos-sdk-jni-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        run: strip bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib || strip -x bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib
+      - name: Upload libbcos-c-sdk.dylib
+        if: matrix.os == 'macos-15-intel'
+        uses: actions/upload-artifact@v4
         with:
           name: libbcos-c-sdk.dylib
           path: build/libbcos-c-sdk.dylib
-      - uses: actions/upload-artifact@v4
+      - name: Upload libbcos-c-sdk-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-c-sdk-aarch64.dylib
+          path: build/libbcos-c-sdk-aarch64.dylib
+      - name: Upload libbcos-sdk-jni.dylib
+        if: matrix.os == 'macos-15-intel'
+        uses: actions/upload-artifact@v4
         with:
           name: libbcos-sdk-jni.dylib
           path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni.dylib
+      - name: Upload libbcos-sdk-jni-aarch64.dylib
+        if: matrix.os == 'macos-15'
+        uses: actions/upload-artifact@v4
+        with:
+          name: libbcos-sdk-jni-aarch64.dylib
+          path: bindings/java/jni/src/main/resources/META-INF/native/libbcos-sdk-jni-aarch64.dylib
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v7
         with:
