@@ -152,6 +152,7 @@ func getContext(index unsafe.Pointer, delete bool) *CallbackChan {
 
 func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
 	cHost := C.CString(host)
+	defer C.free(unsafe.Pointer(cHost)) // Fix memory leak: free C string allocated by C.CString
 	cPort := C.int(port)
 	cIsSmSsl := C.int(0)
 	if isSmSsl {

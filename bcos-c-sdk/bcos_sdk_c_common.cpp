@@ -216,6 +216,8 @@ void bcos_sdk_c_config_destroy(void* p)
     }
 
     bcos_sdk_c_free((void*)config->peers);
+    // Fix memory leak: free ssl_type field allocated by my_strdup in bcos_sdk_create_config
+    bcos_sdk_c_free((void*)config->ssl_type);
     bcos_sdk_c_free((void*)config);
 }
 
