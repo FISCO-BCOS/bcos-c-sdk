@@ -175,6 +175,10 @@
       "version": "1.83.0"
     },
     {
+      "name": "boost-coroutine",
+      "version": "1.83.0"
+    },
+    {
       "name": "boost-property-map",
       "version": "1.83.0"
     },
