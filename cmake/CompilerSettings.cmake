@@ -150,7 +150,7 @@ if (("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU") OR ("${CMAKE_CXX_COMPILER_ID}" MA
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
     add_compile_definitions(NOMINMAX)
 
-    # Only support visual studio 2017 and visual studio 2019
+    # Only support visual studio 2017, 2019 and 2022
     set(MSVC_MIN_VERSION "1914") # VS2017 15.7, for full-ish C++17 support
 
     message(STATUS "Compile On Windows, MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
@@ -159,8 +159,10 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
         message(STATUS "Compile On Visual Studio 2017")
     elseif(MSVC_TOOLSET_VERSION EQUAL 142)
         message(STATUS "Compile On Visual Studio 2019")
+    elseif(MSVC_TOOLSET_VERSION EQUAL 143)
+        message(STATUS "Compile On Visual Studio 2022")
     else()
-        message(FATAL_ERROR "Unsupported Visual Studio, supported list: [2017, 2019]. Current MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
+        message(FATAL_ERROR "Unsupported Visual Studio, supported list: [2017, 2019, 2022]. Current MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
     endif()
 
     add_compile_options(/std:c++latest)
