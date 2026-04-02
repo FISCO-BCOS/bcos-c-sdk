@@ -20,5 +20,5 @@ vcpkg_from_github(
 # Install headers only — skip the problematic b2 library build
 file(INSTALL "${SOURCE_PATH}/include/" DESTINATION "${CURRENT_PACKAGES_DIR}/include")
 
-file(INSTALL "${SOURCE_PATH}/LICENSE_1_0.txt"
+file(INSTALL "${SOURCE_PATH}/README.md"
      DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}" RENAME copyright)
