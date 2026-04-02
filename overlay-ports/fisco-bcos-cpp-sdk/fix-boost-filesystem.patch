@@ -1,27 +1,5 @@
-diff --git a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
-index 6011dbb..1111111 100644
---- a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
-+++ b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
-@@ -21,7 +21,7 @@
- #pragma once
- #include <bcos-boostssl/context/ContextConfig.h>
- #include <boost/asio/ssl.hpp>
--#include <boost/filesystem.hpp>
-+#include <filesystem>
- 
- namespace bcos::boostssl::context
- {
-@@ -33,7 +33,7 @@ public:
-     using ConstPtr = std::shared_ptr<const ContextBuilder>;
- 
- public:
--    std::string readFileContent(boost::filesystem::path const& _file);
-+    std::string readFileContent(std::filesystem::path const& _file);
- 
- public:
-     std::shared_ptr<boost::asio::ssl::context> buildSslContext(
 diff --git a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.cpp b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.cpp
-index 2dfb805..2222222 100644
+index 61e8ac5..9f5210b 100644
 --- a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.cpp
 +++ b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.cpp
 @@ -24,8 +24,8 @@
@@ -35,7 +13,7 @@ index 2dfb805..2222222 100644
  #include <exception>
  #include <iostream>
  
-@@ -35,10 +35,10 @@ using namespace bcos::boostssl::context;
+@@ -35,25 +35,25 @@ using namespace bcos::boostssl::context;
  
  // static const std::string DEFAULT_CONFIG = "./boostssl.ini";
  
@@ -48,11 +26,12 @@ index 2dfb805..2222222 100644
      if (!fileStream)
      {
          // file not exist, throw
-@@ -46,13 +46,13 @@ std::string ContextBuilder::readFileContent(boost::filesystem::path const& _file
+         BOOST_THROW_EXCEPTION(
              InvalidParameter() << errinfo_comment(_file.string() + " file not exist"));
      }
-     fileStream.seekg(0, fileStream.end);
+-    fileStream.seekg(0, boost::filesystem::ifstream::end);
 -    auto length = fileStream.tellg();
++    fileStream.seekg(0, std::ifstream::end);
 +    std::streamoff length = fileStream.tellg();
      if (length == 0)
      {
@@ -60,21 +39,21 @@ index 2dfb805..2222222 100644
          BOOST_THROW_EXCEPTION(
              InvalidParameter() << errinfo_comment(_file.string() + " file is empty"));
      }
-     fileStream.seekg(0, fileStream.beg);
+-    fileStream.seekg(0, boost::filesystem::ifstream::beg);
++    fileStream.seekg(0, std::ifstream::beg);
      content.resize(length);
      fileStream.read((char*)content.data(), length);
-@@ -87,8 +87,8 @@ std::shared_ptr<boost::asio::ssl::context> ContextBuilder::buildSslContext(
-     std::shared_ptr<boost::asio::ssl::context> sslContext =
+     return content;
+@@ -93,14 +93,14 @@ std::shared_ptr<boost::asio::ssl::context> ContextBuilder::buildSslContext(
          std::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12);
  
--    auto keyContent =
+     auto keyContent =
 -        readFileContent(boost::filesystem::path(_certConfig.nodeKey));  // node.key content
-+    auto keyContent = readFileContent(
-+        std::filesystem::path(_certConfig.nodeKey));  // node.key content
++        readFileContent(std::filesystem::path(_certConfig.nodeKey));  // node.key content
      boost::asio::const_buffer keyBuffer(keyContent.data(), keyContent.size());
      sslContext->use_private_key(keyBuffer, boost::asio::ssl::context::file_format::pem);
  
-@@ -96,7 +96,7 @@ std::shared_ptr<boost::asio::ssl::context> ContextBuilder::buildSslContext(
+     // node.crt
      sslContext->use_certificate_chain_file(_certConfig.nodeCert);
  
 -    auto caCertContent = readFileContent(boost::filesystem::path(_certConfig.caCert));  // ca.crt
@@ -82,7 +61,8 @@ index 2dfb805..2222222 100644
      sslContext->add_certificate_authority(
          boost::asio::const_buffer(caCertContent.data(), caCertContent.size()));
  
-@@ -174,7 +174,7 @@ std::shared_ptr<boost::asio::ssl::context> ContextBuilder::buildSslContext(
+@@ -194,7 +194,7 @@ std::shared_ptr<boost::asio::ssl::context> ContextBuilder::buildSslContext(
+         BOOST_THROW_EXCEPTION(std::runtime_error("SSL_CTX_load_verify_locations failed));
      }
      */
 -    auto caCertContent = readFileContent(boost::filesystem::path(_smCertConfig.caCert));  // ca.crt
@@ -90,41 +70,33 @@ index 2dfb805..2222222 100644
      sslContext->add_certificate_authority(
          boost::asio::const_buffer(caCertContent.data(), caCertContent.size()));
  
-diff --git a/bcos-utilities/bcos-utilities/FileUtility.h b/bcos-utilities/bcos-utilities/FileUtility.h
-index 6640f7a..3333333 100644
---- a/bcos-utilities/bcos-utilities/FileUtility.h
-+++ b/bcos-utilities/bcos-utilities/FileUtility.h
+diff --git a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
+index 6011dbb..c882116 100644
+--- a/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
++++ b/bcos-boostssl/bcos-boostssl/context/ContextBuilder.h
 @@ -20,7 +20,7 @@
  #pragma once
- 
- #include "Common.h"
+ #include <bcos-boostssl/context/ContextConfig.h>
+ #include <boost/asio/ssl.hpp>
 -#include <boost/filesystem.hpp>
 +#include <filesystem>
- namespace bcos
+ 
+ namespace bcos::boostssl::context
  {
- /**
-@@ -32,7 +32,7 @@ namespace bcos
-  *         If the file doesn't exist or isn't readable,
-  *         returns an empty bytes.
-  */
--std::shared_ptr<bytes> readContents(boost::filesystem::path const& _file);
-+std::shared_ptr<bytes> readContents(std::filesystem::path const& _file);
+@@ -31,7 +31,7 @@ public:
+     using ConstPtr = std::shared_ptr<const ContextBuilder>;
  
- /**
-  * @brief : read the content of the specified file, and return the content as string
-@@ -42,6 +42,6 @@ std::shared_ptr<bytes> readContents(boost::filesystem::path const& _file);
-  *         If the file doesn't exist or isn't readable,
-  *         returns an empty string
-  */
--std::shared_ptr<std::string> readContentsToString(boost::filesystem::path const& _file);
-+std::shared_ptr<std::string> readContentsToString(std::filesystem::path const& _file);
+ public:
+-    std::string readFileContent(boost::filesystem::path const& _file);
++    std::string readFileContent(std::filesystem::path const& _file);
  
- }  // namespace bcos
+ public:
+     std::shared_ptr<boost::asio::ssl::context> buildSslContext(
 diff --git a/bcos-utilities/bcos-utilities/FileUtility.cpp b/bcos-utilities/bcos-utilities/FileUtility.cpp
-index f2833f8..4444444 100644
+index f2833f8..96ffde9 100644
 --- a/bcos-utilities/bcos-utilities/FileUtility.cpp
 +++ b/bcos-utilities/bcos-utilities/FileUtility.cpp
-@@ -19,8 +19,7 @@
+@@ -18,8 +18,7 @@
  
  #include "FileUtility.h"
  #include <stdio.h>
@@ -134,7 +106,7 @@ index f2833f8..4444444 100644
  #include <cstdlib>
  #include <fstream>
  using namespace std;
-@@ -28,12 +27,12 @@ using namespace std;
+@@ -27,12 +26,12 @@ using namespace std;
  namespace bcos
  {
  template <typename T>
@@ -164,3 +136,33 @@ index f2833f8..4444444 100644
  {
      return genericReadContents<string>(_file);
  }
+diff --git a/bcos-utilities/bcos-utilities/FileUtility.h b/bcos-utilities/bcos-utilities/FileUtility.h
+index 6640f7a..8d42d6c 100644
+--- a/bcos-utilities/bcos-utilities/FileUtility.h
++++ b/bcos-utilities/bcos-utilities/FileUtility.h
+@@ -19,7 +19,7 @@
+ #pragma once
+ 
+ #include "Common.h"
+-#include <boost/filesystem.hpp>
++#include <filesystem>
+ namespace bcos
+ {
+ /**
+@@ -30,7 +30,7 @@ namespace bcos
+  *         If the file doesn't exist or isn't readable,
+  *         returns an empty bytes.
+  */
+-std::shared_ptr<bytes> readContents(boost::filesystem::path const& _file);
++std::shared_ptr<bytes> readContents(std::filesystem::path const& _file);
+ 
+ /**
+  * @brief : read the content of the specified file, and return the content as string
+@@ -40,6 +40,6 @@ std::shared_ptr<bytes> readContents(boost::filesystem::path const& _file);
+  *         If the file doesn't exist or isn't readable,
+  *         returns an empty string
+  */
+-std::shared_ptr<std::string> readContentsToString(boost::filesystem::path const& _file);
++std::shared_ptr<std::string> readContentsToString(std::filesystem::path const& _file);
+ 
+ }  // namespace bcos
