@@ -92,6 +92,28 @@ index 6011dbb..c882116 100644
  
  public:
      std::shared_ptr<boost::asio::ssl::context> buildSslContext(
+diff --git a/bcos-boostssl/bcos-boostssl/context/NodeInfoTools.cpp b/bcos-boostssl/bcos-boostssl/context/NodeInfoTools.cpp
+index a53aca7..7382601 100644
+--- a/bcos-boostssl/bcos-boostssl/context/NodeInfoTools.cpp
++++ b/bcos-boostssl/bcos-boostssl/context/NodeInfoTools.cpp
+@@ -24,7 +24,7 @@
+ #include <bcos-utilities/FileUtility.h>
+ #include <boost/algorithm/string/classification.hpp>
+ #include <boost/exception/diagnostic_information.hpp>
+-#include <boost/filesystem.hpp>
++#include <filesystem>
+ #include <boost/property_tree/ini_parser.hpp>
+ 
+ using namespace bcos::boostssl::context;
+@@ -101,7 +101,7 @@ NodeInfoTools::initCert2PubHexHandler()
+         std::string errorMessage;
+         do
+         {
+-            auto certContent = readContentsToString(boost::filesystem::path(_cert));
++            auto certContent = readContentsToString(std::filesystem::path(_cert));
+             if (!certContent || certContent->empty())
+             {
+                 errorMessage = "unable to load cert content, cert: " + _cert;
 diff --git a/bcos-utilities/bcos-utilities/FileUtility.cpp b/bcos-utilities/bcos-utilities/FileUtility.cpp
 index f2833f8..96ffde9 100644
 --- a/bcos-utilities/bcos-utilities/FileUtility.cpp

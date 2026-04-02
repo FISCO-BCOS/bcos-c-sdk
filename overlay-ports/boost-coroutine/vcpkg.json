@@ -1,0 +1,6 @@
+{
+  "name": "boost-coroutine",
+  "version": "1.83.0",
+  "description": "Stub port — Boost.Coroutine is deprecated since 1.83. The standard vcpkg b2-based build fails on Windows because cmake-built boost-context does not produce b2-style library names (boost_context-vc140-mt-gd.lib). This header-only stub satisfies the dependency without attempting the b2 build.",
+  "license": "BSL-1.0"
+}
