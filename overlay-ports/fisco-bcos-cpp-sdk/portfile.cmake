@@ -10,6 +10,8 @@ vcpkg_from_github(
             "${CMAKE_CURRENT_LIST_DIR}/fix-unused-this.patch"
             "${CMAKE_CURRENT_LIST_DIR}/fix-memory-leak.patch"
             "${CMAKE_CURRENT_LIST_DIR}/fix-handler-cleanup.patch"
+            "${CMAKE_CURRENT_LIST_DIR}/fix-boost-filesystem.patch"
+            "${CMAKE_CURRENT_LIST_DIR}/fix-boost-detail-headers.patch"
 )
 
 vcpkg_cmake_configure(
