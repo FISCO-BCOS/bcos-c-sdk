@@ -10,8 +10,6 @@
         "fisco-bcos-cpp-sdk",
         "wedprcrypto",
         "secp256k1",
-        "boost-uuid",
-        "boost-beast",
         "tarscpp"
       ]
     }
