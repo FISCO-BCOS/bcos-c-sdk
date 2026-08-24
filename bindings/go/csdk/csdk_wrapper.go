@@ -6,11 +6,29 @@ package csdk
 // #cgo linux,arm64 LDFLAGS: -L/usr/local/lib/ -L${SRCDIR}/libs -lbcos-c-sdk-aarch64
 // #cgo windows,amd64 LDFLAGS: -L${SRCDIR}/libs -L${SRCDIR}/libs/win -lbcos-c-sdk
 // #cgo CFLAGS: -I./
+// #include <stdlib.h>
+// #include <stdbool.h>
 // #include "../../../bcos-c-sdk/bcos_sdk_c_common.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_error.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_rpc.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_uti_tx.h"
+// void bcos_sdk_create_signed_transaction_with_full_fields(void* key_pair, const char* group_id,
+//     const char* chain_id, const char* to, const char* nonce, const unsigned char* input,
+//     long inputSize, const char* abi, int64_t block_limit, const char* value, const char* gas_price,
+//     int64_t gas_limit, int32_t attribute, const char* extra_data, char** tx_hash, char** signed_tx);
+// void* bcos_sdk_create_transaction_v1_data(
+//   const char* group_id,
+//   const char* chain_id,
+//   const char* to,
+//   const char* nonce,
+//   const unsigned char* input,
+//   long inputSize,
+//   const char* abi,
+//   int64_t block_limit,
+//   const char* value,
+//   const char* gas_price,
+//   int64_t gas_limit);
 // #include "../../../bcos-c-sdk/bcos_sdk_c_amop.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_event_sub.h"
 // #include "../../../bcos-c-sdk/bcos_sdk_c_uti_keypair.h"
@@ -40,7 +58,9 @@ type CSDK struct {
 	groupID         *C.char
 	keyPair         unsafe.Pointer
 	privateKeyBytes []byte
-	keyPairMutex    sync.Mutex
+	// keyPairMutex guards keyPair pointer lifetime.
+	// Sign/read paths take RLock; SetPrivateKey/Close take Lock so they exclude concurrent signs.
+	keyPairMutex sync.RWMutex
 }
 
 var contextCache = cache.New(5*time.Minute, 10*time.Minute)
@@ -150,57 +170,73 @@ func getContext(index unsafe.Pointer, delete bool) *CallbackChan {
 	return nil
 }
 
-func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
-	cHost := C.CString(host)
-	defer C.free(unsafe.Pointer(cHost)) // Fix memory leak: free C string allocated by C.CString
-	cPort := C.int(port)
-	cIsSmSsl := C.int(0)
-	if isSmSsl {
-		cIsSmSsl = C.int(1)
-	}
-	config := C.bcos_sdk_create_config(cIsSmSsl, cHost, cPort)
-	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
+// Endpoint is a BCOS RPC peer (host + port).
+type Endpoint struct {
+	Host string
+	Port int
+}
 
+// SdkOptions configures [common] for programmatic connections (INI-equivalent defaults when nil).
+type SdkOptions struct {
+	ThreadPoolSize                   *int
+	MessageTimeoutMs                 *int
+	SendRpcRequestToHighestBlockNode *bool
+}
+
+func intDefault(p *int, fallback int) int {
+	if p != nil {
+		return *p
+	}
+	return fallback
+}
+
+func boolDefault(p *bool, fallback bool) bool {
+	if p != nil {
+		return *p
+	}
+	return fallback
+}
+
+func applyTlsToConfig(config *C.struct_bcos_sdk_c_config, isSmSsl, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) {
+	if disableSsl {
+		config.disable_ssl = C.int(1)
+		return
+	}
 	cTlsCaPath := C.CString(tlsCaPath)
 	cTlsKeyPath := C.CString(tlsKeyPath)
 	cTlsCertPath := C.CString(tlsCertPath)
-	if !disableSsl {
-		if isSmSsl {
-			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.ca_cert))
-			config.sm_cert_config.ca_cert = cTlsCaPath
-			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_key))
-			config.sm_cert_config.node_key = cTlsKeyPath
-			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_cert))
-			config.sm_cert_config.node_cert = cTlsCertPath
-
-			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_key))
-			cTlsSmEnKey := C.CString(tlsSmEnKey)
-			config.sm_cert_config.en_node_key = cTlsSmEnKey
-			C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_cert))
-			cTlsSmEnCert := C.CString(tlsSEnCert)
-			config.sm_cert_config.en_node_cert = cTlsSmEnCert
-		} else {
-			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.ca_cert))
-			config.cert_config.ca_cert = cTlsCaPath
-			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_key))
-			config.cert_config.node_key = cTlsKeyPath
-			C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_cert))
-			config.cert_config.node_cert = cTlsCertPath
-		}
+	if isSmSsl {
+		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.ca_cert))
+		config.sm_cert_config.ca_cert = cTlsCaPath
+		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_key))
+		config.sm_cert_config.node_key = cTlsKeyPath
+		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.node_cert))
+		config.sm_cert_config.node_cert = cTlsCertPath
+		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_key))
+		cTlsSmEnKey := C.CString(tlsSmEnKey)
+		config.sm_cert_config.en_node_key = cTlsSmEnKey
+		C.bcos_sdk_c_free(unsafe.Pointer(config.sm_cert_config.en_node_cert))
+		cTlsSmEnCert := C.CString(tlsSEnCert)
+		config.sm_cert_config.en_node_cert = cTlsSmEnCert
 	} else {
-		config.disable_ssl = C.int(1)
+		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.ca_cert))
+		config.cert_config.ca_cert = cTlsCaPath
+		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_key))
+		config.cert_config.node_key = cTlsKeyPath
+		C.bcos_sdk_c_free(unsafe.Pointer(config.cert_config.node_cert))
+		config.cert_config.node_cert = cTlsCertPath
 	}
-	config.message_timeout_ms = C.int(-1)
+}
+
+func startSDKFromConfig(groupID string, privateKey []byte, config *C.struct_bcos_sdk_c_config) (*CSDK, error) {
 	sdk := C.bcos_sdk_create(config)
 	if sdk == nil {
 		message := C.bcos_sdk_get_last_error_msg()
-		//defer C.free(unsafe.Pointer(message))
 		return nil, fmt.Errorf("bcos_sdk_create failed with error: %s", C.GoString(message))
 	}
 	C.bcos_sdk_start(sdk)
 	if C.bcos_sdk_get_last_error() != 0 {
 		message := C.bcos_sdk_get_last_error_msg()
-		//defer C.free(unsafe.Pointer(message))
 		return nil, fmt.Errorf("bcos_sdk_start failed with error: %s", C.GoString(message))
 	}
 
@@ -223,6 +259,95 @@ func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []by
 		privateKeyBytes: privateKey,
 		keyPair:         keyPair,
 	}, nil
+}
+
+// NewSDKWithPeers connects to multiple RPC peers with TLS settings and optional [common] overrides.
+func NewSDKWithPeers(groupID string, peers []Endpoint, isSmSsl bool, privateKey []byte, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string, opts *SdkOptions) (*CSDK, error) {
+	if len(peers) == 0 {
+		return nil, fmt.Errorf("peers must not be empty")
+	}
+	for i, p := range peers {
+		if p.Host == "" || p.Port <= 0 || p.Port > 65535 {
+			return nil, fmt.Errorf("invalid peer at index %d: %s:%d", i, p.Host, p.Port)
+		}
+	}
+
+	cIsSmSsl := C.int(0)
+	if isSmSsl {
+		cIsSmSsl = C.int(1)
+	}
+	firstHost := C.CString(peers[0].Host)
+	defer C.free(unsafe.Pointer(firstHost))
+	config := C.bcos_sdk_create_config(cIsSmSsl, firstHost, C.int(peers[0].Port))
+	if config == nil {
+		return nil, fmt.Errorf("bcos_sdk_create_config failed")
+	}
+	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
+
+	if len(peers) > 1 {
+		epBase := (*C.struct_bcos_sdk_c_endpoint)(C.malloc(C.size_t(len(peers)) * C.size_t(unsafe.Sizeof(C.struct_bcos_sdk_c_endpoint{}))))
+		for i, p := range peers {
+			ep := (*C.struct_bcos_sdk_c_endpoint)(unsafe.Add(unsafe.Pointer(epBase), uintptr(i)*unsafe.Sizeof(C.struct_bcos_sdk_c_endpoint{})))
+			ep.host = C.CString(p.Host)
+			ep.port = C.uint16_t(p.Port)
+		}
+		if config.peers_count > 0 && config.peers != nil {
+			first := (*C.struct_bcos_sdk_c_endpoint)(unsafe.Pointer(config.peers))
+			C.bcos_sdk_c_free(unsafe.Pointer(first.host))
+			C.bcos_sdk_c_free(unsafe.Pointer(config.peers))
+		}
+		config.peers = epBase
+		config.peers_count = C.size_t(len(peers))
+	}
+
+	config.thread_pool_size = C.int(intDefault(optsThreadPool(opts), 8))
+	config.message_timeout_ms = C.int(intDefault(optsMessageTimeout(opts), 10000))
+	sendHighest := boolDefault(optsSendToHighest(opts), true)
+	if sendHighest {
+		config.send_rpc_request_to_highest_block_node = C.int(1)
+	} else {
+		config.send_rpc_request_to_highest_block_node = C.int(0)
+	}
+
+	applyTlsToConfig(config, isSmSsl, disableSsl, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert)
+	return startSDKFromConfig(groupID, privateKey, config)
+}
+
+func optsThreadPool(opts *SdkOptions) *int {
+	if opts == nil {
+		return nil
+	}
+	return opts.ThreadPoolSize
+}
+
+func optsMessageTimeout(opts *SdkOptions) *int {
+	if opts == nil {
+		return nil
+	}
+	return opts.MessageTimeoutMs
+}
+
+func optsSendToHighest(opts *SdkOptions) *bool {
+	if opts == nil {
+		return nil
+	}
+	return opts.SendRpcRequestToHighestBlockNode
+}
+
+func NewSDK(groupID string, host string, port int, isSmSsl bool, privateKey []byte, disableSsl bool, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert string) (*CSDK, error) {
+	cHost := C.CString(host)
+	defer C.free(unsafe.Pointer(cHost)) // Fix memory leak: free C string allocated by C.CString
+	cPort := C.int(port)
+	cIsSmSsl := C.int(0)
+	if isSmSsl {
+		cIsSmSsl = C.int(1)
+	}
+	config := C.bcos_sdk_create_config(cIsSmSsl, cHost, cPort)
+	defer C.bcos_sdk_c_config_destroy(unsafe.Pointer(config))
+
+	applyTlsToConfig(config, isSmSsl, disableSsl, tlsCaPath, tlsKeyPath, tlsCertPath, tlsSmEnKey, tlsSEnCert)
+	config.message_timeout_ms = C.int(-1)
+	return startSDKFromConfig(groupID, privateKey, config)
 }
 
 func NewSDKByConfigFile(configFile string, groupID string, privateKey []byte) (*CSDK, error) {
@@ -562,13 +687,13 @@ func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, da
 	if block_limit < 0 {
 		return nil, fmt.Errorf("group not exist, group: %s", C.GoString(csdk.groupID))
 	}
-	csdk.keyPairMutex.Lock()
+	csdk.keyPairMutex.RLock()
 	C.bcos_sdk_create_signed_transaction_ver_extra_data(csdk.keyPair, csdk.groupID, csdk.chainID, cTo, cData, cAbi, block_limit, 0, cExtraData, &tx_hash, &signed_tx)
 	if C.bcos_sdk_is_last_opr_success() == 0 {
-		csdk.keyPairMutex.Unlock()
+		csdk.keyPairMutex.RUnlock()
 		return nil, fmt.Errorf("bcos_sdk_create_signed_transaction, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
-	csdk.keyPairMutex.Unlock()
+	csdk.keyPairMutex.RUnlock()
 	defer C.bcos_sdk_c_free(unsafe.Pointer(tx_hash))
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signed_tx))
 	txHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(tx_hash), "0x"))
@@ -581,6 +706,137 @@ func (csdk *CSDK) CreateAndSendTransaction(chanData *CallbackChan, to string, da
 		return txHash, fmt.Errorf("bcos rpc send transaction failed, error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
 	}
 	return txHash, nil
+}
+
+// SignedTxPair is the result of bcos_sdk_create_signed_transaction_with_full_fields.
+type SignedTxPair struct {
+	TxHash   string
+	SignedTx []byte
+}
+
+// NewKeyPairFromPrivateKey creates an ephemeral SM2/secp256k1 keypair (caller must DestroyKeyPair).
+func (csdk *CSDK) NewKeyPairFromPrivateKey(privateKey []byte) (unsafe.Pointer, error) {
+	if len(privateKey) != 32 {
+		return nil, fmt.Errorf("private key must be 32 bytes, got %d", len(privateKey))
+	}
+	cryptoType := C_SDK_ECDSA_CRYPTO
+	if csdk.smCrypto {
+		cryptoType = C_SDK_SM_CRYPTO
+	}
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(cryptoType, unsafe.Pointer(&privateKey[0]), C.uint(len(privateKey)))
+	if keyPair == nil {
+		return nil, fmt.Errorf("bcos_sdk_create_keypair_by_private_key: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return keyPair, nil
+}
+
+// DestroyKeyPair releases a keypair created by NewKeyPairFromPrivateKey.
+func (csdk *CSDK) DestroyKeyPair(keyPair unsafe.Pointer) {
+	if keyPair != nil {
+		C.bcos_sdk_destroy_keypair(keyPair)
+	}
+}
+
+// CreateSignedTransactionWithDefaultKeyPair signs using the connection's default keypair.
+func (csdk *CSDK) CreateSignedTransactionWithDefaultKeyPair(
+	blockLimit int64,
+	to string,
+	nonce string,
+	input []byte,
+	abi string,
+	attribute int32,
+	extraData string,
+) (*SignedTxPair, error) {
+	csdk.keyPairMutex.RLock()
+	defer csdk.keyPairMutex.RUnlock()
+	return csdk.createSignedTransactionWithFullFields(csdk.keyPair, blockLimit, to, nonce, input, abi, attribute, "", "", 0, extraData)
+}
+
+// CreateSignedTransactionWithPrivateKey signs with an explicit 32-byte private key (ephemeral keypair).
+func (csdk *CSDK) CreateSignedTransactionWithPrivateKey(
+	privateKey []byte,
+	blockLimit int64,
+	to string,
+	nonce string,
+	input []byte,
+	abi string,
+	attribute int32,
+	extraData string,
+) (*SignedTxPair, error) {
+	keyPair, err := csdk.NewKeyPairFromPrivateKey(privateKey)
+	if err != nil {
+		return nil, err
+	}
+	defer csdk.DestroyKeyPair(keyPair)
+	return csdk.createSignedTransactionWithFullFields(keyPair, blockLimit, to, nonce, input, abi, attribute, "", "", 0, extraData)
+}
+
+func (csdk *CSDK) createSignedTransactionWithFullFields(
+	keyPair unsafe.Pointer,
+	blockLimit int64,
+	to string,
+	nonce string,
+	input []byte,
+	abi string,
+	attribute int32,
+	value string,
+	gasPrice string,
+	gasLimit int64,
+	extraData string,
+) (*SignedTxPair, error) {
+	if keyPair == nil {
+		return nil, fmt.Errorf("key pair is nil")
+	}
+	if len(input) == 0 {
+		return nil, fmt.Errorf("input is empty")
+	}
+	cTo := C.CString(to)
+	cNonce := C.CString(nonce)
+	cAbi := C.CString(abi)
+	cValue := C.CString(value)
+	cGasPrice := C.CString(gasPrice)
+	cExtra := C.CString(extraData)
+	defer C.free(unsafe.Pointer(cTo))
+	defer C.free(unsafe.Pointer(cNonce))
+	defer C.free(unsafe.Pointer(cAbi))
+	defer C.free(unsafe.Pointer(cValue))
+	defer C.free(unsafe.Pointer(cGasPrice))
+	defer C.free(unsafe.Pointer(cExtra))
+
+	var txHash *C.char
+	var signedTx *C.char
+	C.bcos_sdk_create_signed_transaction_with_full_fields(
+		keyPair,
+		csdk.groupID,
+		csdk.chainID,
+		cTo,
+		cNonce,
+		(*C.uchar)(unsafe.Pointer(&input[0])),
+		C.long(len(input)),
+		cAbi,
+		C.int64_t(blockLimit),
+		cValue,
+		cGasPrice,
+		C.int64_t(gasLimit),
+		C.int32_t(attribute),
+		cExtra,
+		&txHash,
+		&signedTx,
+	)
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, fmt.Errorf("bcos_sdk_create_signed_transaction_with_full_fields: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	defer C.bcos_sdk_c_free(unsafe.Pointer(txHash))
+	defer C.bcos_sdk_c_free(unsafe.Pointer(signedTx))
+
+	encoded, err := hex.DecodeString(strings.TrimPrefix(C.GoString(signedTx), "0x"))
+	if err != nil {
+		return nil, fmt.Errorf("decode signed tx: %w", err)
+	}
+	return &SignedTxPair{
+		TxHash:   C.GoString(txHash),
+		SignedTx: encoded,
+	}, nil
 }
 
 func (csdk *CSDK) CreateEncodedTransactionDataV1(blockLimit int64, to string, input []byte, abi string) ([]byte, []byte, error) {
@@ -623,11 +879,82 @@ func (csdk *CSDK) CreateEncodedTransactionDataV1(blockLimit int64, to string, in
 	return data, dataHash, nil
 }
 
+// CreateEncodedTransactionDataV1WithNonceV1Data uses bcos_sdk_create_transaction_v1_data to build
+// encoded transaction data with explicit nonce.
+func (csdk *CSDK) CreateEncodedTransactionDataV1WithNonceV1Data(blockLimit int64, to string, input []byte, abi string, nonce string, value string, gasPrice string) ([]byte, []byte, error) {
+	cTo := C.CString(to)
+	cNonce := C.CString(nonce)
+	cAbi := C.CString(abi)
+	defer C.free(unsafe.Pointer(cTo))
+	defer C.free(unsafe.Pointer(cNonce))
+	defer C.free(unsafe.Pointer(cAbi))
+
+	var inputPtr unsafe.Pointer
+	if len(input) > 0 {
+		inputPtr = unsafe.Pointer(&input[0])
+	} else {
+		// Avoid passing non-nil pointer for empty input; createTransactionDataV1 expects input bytes.
+		inputPtr = unsafe.Pointer(&[]byte{0}[0])
+	}
+
+	cValue := C.CString(value)
+	cGasPrice := C.CString(gasPrice)
+	defer C.free(unsafe.Pointer(cValue))
+	defer C.free(unsafe.Pointer(cGasPrice))
+
+	encodedTransactionPointer := C.bcos_sdk_create_transaction_v1_data(
+		csdk.groupID,
+		csdk.chainID,
+		cTo,
+		cNonce,
+		(*C.uchar)(inputPtr),
+		C.long(len(input)),
+		cAbi,
+		C.int64_t(blockLimit),
+		cValue,
+		cGasPrice,
+		C.int64_t(0), // gas_limit >= 0; 0 acts as placeholder for builder.
+	)
+	defer C.bcos_sdk_destroy_transaction_data(encodedTransactionPointer)
+
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_create_transaction_v1_data error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+
+	encodedTransactionData := C.bcos_sdk_encode_transaction_data(encodedTransactionPointer)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(encodedTransactionData))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_create_transaction_v1_data encode error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+
+	data, err := hex.DecodeString(strings.TrimPrefix(C.GoString(encodedTransactionData), "0x"))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cryptoType := C.int(0)
+	if csdk.smCrypto {
+		cryptoType = C.int(1)
+	}
+	dataHashHex := C.bcos_sdk_calc_transaction_data_hash(cryptoType, encodedTransactionPointer)
+	defer C.bcos_sdk_c_free(unsafe.Pointer(dataHashHex))
+	if C.bcos_sdk_is_last_opr_success() == 0 {
+		return nil, nil, fmt.Errorf("bcos_sdk_calc_transaction_data_hash error: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	dataHash, err := hex.DecodeString(strings.TrimPrefix(C.GoString(dataHashHex), "0x"))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return data, dataHash, nil
+}
+
 func (csdk *CSDK) CreateEncodedSignature(hash []byte) ([]byte, error) {
 	hexHash := hex.EncodeToString(hash)
 	cHexHash := C.CString(hexHash)
-	csdk.keyPairMutex.Lock()
-	defer csdk.keyPairMutex.Unlock()
+	defer C.free(unsafe.Pointer(cHexHash))
+	csdk.keyPairMutex.RLock()
+	defer csdk.keyPairMutex.RUnlock()
 	signatureHex := C.bcos_sdk_sign_transaction_data_hash(csdk.keyPair, cHexHash)
 	defer C.bcos_sdk_c_free(unsafe.Pointer(signatureHex))
 	if C.bcos_sdk_is_last_opr_success() == 0 {
@@ -638,6 +965,34 @@ func (csdk *CSDK) CreateEncodedSignature(hash []byte) ([]byte, error) {
 		return nil, err
 	}
 	return signatureBytes, nil
+}
+
+// KeyPairAddress returns the address of the current default keypair.
+func (csdk *CSDK) KeyPairAddress() (string, error) {
+	csdk.keyPairMutex.RLock()
+	defer csdk.keyPairMutex.RUnlock()
+	if csdk.keyPair == nil {
+		return "", fmt.Errorf("key pair is nil")
+	}
+	addr := C.bcos_sdk_get_keypair_address(csdk.keyPair)
+	if addr == nil {
+		return "", fmt.Errorf("bcos_sdk_get_keypair_address failed: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return C.GoString(addr), nil
+}
+
+// KeyPairPublicKey returns the hex public key of the current default keypair (no 0x prefix).
+func (csdk *CSDK) KeyPairPublicKey() (string, error) {
+	csdk.keyPairMutex.RLock()
+	defer csdk.keyPairMutex.RUnlock()
+	if csdk.keyPair == nil {
+		return "", fmt.Errorf("key pair is nil")
+	}
+	pk := C.bcos_sdk_get_keypair_public_key(csdk.keyPair)
+	if pk == nil {
+		return "", fmt.Errorf("bcos_sdk_get_keypair_public_key failed: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return strings.TrimPrefix(C.GoString(pk), "0x"), nil
 }
 
 func (csdk *CSDK) CreateEncodedTransaction(transactionData, dataHash, signature []byte, attribute int32, extraData string) ([]byte, error) {
@@ -680,3 +1035,48 @@ func (csdk *CSDK) SendEncodedTransaction(chanData *CallbackChan, encodedTransact
 	}
 	return nil
 }
+
+// NewSignOnlyCSDK builds a CSDK that can sign/verify without a live RPC connection.
+// Use CloseSignOnly to free resources (not Close, which expects a network SDK).
+func NewSignOnlyCSDK(smCrypto bool, privateKey []byte, groupID, chainID string) (*CSDK, error) {
+	if len(privateKey) != 32 {
+		return nil, fmt.Errorf("private key must be 32 bytes")
+	}
+	cryptoType := C_SDK_ECDSA_CRYPTO
+	if smCrypto {
+		cryptoType = C_SDK_SM_CRYPTO
+	}
+	keyPair := C.bcos_sdk_create_keypair_by_private_key(cryptoType, unsafe.Pointer(&privateKey[0]), C.uint(len(privateKey)))
+	if keyPair == nil {
+		return nil, fmt.Errorf("bcos_sdk_create_keypair_by_private_key: %s", C.GoString(C.bcos_sdk_get_last_error_msg()))
+	}
+	return &CSDK{
+		smCrypto:        smCrypto,
+		groupID:         C.CString(groupID),
+		chainID:         C.CString(chainID),
+		keyPair:         keyPair,
+		privateKeyBytes: append([]byte(nil), privateKey...),
+	}, nil
+}
+
+// CloseSignOnly releases keypair/strings created by NewSignOnlyCSDK.
+func (csdk *CSDK) CloseSignOnly() {
+	if csdk == nil {
+		return
+	}
+	csdk.keyPairMutex.Lock()
+	defer csdk.keyPairMutex.Unlock()
+	if csdk.keyPair != nil {
+		C.bcos_sdk_destroy_keypair(csdk.keyPair)
+		csdk.keyPair = nil
+	}
+	if csdk.groupID != nil {
+		C.free(unsafe.Pointer(csdk.groupID))
+		csdk.groupID = nil
+	}
+	if csdk.chainID != nil {
+		C.free(unsafe.Pointer(csdk.chainID))
+		csdk.chainID = nil
+	}
+}
+
